@@ -31,10 +31,10 @@
          [:contact/by-name name])
   static om/IQuery
   (query [this]
-         '[:name :photo-path :delivery-status :datetime :new-messages-count :online])
+         '[:name :photo :delivery-status :datetime :new-messages-count :online])
   Object
   (render [this]
-          (let [{:keys [name photo-path delivery-status datetime new-messages-count online]}
+          (let [{:keys [name photo delivery-status datetime new-messages-count online]}
                 (dissoc (om/props this) :om.next/computed)
                 {:keys [nav]} (om/get-computed this)]
             (touchable-highlight
@@ -53,8 +53,8 @@
                                 :borderRadius 50
                                 :backgroundColor "#FFFFFF"
                                 :elevation 6}
-                               (image {:source (if (< 0 (count photo-path))
-                                                 {:uri photo-path}
+                               (image {:source (if (< 0 (count photo))
+                                                 {:uri photo}
                                                  res/user-no-photo)
                                        :style {:borderWidth 2
                                                :borderColor "#FFFFFF"
@@ -137,9 +137,12 @@
                         {:nav nav})))
 
 (defn load-contacts []
-  (let [contacts (contacts/load-whisper-contacts)]
-    (swap! state/app-state update :contacts-ds
-           #(clone-with-rows % contacts))))
+  (contacts/load-contacts
+   (fn [contacts]
+     (swap! state/app-state update :contacts-ds
+            #(clone-with-rows % contacts)))
+   (fn [error]
+     (toast (str error)))))
 
 (defui ContactsList
   static om/IQuery
