@@ -5,8 +5,7 @@
    [natal-shell.async-storage :refer [get-item set-item]]
    [natal-shell.core :refer [with-error-view]]
    [natal-shell.alert :refer [alert]])
-  (:require [clojure.string :as cstr]
-            [om.next :as om :refer-macros [defui]]
+  (:require [om.next :as om :refer-macros [defui]]
             [re-natal.support :as sup]
             [syng-im.protocol.web3 :as whisper]
             [messenger.state :as state]
@@ -24,41 +23,26 @@
     (.replace @nav-atom (clj->js {:component contacts-list
                                   :name "contacts-list"}))))
 
-(defn get-contact-name [phone-contact]
-  (cstr/join " "
-             (filter #(not (cstr/blank? %))
-                     [(:givenName phone-contact)
-                      (:middleName phone-contact)
-                      (:familyName phone-contact)])))
-
 (defn handle-load-contacts-identities-response [contacts-by-hash data]
-  (let [contacts (map (fn [server-contact]
-                        (let [number-info (get contacts-by-hash
-                                               (:phone-number-hash server-contact))
-                              phone-contact (:contact number-info)]
-                          {:phone-number (:number number-info)
-                           :whisper-identity (:whisper-identity server-contact)
-                           :name (get-contact-name phone-contact)
-                           :photo-path (:photo-path phone-contact)}))
+  (let [contacts (map (fn [contact]
+                        {:phone-number (get contacts-by-hash
+                                            (:phone-number-hash contact))
+                         :whisper-identity (:whisper-identity contact)})
                       (js->clj (:contacts data)))]
     (db/add-contacts contacts)
     (show-home-view)))
 
 (defn get-contacts-by-hash [contacts]
-  (let [numbers-info (reduce (fn [numbers contact]
-                               (into numbers
-                                     (map (fn [c]
-                                            {:number (:number c)
-                                             :contact contact})
-                                          (:phone-numbers contact))))
-                             '()
-                             contacts)]
-    (reduce (fn [m number-info]
-              (let [number (:number number-info)
-                    hash (encrypt number)]
-                (assoc m hash number-info)))
+  (let [numbers (reduce (fn [numbers contact]
+                          (into numbers
+                                (map :number (:phone-numbers contact))))
+                        '()
+                        contacts)]
+    (reduce (fn [m number]
+              (let [hash (encrypt number)]
+                (assoc m hash number)))
             {}
-            numbers-info)))
+            numbers)))
 
 (defn send-load-contacts-identities [contacts]
   (let [contacts-by-hash (get-contacts-by-hash contacts)
@@ -69,7 +53,7 @@
                  (toast (str error))))))
 
 (defn load-contacts []
-  (contacts/load-phone-contacts
+  (contacts/load-contacts
    send-load-contacts-identities
    (fn [error]
      (toast (str error)))))

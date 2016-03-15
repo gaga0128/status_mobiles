@@ -5,9 +5,7 @@
 
 (def realm (js/Realm. (clj->js {:schema [{:name "Contact"
                                           :properties {:phone-number "string"
-                                                       :whisper-identity "string"
-                                                       :name "string"
-                                                       :photo-path "string"}}]})))
+                                                       :whisper-identity "string"}}]})))
 
 (defn write [f]
   (.write realm f))
@@ -16,11 +14,7 @@
   (.objects realm "Contact"))
 
 (defn get-contacts []
-  (vals (js->clj (get-contacts-objects) :keywordize-keys true)))
-
-(defn delete-contacts []
-  (write (fn []
-           (.delete realm (get-contacts-objects)))))
+  (js->clj (get-contacts-objects) :keywordize-keys true))
 
 (defn filtered [objs query]
   (.filtered objs query))
@@ -28,12 +22,10 @@
 (defn get-count [objs]
   (.-length objs))
 
-(defn create-contact [{:keys [phone-number whisper-identity name photo-path]}]
+(defn create-contact [{:keys [phone-number whisper-identity]}]
   (.create realm "Contact"
            (clj->js {:phone-number phone-number
-                     :whisper-identity whisper-identity
-                     :name (or name "")
-                     :photo-path (or photo-path "")})))
+                     :whisper-identity whisper-identity})))
 
 (defn contact-exist? [contacts contact]
   (some #(= (:phone-number contact) (:phone-number %)) contacts))
