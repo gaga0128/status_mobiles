@@ -8,13 +8,14 @@
     (r/write
       (fn []
         (r/create :kv-store {:key   key
-                             :value (with-out-str (pr value))} true))))
+                             :value (str value)} true))))
   (get [_ key]
     (some-> (r/get-by-field :kv-store :key key)
             (r/single-cljs)
             (r/decode-value)))
   (contains-key? [_ key]
-    (r/exists? :kv-store :key key))
+    (= 0
+       (.-length (r/get-by-field :kv-store :key key))))
   (delete [_ key]
     (-> (r/get-by-field :kv-store :key key)
         (r/single)

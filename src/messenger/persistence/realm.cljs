@@ -13,12 +13,7 @@
                     {:name       :kv-store
                      :primaryKey :key
                      :properties {:key   "string"
-                                  :value "string"}}
-                    {:name       :msgs
-                     :primaryKey :msg-id
-                     :properties {:msg-id  "string"
-                                  :chat-id "string"
-                                  :msg     "string"}}]})
+                                  :value "string"}}]})
 
 (def realm (js/Realm. (clj->js opts)))
 
@@ -69,10 +64,6 @@
 (defn delete [obj]
   (write (fn []
            (.delete realm obj))))
-
-(defn exists? [schema-name field value]
-  (> (.-length (get-by-field schema-name field value))
-     0))
 
 (comment
   )

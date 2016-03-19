@@ -14,7 +14,6 @@
                           :user-phone-number     nil
                           :user-identity         nil
                           :confirmation-code     nil
-                          :identity-password     "replace-me-with-user-entered-password"
                           :channels              {:pub-sub-publisher   (chan)
                                                   :pub-sub-publication nil}}))
 
@@ -41,7 +40,6 @@
 (def user-notification-path [:user-notification])
 (def protocol-initialized-path [:protocol-initialized])
 (def simple-store-path [:simple-store])
-(def identity-password-path [:identity-password])
 
 (defn pub-sub-publisher [app] (get-in app pub-sub-bus-path))
 (defn kv-store []
