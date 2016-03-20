@@ -1,6 +1,7 @@
 (ns messenger.persistence.simple-kv-store
   (:require [syng-im.protocol.state.storage :as st]
-            [messenger.persistence.realm :as r]))
+            [messenger.persistence.realm :as r]
+            [messenger.utils.types :refer [to-edn-string]]))
 
 (defrecord SimpleKvStore []
   st/Storage
@@ -8,14 +9,13 @@
     (r/write
       (fn []
         (r/create :kv-store {:key   key
-                             :value (str value)} true))))
+                             :value (to-edn-string value)} true))))
   (get [_ key]
     (some-> (r/get-by-field :kv-store :key key)
             (r/single-cljs)
             (r/decode-value)))
   (contains-key? [_ key]
-    (= 0
-       (.-length (r/get-by-field :kv-store :key key))))
+    (r/exists? :kv-store :key key))
   (delete [_ key]
     (-> (r/get-by-field :kv-store :key key)
         (r/single)
