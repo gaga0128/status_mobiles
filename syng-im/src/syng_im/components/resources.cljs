@@ -1,4 +1,4 @@
-(ns syng-im.resources)
+(ns syng-im.components.resources)
 
 (def logo-icon (js/require "./images/logo.png"))
 (def nav-back-icon (js/require "./images/nav-back.png"))
@@ -10,4 +10,3 @@
 (def mic (js/require "./images/mic.png"))
 (def smile (js/require "./images/smile.png"))
 (def att (js/require "./images/att.png"))
-

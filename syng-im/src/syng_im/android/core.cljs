@@ -7,13 +7,17 @@
             [syng-im.handlers]
             [syng-im.subs]
             [syng-im.components.react :refer [navigator app-registry]]
+            [syng-im.components.contact-list.contact-list :refer [contact-list]]
             [syng-im.components.chat :refer [chat]]
-            [syng-im.utils.logging :as log]
-            [syng-im.navigation :refer [*nav-render*]]))
+            [syng-im.utils.logging :as log]))
 
+(def ^{:dynamic true :private true} *nav-render*
+  "Flag to suppress navigator re-renders from outside om when pushing/popping."
+  true)
 
 (def back-button-handler (cljs/atom {:nav     nil
                                      :handler nil}))
+
 
 (defn init-back-button-handler! [nav]
   (let [handler @back-button-handler]
@@ -29,7 +33,7 @@
         (add-event-listener "hardwareBackPress" new-listener)))))
 
 (defn app-root []
-  [navigator {:initial-route (clj->js {:view-id :chat})
+  [navigator {:initial-route (clj->js {:view-id :contact-list})
               :render-scene  (fn [route nav]
                                (log/debug "route" route)
                                (when *nav-render*
@@ -37,9 +41,12 @@
                                        view-id (keyword view-id)]
                                    (init-back-button-handler! nav)
                                    (case view-id
+                                     :contact-list (r/as-element [contact-list
+                                                                  {:navigator nav}])
                                      :chat (r/as-element [chat {:navigator nav}])))))}])
 
 (defn init []
   (dispatch-sync [:initialize-db])
   (dispatch [:initialize-protocol])
+  (dispatch [:load-syng-contacts])
   (.registerComponent app-registry "SyngIm" #(r/reactify-component app-root)))
