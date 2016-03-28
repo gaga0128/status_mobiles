@@ -1,4 +1,4 @@
-(ns syng-im.resources)
+(ns syng-im.components.resources)
 
 (def logo-icon (js/require "./images/logo.png"))
 (def nav-back-icon (js/require "./images/nav-back.png"))
@@ -6,9 +6,7 @@
 (def online-icon (js/require "./images/online.png"))
 (def seen-icon (js/require "./images/seen.png"))
 (def delivered-icon (js/require "./images/delivered.png"))
-(def delivery-failed-icon (js/require "./images/deliveryfailed.png"))
 (def play (js/require "./images/play.png"))
 (def mic (js/require "./images/mic.png"))
 (def smile (js/require "./images/smile.png"))
 (def att (js/require "./images/att.png"))
-

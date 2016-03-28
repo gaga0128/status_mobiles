@@ -7,13 +7,13 @@
     [syng-im.protocol.protocol-handler :refer [make-handler]]
     [syng-im.models.protocol :refer [update-identity
                                      set-initialized]]
+    [syng-im.models.user-data :as user-data]
+    [syng-im.models.contacts :as contacts]
     [syng-im.models.messages :refer [save-message
-                                     update-message!
-                                     message-by-id]]
-    [syng-im.models.chat :refer [signal-chat-updated]]
-    [syng-im.utils.logging :as log]
-    [syng-im.protocol.api :as api]
-    [syng-im.constants :refer [text-content-type]]))
+                                     new-message-arrived]]
+    [syng-im.handlers.server :as server]
+    [syng-im.handlers.contacts :as contacts-service]
+    [syng-im.utils.logging :as log]))
 
 ;; -- Middleware ------------------------------------------------------------
 ;;
@@ -34,6 +34,12 @@
   (fn [_ _]
     app-db))
 
+;; -- Common --------------------------------------------------------------
+
+(register-handler :set-loading
+  (fn [db [_ value]]
+    (assoc db :loading value)))
+
 ;; -- Protocol --------------------------------------------------------------
 
 (register-handler :initialize-protocol
@@ -51,36 +57,45 @@
   (fn [db [_ {chat-id :from
               msg-id  :msg-id :as msg}]]
     (save-message chat-id msg)
-    (signal-chat-updated db chat-id)))
+    (new-message-arrived db chat-id msg-id)))
 
-(register-handler :acked-msg
-  (fn [db [_ from msg-id]]
-    (update-message! {:msg-id          msg-id
-                      :delivery-status :delivered})
-    (signal-chat-updated db from)))
+;; -- User data --------------------------------------------------------------
 
-(register-handler :msg-delivery-failed
-  (fn [db [_ msg-id]]
-    (update-message! {:msg-id          msg-id
-                      :delivery-status :failed})
-    (let [{:keys [chat-id]} (message-by-id msg-id)]
-      (signal-chat-updated db chat-id))))
+(register-handler :set-user-phone-number
+  (fn [db [_ value]]
+    (assoc db :user-phone-number value)))
 
-(register-handler :send-chat-msg
-  (fn [db [_ chat-id text]]
-    (log/debug "chat-id" chat-id "text" text)
-    (let [{msg-id     :msg-id
-           {from :from
-            to   :to} :msg} (api/send-user-msg {:to      chat-id
-                                                :content text})
-          msg {:msg-id       msg-id
-               :from         from
-               :to           to
-               :content      text
-               :content-type text-content-type
-               :outgoing     true}]
-      (save-message chat-id msg)
-      (signal-chat-updated db chat-id))))
+(register-handler :load-user-phone-number
+  (fn [db [_]]
+    (user-data/load-phone-number)
+    db))
+
+;; -- Sign up --------------------------------------------------------------
+
+(register-handler :sign-up
+  (fn [db [_ phone-number whisper-identity handler]]
+    (server/sign-up phone-number whisper-identity handler)
+    db))
+
+(register-handler :set-confirmation-code
+  (fn [db [_ value]]
+    (assoc db :confirmation-code value)))
+
+(register-handler :sign-up-confirm
+  (fn [db [_ confirmation-code handler]]
+    (server/sign-up-confirm confirmation-code handler)
+    db))
+
+(register-handler :sync-contacts
+  (fn [db [_ handler]]
+    (contacts-service/sync-contacts handler)
+    db))
+
+;; -- Contacts --------------------------------------------------------------
+
+(register-handler :load-syng-contacts
+  (fn [db [_ value]]
+    (contacts/load-syng-contacts db)))
 
 ;; -- Something --------------------------------------------------------------
 

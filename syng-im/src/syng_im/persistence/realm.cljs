@@ -4,7 +4,7 @@
             [syng-im.utils.types :refer [to-string]])
   (:refer-clojure :exclude [exists?]))
 
-(set! js/window.Realm (js/require "realm"))
+(set! js/Realm (js/require "realm"))
 
 (def opts {:schema [{:name       "Contact"
                      :properties {:phone-number     "string"
@@ -17,17 +17,14 @@
                                   :value "string"}}
                     {:name       :msgs
                      :primaryKey :msg-id
-                     :properties {:msg-id          "string"
-                                  :from            "string"
-                                  :to              "string"
-                                  :content         "string" ;; TODO make it ArrayBuffer
-                                  :content-type    "string"
-                                  :timestamp       "int"
-                                  :chat-id         {:type    "string"
-                                                    :indexed true}
-                                  :outgoing        "bool"
-                                  :delivery-status {:type     "string"
-                                                    :optional true}}}]})
+                     :properties {:msg-id       "string"
+                                  :from         "string"
+                                  :to           "string"
+                                  :content      "string"    ;; TODO make it ArrayBuffer
+                                  :content-type "string"
+                                  :timestamp    "int"
+                                  :chat-id      "string"
+                                  :outgoing     "bool"}}]})
 
 (def realm (js/Realm. (clj->js opts)))
 
@@ -37,10 +34,7 @@
                          (into {})))
 
 (defn field-type [schema-name field]
-  (let [field-def (get-in schema-by-name [schema-name :properties field])]
-    (if (map? field-def)
-      (:type field-def)
-      field-def)))
+  (get-in schema-by-name [schema-name :properties field]))
 
 (defn write [f]
   (.write realm f))
@@ -58,13 +52,14 @@
   (let [value (to-string value)
         query (str (name field) "=" (if (= "string" (field-type schema-name field))
                                       (str "\"" value "\"")
-                                      value))]
+                                      value))
+        ;_     (log/debug query)
+        ]
     query))
 
 (defn get-by-field [schema-name field value]
-  (let [q (to-query schema-name :eq field value)]
-    (-> (.objects realm (name schema-name))
-        (.filtered q))))
+  (-> (.objects realm (name schema-name))
+      (.filtered (to-query schema-name :eq field value))))
 
 (defn sorted [results field-name order]
   (.sorted results (to-string field-name) (if (= order :asc)
@@ -97,13 +92,3 @@
 
 (defn get-list [schema-name]
   (vals (js->clj (.objects realm schema-name) :keywordize-keys true)))
-
-
-(comment
-
-  (write #(.create realm "msgs" (clj->js {:msg-id          "1459175391577-a2185a35-5c49-5a6b-9c08-6eb5b87ceb7f"
-                                          :content         "sdfd"
-                                          :delivery-status "seen"}) true))
-
-
-  )
