@@ -11,8 +11,9 @@
             [syng-im.components.chat :refer [chat]]
             [syng-im.components.sign-up :refer [sign-up-view]]
             [syng-im.components.sign-up-confirm :refer [sign-up-confirm-view]]
-            [syng-im.components.nav :as nav]
-            [syng-im.utils.logging :as log]))
+            [syng-im.components.chats.chats-list :refer [chats-list]]
+            [syng-im.utils.logging :as log]
+            [syng-im.navigation :as nav]))
 
 (def back-button-handler (cljs/atom {:nav     nil
                                      :handler nil}))
@@ -24,28 +25,26 @@
       (let [new-listener (fn []
                            (binding [nav/*nav-render* false]
                              (when (< 1 (.-length (.getCurrentRoutes nav)))
-                               (.pop nav)
+                               (nav/nav-pop nav)
                                true)))]
         (reset! back-button-handler {:nav     nav
                                      :handler new-listener})
         (add-event-listener "hardwareBackPress" new-listener)))))
 
 (defn app-root []
-  [navigator {:initial-route (clj->js {:view-id :sign-up})
+  [navigator {:initial-route (clj->js {:view-id :chat-list})
               :render-scene  (fn [route nav]
                                (log/debug "route" route)
-                               (when true ;; nav/*nav-render*
+                               (when true                   ;; nav/*nav-render*
                                  (let [{:keys [view-id]} (js->clj route :keywordize-keys true)
                                        view-id (keyword view-id)]
                                    (init-back-button-handler! nav)
                                    (case view-id
-                                     :contact-list (r/as-element [contact-list
-                                                                  {:navigator nav}])
+                                     :chat-list (r/as-element [chats-list {:navigator nav}])
+                                     :contact-list (r/as-element [contact-list {:navigator nav}])
                                      :chat (r/as-element [chat {:navigator nav}])
-                                     :sign-up (r/as-element [sign-up-view
-                                                             {:navigator nav}])
-                                     :sign-up-confirm (r/as-element [sign-up-confirm-view
-                                                                     {:navigator nav}])))))}])
+                                     :sign-up (r/as-element [sign-up-view {:navigator nav}])
+                                     :sign-up-confirm (r/as-element [sign-up-confirm-view {:navigator nav}])))))}])
 
 (defn init []
   (dispatch-sync [:initialize-db])
