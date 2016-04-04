@@ -9,11 +9,7 @@
     "realm",
     "react-native-loading-spinner-overlay",
     "react-native-i18n",
-    "realm/react-native",
-    "react-native-action-button",
-    "react-native-vector-icons/Ionicons",
-    "react-native-circle-checkbox",
-    "react-native-randombytes"
+    "realm/react-native"
   ],
   "imageDirs": [
     "images"

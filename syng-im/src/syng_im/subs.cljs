@@ -5,10 +5,8 @@
             [syng-im.models.chat :refer [current-chat-id
                                          chat-updated?]]
             [syng-im.models.chats :refer [chats-list
-                                          chats-updated?
-                                          chat-by-id]]
-            [syng-im.models.messages :refer [get-messages]]
-            [syng-im.models.contacts :refer [contacts-list]]))
+                                          chats-updated?]]
+            [syng-im.models.messages :refer [get-messages]]))
 
 ;; -- Chat --------------------------------------------------------------
 
@@ -33,10 +31,7 @@
 
 (register-sub :get-input-command
   (fn [db _]
-    (reaction (get-in @db db/input-command-path))
-    ;; (let [input-command-name ]
-    ;;   (reaction @input-command-name))
-    ))
+    (reaction (get-in @db db/input-command-path))))
 
 ;; -- Chats list --------------------------------------------------------------
 
@@ -47,14 +42,6 @@
       (reaction
         (let [_ @chats-updated]
           (chats-list))))))
-
-(register-sub :get-current-chat
-  (fn [db _]
-    (let [current-chat-id (-> (current-chat-id @db)
-                              (reaction))]
-      (-> (when-let [chat-id @current-chat-id]
-            (chat-by-id chat-id))
-          (reaction)))))
 
 ;; -- User data --------------------------------------------------------------
 
@@ -87,9 +74,3 @@
   (fn [db _]
     (reaction
       (get @db :contacts))))
-
-(register-sub :all-contacts
-  (fn [db _]
-    (reaction
-      (contacts-list))))
-

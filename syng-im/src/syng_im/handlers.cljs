@@ -1,6 +1,6 @@
 (ns syng-im.handlers
   (:require
-    [re-frame.core :refer [register-handler after dispatch]]
+    [re-frame.core :refer [register-handler after]]
     [schema.core :as s :include-macros true]
     [syng-im.db :refer [app-db schema]]
     [syng-im.protocol.api :refer [init-protocol]]
@@ -16,18 +16,15 @@
     [syng-im.handlers.contacts :as contacts-service]
     [syng-im.handlers.suggestions :as suggestions-service]
     [syng-im.handlers.commands :as commands-service]
+    [syng-im.handlers.sign-up :as sign-up-service]
 
     [syng-im.models.chats :refer [create-chat]]
     [syng-im.models.chat :refer [signal-chat-updated
-                                 set-current-chat-id
-                                 update-new-group-selection
-                                 clear-new-group
-                                 new-group-selection]]
+                                 set-current-chat-id]]
     [syng-im.utils.logging :as log]
     [syng-im.protocol.api :as api]
     [syng-im.constants :refer [text-content-type]]
-    [syng-im.navigation :refer [nav-push]]
-    [syng-im.utils.crypt :refer [gen-random-bytes]]))
+    [syng-im.navigation :refer [nav-push]]))
 
 ;; -- Middleware ------------------------------------------------------------
 ;;
@@ -53,33 +50,6 @@
   (fn [db [_ value]]
     (assoc db :loading value)))
 
-(register-handler :initialize-crypt
-  (fn [db _]
-    (log/debug "initializing crypt")
-    (gen-random-bytes 1024 (fn [{:keys [error buffer]}]
-                             (if error
-                               (do
-                                 (log/error "Failed to generate random bytes to initialize sjcl crypto")
-                                 (dispatch [:notify-user {:type  :error
-                                                          :error error}]))
-                               (do
-                                 (->> (.toString buffer "hex")
-                                      (.toBits (.. js/ecc -sjcl -codec -hex))
-                                      (.addEntropy (.. js/ecc -sjcl -random)))
-                                 (dispatch [:crypt-initialized])))))
-    db))
-
-(register-handler :crypt-initialized
-  (fn [db _]
-    (log/debug "crypt initialized")
-    db))
-
-(register-handler :navigate-to
-  (fn [db [action navigator route]]
-    (log/debug action route)
-    (nav-push navigator route)
-    db))
-
 ;; -- Protocol --------------------------------------------------------------
 
 (register-handler :initialize-protocol
@@ -99,14 +69,8 @@
     (log/debug action "msg" msg)
     (save-message chat-id msg)
     (-> db
-        (create-chat chat-id [chat-id] false)
+        (create-chat chat-id [chat-id])
         (signal-chat-updated chat-id))))
-
-(register-handler :group-received-msg
-  (fn [db [action {chat-id :group-id :as msg}]]
-    (log/debug action "msg" msg)
-    (save-message chat-id msg)
-    (signal-chat-updated db chat-id)))
 
 (register-handler :acked-msg
   (fn [db [_ from msg-id]]
@@ -124,31 +88,37 @@
 (register-handler :send-chat-msg
   (fn [db [action chat-id text]]
     (log/debug action "chat-id" chat-id "text" text)
-    (let [{msg-id     :msg-id
-           {from :from
-            to   :to} :msg} (api/send-user-msg {:to      chat-id
-                                                :content text})
-          msg {:msg-id       msg-id
-               :from         from
-               :to           to
-               :content      text
-               :content-type text-content-type
-               :outgoing     true}]
+    (let [msg (if (= chat-id "console")
+                (sign-up-service/send-console-msg text)
+                (let [{msg-id :msg-id
+                       {from :from
+                        to   :to} :msg} (api/send-user-msg {:to      chat-id
+                                                            :content text})]
+                  {:msg-id       msg-id
+                   :from         from
+                   :to           to
+                   :content      text
+                   :content-type text-content-type
+                   :outgoing     true}))]
       (save-message chat-id msg)
       (signal-chat-updated db chat-id))))
 
-(register-handler :send-group-chat-msg
-  (fn [db [action chat-id text]]
-    (log/debug action "chat-id" chat-id "text" text)
-    (let [{msg-id       :msg-id
-           {from :from} :msg} (api/send-group-user-msg {:group-id chat-id
-                                                        :content  text})
-          msg {:msg-id       msg-id
-               :from         from
-               :to           nil
-               :content      text
-               :content-type text-content-type
-               :outgoing     true}]
+(register-handler :send-chat-command
+  (fn [db [action chat-id command content]]
+    (log/debug action "chat-id" chat-id "command" command "content" content)
+    (let [msg (if (= chat-id "console")
+                (sign-up-service/send-console-command command content)
+                ;; TODO handle command, now sends as plain message
+                (let [{msg-id :msg-id
+                       {from :from
+                        to   :to} :msg} (api/send-user-msg {:to      chat-id
+                                                            :content content})]
+                  {:msg-id       msg-id
+                   :from         from
+                   :to           to
+                   :content      content
+                   :content-type text-content-type
+                   :outgoing     true}))]
       (save-message chat-id msg)
       (signal-chat-updated db chat-id))))
 
@@ -195,9 +165,14 @@
 (register-handler :show-chat
   (fn [db [action chat-id navigator]]
     (log/debug action "chat-id" chat-id)
-    (let [db (set-current-chat-id db chat-id)]
-      (dispatch [:navigate-to navigator {:view-id :chat}])
-      db)))
+    (nav-push navigator {:view-id :chat})
+    (set-current-chat-id db chat-id)))
+
+(register-handler :set-sign-up-chat
+  (fn [db [_]]
+    (-> db
+        (set-current-chat-id "console")
+        sign-up-service/intro)))
 
 ;; -- Chat --------------------------------------------------------------
 
@@ -208,39 +183,3 @@
 (register-handler :set-input-command
   (fn [db [_ command]]
     (commands-service/set-input-command db command)))
-
-(register-handler :show-contacts
-  (fn [db [action navigator]]
-    (log/debug action)
-    (nav-push navigator {:view-id :contact-list})
-    db))
-
-(register-handler :show-group-new
-  (fn [db [action navigator]]
-    (log/debug action)
-    (nav-push navigator {:view-id :new-group})
-    (clear-new-group db)))
-
-(register-handler :select-for-new-group
-  (fn [db [action identity add?]]
-    (log/debug action identity add?)
-    (update-new-group-selection db identity add?)))
-
-(register-handler :create-new-group
-  (fn [db [action group-name navigator]]
-    (log/debug action)
-    (let [identities (-> (new-group-selection db)
-                         (vec))
-          group-id   (api/start-group-chat identities group-name)
-          db         (create-chat db group-id identities true group-name)]
-      (dispatch [:show-chat group-id navigator])
-      db)))
-
-(register-handler :group-chat-invite-received
-  (fn [db [action from group-id identities group-name]]
-    (log/debug action from group-id identities)
-    (create-chat db group-id identities true group-name)))
-
-(comment
-
-  )

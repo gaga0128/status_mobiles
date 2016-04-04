@@ -19,8 +19,7 @@
 
 
 (defn chat [{:keys [navigator]}]
-  (let [messages (subscribe [:get-chat-messages])
-        chat     (subscribe [:get-current-chat])]
+  (let [messages (subscribe [:get-chat-messages])]
     (fn []
       (let [msgs       @messages
             _          (log/debug "messages=" msgs)
@@ -30,8 +29,7 @@
          (when android?
            ;; TODO add IOS version
            [toolbar-android {:logo          res/logo-icon
-                             :title         (or (@chat :name)
-                                                "Chat name")
+                             :title         "Chat name"
                              :titleColor    "#4A5258"
                              :subtitle      "Last seen just now"
                              :subtitleColor "#AAB2B2"
