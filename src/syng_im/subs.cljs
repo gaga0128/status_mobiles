@@ -8,10 +8,8 @@
                                           chats-updated?
                                           chat-by-id]]
             [syng-im.models.messages :refer [get-messages]]
-            [syng-im.models.contacts :refer [contacts-list]]
-            [syng-im.models.commands :refer [get-chat-command
-                                             get-chat-command-content
-                                             get-chat-command-request]]
+            [syng-im.models.contacts :refer [contacts-list
+                                             contacts-list-exclude]]
             [syng-im.handlers.suggestions :refer [get-suggestions]]))
 
 ;; -- Chat --------------------------------------------------------------
@@ -42,18 +40,11 @@
 
 (register-sub :get-chat-command
   (fn [db _]
-    (-> (get-chat-command @db)
-        (reaction))))
+    (reaction (get-in @db (db/chat-command-path (current-chat-id @db))))))
 
 (register-sub :get-chat-command-content
   (fn [db _]
-    (-> (get-chat-command-content @db)
-        (reaction))))
-
-(register-sub :chat-command-request
-  (fn [db _]
-    (-> (get-chat-command-request @db)
-        (reaction))))
+    (reaction (get-in @db (db/chat-command-content-path (current-chat-id @db))))))
 
 ;; -- Chats list --------------------------------------------------------------
 
@@ -75,11 +66,11 @@
 
 ;; -- User data --------------------------------------------------------------
 
-;; (register-sub
-;;   :get-user-phone-number
-;;   (fn [db _]
-;;     (reaction
-;;       (get @db :user-phone-number))))
+(register-sub
+  :get-user-phone-number
+  (fn [db _]
+    (reaction
+      (get @db :user-phone-number))))
 
 (register-sub
   :get-user-identity
@@ -94,10 +85,10 @@
       (get @db :loading))))
 
 (register-sub
- :signed-up
- (fn [db _]
-   (reaction
-    (get @db :signed-up))))
+  :get-confirmation-code
+  (fn [db _]
+    (reaction
+      (get @db :confirmation-code))))
 
 (register-sub
   :get-contacts
@@ -109,3 +100,17 @@
   (fn [db _]
     (reaction
       (contacts-list))))
+
+(register-sub :all-new-contacts
+  (fn [db _]
+    (let [current-chat-id (-> (current-chat-id @db)
+                              (reaction))
+          chat            (-> (when-let [chat-id @current-chat-id]
+                                (chat-by-id chat-id))
+                              (reaction))]
+      (reaction
+        (when @chat
+          (let [current-participants (->> @chat
+                                          :contacts
+                                          (map :identity))]
+            (contacts-list-exclude current-participants)))))))

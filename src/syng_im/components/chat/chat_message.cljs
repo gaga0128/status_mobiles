@@ -12,8 +12,7 @@
             [syng-im.navigation :refer [nav-pop]]
             [syng-im.resources :as res]
             [syng-im.constants :refer [text-content-type
-                                       content-type-command
-                                       content-type-command-request]]))
+                                       content-type-command]]))
 
 
 (defn message-date [{:keys [date]}]
@@ -67,18 +66,17 @@
 (defn message-content-command [content]
   (let [{:keys [command content]} (commands/parse-command-msg-content content)]
     [view {:style {:flexDirection "column"}}
-     [view {:style {:marginTop       -5
-                    :marginLeft      0
+     [view {:style {:margin          10
                     :backgroundColor (:color command)
                     :borderRadius    10}}
-      [text {:style {:marginTop        0
+      [text {:style {:marginTop        -2
                      :marginHorizontal 10
                      :fontSize         14
                      :fontFamily       "Avenir-Roman"
                      :color            "white"}}
        (:text command)]]
-     [text {:style {:marginTop        5
-                    :marginHorizontal 0
+     [text {:style {:marginTop        -2
+                    :marginHorizontal 10
                     :fontSize         14
                     :fontFamily       "Avenir-Roman"
                     :color            "black"}}
@@ -87,65 +85,28 @@
         "******"
         content)]]))
 
-(defn set-chat-command [msg-id command]
-  (dispatch [:set-response-chat-command msg-id (:command command)]))
-
-(defn message-content-command-request [msg-id content outgoing text-color background-color]
-  (let [{:keys [command content]} (commands/parse-command-request-msg-content content)]
-    [touchable-highlight {:onPress (fn []
-                                     (set-chat-command msg-id command))}
-     [view {}
-      [view {:style (merge {:marginTop         15
-                            :borderRadius      6
-                            :paddingVertical   12
-                            :paddingHorizontal 16}
-                           (if outgoing
-                             {:backgroundColor "#D3EEEF"}
-                             {:backgroundColor background-color}))}
-       [text {:style (merge {:fontSize   14
-                             :fontFamily "Avenir-Roman"}
-                            (if outgoing
-                              {:color "#4A5258"}
-                              {:color text-color}))}
-        content]]
-      [view {:style {:position        "absolute"
-                     :top             0
-                     :left            20
-                     :width           30
-                     :height          30
-                     :borderRadius    50
-                     :backgroundColor (:color command)}}
-       [image {:source res/att
-               :style  {:width    17
-                        :height   14
-                        :position "absolute"
-                        :top      8
-                        :left     6}}]]]]))
-
-(defn message-content [{:keys [msg-id content-type content outgoing text-color background-color]}]
-  (if (= content-type content-type-command-request)
-    [message-content-command-request msg-id content outgoing text-color background-color]
-    [view {:style (merge {:borderRadius 6}
-                         (if (= content-type text-content-type)
-                           {:paddingVertical   12
-                            :paddingHorizontal 16}
-                           {:paddingVertical   14
-                            :paddingHorizontal 10})
-                         (if outgoing
-                           {:backgroundColor "#D3EEEF"}
-                           {:backgroundColor background-color}))}
-     (cond
-       (= content-type text-content-type)
-       [text {:style (merge {:fontSize   14
-                             :fontFamily "Avenir-Roman"}
-                            (if outgoing
-                              {:color "#4A5258"}
-                              {:color text-color}))}
-        content]
-       (= content-type content-type-command)
-       [message-content-command content]
-       :else [message-content-audio {:content      content
-                                     :content-type content-type}])]))
+(defn message-content [{:keys [content-type content outgoing text-color background-color]}]
+  [view {:style (merge {:borderRadius 6}
+                       (if (= content-type text-content-type)
+                         {:paddingVertical   12
+                          :paddingHorizontal 16}
+                         {:paddingVertical   14
+                          :paddingHorizontal 10})
+                       (if outgoing
+                         {:backgroundColor "#D3EEEF"}
+                         {:backgroundColor background-color}))}
+   (cond
+     (= content-type text-content-type)
+     [text {:style (merge {:fontSize   14
+                           :fontFamily "Avenir-Roman"}
+                          (if outgoing
+                            {:color "#4A5258"}
+                            {:color text-color}))}
+      content]
+     (= content-type content-type-command)
+     [message-content-command content]
+     :else [message-content-audio {:content      content
+                                   :content-type content-type}])])
 
 (defn message-delivery-status [{:keys [delivery-status]}]
   [view {:style {:flexDirection "row"
@@ -175,8 +136,7 @@
                           :alignItems "flex-end"}
                          {:alignSelf  "flex-start"
                           :alignItems "flex-start"}))}
-   [message-content {:msg-id           msg-id
-                     :content-type     content-type
+   [message-content {:content-type     content-type
                      :content          content
                      :outgoing         outgoing
                      :text-color       text-color

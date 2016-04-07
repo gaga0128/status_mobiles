@@ -9,11 +9,11 @@
              :identity-password    "replace-me-with-user-entered-password"
              :contacts             []
              :chat                 {:current-chat-id "0x0479a5ed1f38cadfad1db6cd56c4b659b0ebe052bbe9efa950f6660058519fa4ca6be2dda66afa80de96ab00eb97a2605d5267a1e8f4c2a166ab551f6826608cdd"
-                                    :command nil}
+                                    :command         nil}
              :chats                {}
              :chats-updated-signal 0
              :new-group            #{}
-             :signed-up            false})
+             :new-participants     #{}})
 
 
 (def protocol-initialized-path [:protocol-initialized])
@@ -26,12 +26,7 @@
   [:chats chat-id :input-text])
 (defn chat-command-path [chat-id]
   [:chats chat-id :command-input :command])
-(defn chat-command-to-msg-id-path [chat-id]
-  [:chats chat-id :command-input :to-msg-id])
 (defn chat-command-content-path [chat-id]
   [:chats chat-id :command-input :content])
-(defn chat-command-requests-path [chat-id]
-  [:chats chat-id :command-requests])
-(defn chat-command-request-path [chat-id msg-id]
-  [:chats chat-id :command-requests msg-id])
 (def new-group-path [:new-group])
+(def new-participants-path [:new-participants])

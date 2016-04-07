@@ -12,23 +12,24 @@
     [syng-im.models.messages :refer [save-message
                                      update-message!
                                      message-by-id]]
-    [syng-im.models.commands :refer [set-chat-command
-                                     set-response-chat-command
-                                     set-chat-command-content
-                                     set-chat-command-request]]
     [syng-im.handlers.server :as server]
     [syng-im.handlers.contacts :as contacts-service]
-    [syng-im.handlers.suggestions :refer [get-command
-                                          handle-command]]
+    [syng-im.handlers.commands :refer [set-chat-command
+                                       set-chat-command-content]]
     [syng-im.handlers.sign-up :as sign-up-service]
 
-    [syng-im.models.chats :refer [create-chat]]
+    [syng-im.models.chats :refer [create-chat
+                                  chat-add-participants]]
     [syng-im.models.chat :refer [signal-chat-updated
                                  set-current-chat-id
+                                 current-chat-id
                                  update-new-group-selection
+                                 update-new-participants-selection
                                  clear-new-group
+                                 clear-new-participants
                                  new-group-selection
-                                 set-chat-input-text]]
+                                 set-chat-input-text
+                                 new-participants-selection]]
     [syng-im.utils.logging :as log]
     [syng-im.protocol.api :as api]
     [syng-im.constants :refer [text-content-type]]
@@ -114,14 +115,29 @@
     (save-message chat-id msg)
     (signal-chat-updated db chat-id)))
 
+(defn joined-chat-msg [chat-id from msg-id]
+  (let [contact-name (:name (contacts/contatct-by-identity from))]
+    (save-message chat-id {:from         "system"
+                           :msg-id       msg-id
+                           :content      (str (or contact-name from) " received chat invitation")
+                           :content-type text-content-type})))
+
+(register-handler :group-chat-invite-acked
+  (fn [db [action from group-id ack-msg-id]]
+    (log/debug action from group-id ack-msg-id)
+    (joined-chat-msg group-id from ack-msg-id)
+    (signal-chat-updated db group-id)))
+
 (register-handler :acked-msg
-  (fn [db [_ from msg-id]]
+  (fn [db [action from msg-id]]
+    (log/debug action from msg-id)
     (update-message! {:msg-id          msg-id
                       :delivery-status :delivered})
     (signal-chat-updated db from)))
 
 (register-handler :msg-delivery-failed
-  (fn [db [_ msg-id]]
+  (fn [db [action msg-id]]
+    (log/debug action from msg-id)
     (update-message! {:msg-id          msg-id
                       :delivery-status :failed})
     (let [{:keys [chat-id]} (message-by-id msg-id)]
@@ -130,31 +146,28 @@
 (register-handler :send-chat-msg
   (fn [db [action chat-id text]]
     (log/debug action "chat-id" chat-id "text" text)
-    (if-let [command (get-command text)]
-      (dispatch [:set-chat-command (:command command)])
-      (let [msg (if (= chat-id "console")
-                  (sign-up-service/send-console-msg text)
-                  (let [{msg-id :msg-id
-                         {from :from
-                          to   :to} :msg} (api/send-user-msg {:to      chat-id
-                                                              :content text})]
-                    {:msg-id       msg-id
-                     :from         from
-                     :to           to
-                     :content      text
-                     :content-type text-content-type
-                     :outgoing     true}))]
-        (save-message chat-id msg)
-        (signal-chat-updated db chat-id)))))
+    (let [msg (if (= chat-id "console")
+                (sign-up-service/send-console-msg text)
+                (let [{msg-id     :msg-id
+                       {from :from
+                        to   :to} :msg} (api/send-user-msg {:to      chat-id
+                                                            :content text})]
+                  {:msg-id       msg-id
+                   :from         from
+                   :to           to
+                   :content      text
+                   :content-type text-content-type
+                   :outgoing     true}))]
+      (save-message chat-id msg)
+      (signal-chat-updated db chat-id))))
 
 (register-handler :send-chat-command
   (fn [db [action chat-id command content]]
     (log/debug action "chat-id" chat-id "command" command "content" content)
-    (let [db (set-chat-input-text db nil)
-          msg (if (= chat-id "console")
-                (sign-up-service/send-console-command db command content)
+    (let [msg (if (= chat-id "console")
+                (sign-up-service/send-console-command command content)
                 ;; TODO handle command, now sends as plain message
-                (let [{msg-id :msg-id
+                (let [{msg-id     :msg-id
                        {from :from
                         to   :to} :msg} (api/send-user-msg {:to      chat-id
                                                             :content content})]
@@ -165,9 +178,7 @@
                    :content-type text-content-type
                    :outgoing     true}))]
       (save-message chat-id msg)
-      (-> db
-          (handle-command command content)
-          (signal-chat-updated chat-id)))))
+      (signal-chat-updated db chat-id))))
 
 (register-handler :send-group-chat-msg
   (fn [db [action chat-id text]]
@@ -198,8 +209,13 @@
 ;; -- Sign up --------------------------------------------------------------
 
 (register-handler :sign-up
-  (fn [db [_ phone-number handler]]
-    (server/sign-up db phone-number handler)))
+  (fn [db [_ phone-number whisper-identity handler]]
+    (server/sign-up phone-number whisper-identity handler)
+    db))
+
+(register-handler :set-confirmation-code
+  (fn [db [_ value]]
+    (assoc db :confirmation-code value)))
 
 (register-handler :sign-up-confirm
   (fn [db [_ confirmation-code handler]]
@@ -226,13 +242,11 @@
       (dispatch [:navigate-to navigator {:view-id :chat}])
       db)))
 
-(register-handler :init-console-chat
+(register-handler :set-sign-up-chat
   (fn [db [_]]
-    (sign-up-service/init db)))
-
-(register-handler :set-signed-up
-  (fn [db [_ signed-up]]
-    (sign-up-service/set-signed-up db signed-up)))
+    (-> db
+        (set-current-chat-id "console")
+        sign-up-service/intro)))
 
 ;; -- Chat --------------------------------------------------------------
 
@@ -244,23 +258,38 @@
   (fn [db [_ command-key]]
     (set-chat-command db command-key)))
 
-(register-handler :set-response-chat-command
-  (fn [db [_ to-msg-id command-key]]
-    (set-response-chat-command db to-msg-id command-key)))
-
 (register-handler :set-chat-command-content
   (fn [db [_ content]]
     (set-chat-command-content db content)))
-
-(register-handler :set-chat-command-request
-  (fn [db [_ msg-id handler]]
-    (set-chat-command-request db msg-id handler)))
 
 (register-handler :show-contacts
   (fn [db [action navigator]]
     (log/debug action)
     (nav-push navigator {:view-id :contact-list})
     db))
+
+(register-handler :select-new-participant
+  (fn [db [action identity add?]]
+    (log/debug action identity add?)
+    (update-new-participants-selection db identity add?)))
+
+(register-handler :show-add-participants
+  (fn [db [action navigator]]
+    (log/debug action)
+    (nav-push navigator {:view-id :add-participants})
+    (clear-new-participants db)))
+
+(register-handler :add-new-participants
+  (fn [db [action navigator]]
+    (log/debug action)
+    (let [identities (-> (new-participants-selection db)
+                         (vec))
+          chat-id    (current-chat-id db)]
+      (chat-add-participants chat-id identities)
+      (dispatch [:show-chat chat-id navigator])
+      (doseq [ident identities]
+        (api/group-add-participant chat-id ident))
+      db)))
 
 (register-handler :show-group-new
   (fn [db [action navigator]]
