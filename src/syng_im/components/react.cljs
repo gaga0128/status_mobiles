@@ -20,11 +20,6 @@
 (defn list-item [component]
   (r/as-element component))
 
-(comment
-  (.-width (.get (.. js/React -Dimensions) "window"))
-  )
-
-
 ;; (do
 ;;   (def activity-indicator-ios (r/adapt-react-class (.-ActivityIndicatorIOS js/React)))
 ;;   (def animated-image (r/adapt-react-class (.-Animated.Image js/React)))

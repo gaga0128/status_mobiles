@@ -18,29 +18,13 @@
             [syng-im.components.chat.chat-message-new :refer [chat-message-new]]))
 
 
-(defn contacts-by-identity [contacts]
-  (->> contacts
-       (map (fn [{:keys [identity] :as contact}]
-              [identity contact]))
-       (into {})))
-
-(defn add-msg-color [{:keys [from] :as msg} contact-by-identity]
-  (if (= "system" from)
-    (assoc msg :text-color "#4A5258"
-               :background-color "#D3EEEF")
-    (let [{:keys [text-color background-color]} (get contact-by-identity from)]
-      (assoc msg :text-color text-color
-                 :background-color background-color))))
-
 (defn chat [{:keys [navigator]}]
   (let [messages (subscribe [:get-chat-messages])
         chat     (subscribe [:get-current-chat])]
     (fn []
-      (let [msgs                @messages
-            ;_                 (log/debug "messages=" msgs)
-            datasource          (to-realm-datasource msgs)
-            contacts            (:contacts @chat)
-            contact-by-identity (contacts-by-identity contacts)]
+      (let [msgs       @messages
+            _          (log/debug "messages=" msgs)
+            datasource (to-realm-datasource msgs)]
         [view {:style {:flex            1
                        :backgroundColor "#eef2f5"}}
          (when android?
@@ -61,8 +45,6 @@
                      :renderScrollComponent (fn [props]
                                               (invertible-scroll-view nil))
                      :renderRow             (fn [row section-id row-id]
-                                              (let [msg (-> (js->clj row :keywordize-keys true)
-                                                            (add-msg-color contact-by-identity))]
-                                                (r/as-element [chat-message msg])))
+                                              (r/as-element [chat-message (js->clj row :keywordize-keys true)]))
                      :style                 {:backgroundColor "white"}}]
          [chat-message-new]]))))
