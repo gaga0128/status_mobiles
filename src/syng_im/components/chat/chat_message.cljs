@@ -81,7 +81,7 @@
                     :marginHorizontal 0
                     :fontSize         14
                     :fontFamily       "Avenir-Roman"
-                    :color           "black"}}
+                    :color            "black"}}
       ;; TODO isn't smart
       (if (= (:command command) :keypair-password)
         "******"
@@ -90,38 +90,41 @@
 (defn set-chat-command [command]
   (dispatch [:set-chat-command (:command command)]))
 
-(defn message-content-command-request [content outgoing]
+(defn message-content-command-request [content outgoing text-color background-color]
   (let [{:keys [command content]} (commands/parse-command-request-msg-content content)]
-    [view {:style {:marginTop 10}}
-     [view {:style (merge {:borderRadius      6
-                           :paddingVertical   12
-                           :paddingHorizontal 16}
-                          (if outgoing
-                            {:backgroundColor "#D3EEEF"}
-                            {:backgroundColor "#FBF6E3"}))}
-      [text {:style {:fontSize   14
-                     :fontFamily "Avenir-Roman"
-                     :color      "#4A5258"}}
-       content]]
-     [touchable-highlight {:style {:position    "absolute"
-                                   :top         -15
-                                   :left        20}
-                           :onPress (fn []
-                                      (set-chat-command command))}
-      [view {:style {:width           30
+    [touchable-highlight {:onPress (fn []
+                                     (set-chat-command command))}
+     [view {}
+      [view {:style (merge {:marginTop         15
+                            :borderRadius      6
+                            :paddingVertical   12
+                            :paddingHorizontal 16}
+                           (if outgoing
+                             {:backgroundColor "#D3EEEF"}
+                             {:backgroundColor background-color}))}
+       [text {:style (merge {:fontSize   14
+                             :fontFamily "Avenir-Roman"}
+                            (if outgoing
+                              {:color "#4A5258"}
+                              {:color text-color}))}
+        content]]
+      [view {:style {:position        "absolute"
+                     :top             0
+                     :left            20
+                     :width           30
                      :height          30
                      :borderRadius    50
                      :backgroundColor (:color command)}}
        [image {:source res/att
-               :style  {:width  17
-                        :height 14
+               :style  {:width    17
+                        :height   14
                         :position "absolute"
-                        :top 8
-                        :left 6}}]]]]))
+                        :top      8
+                        :left     6}}]]]]))
 
-(defn message-content [{:keys [content-type content outgoing]}]
+(defn message-content [{:keys [content-type content outgoing text-color background-color]}]
   (if (= content-type content-type-command-request)
-    [message-content-command-request content outgoing]
+    [message-content-command-request content outgoing text-color background-color]
     [view {:style (merge {:borderRadius 6}
                          (if (= content-type text-content-type)
                            {:paddingVertical   12
@@ -130,12 +133,14 @@
                             :paddingHorizontal 10})
                          (if outgoing
                            {:backgroundColor "#D3EEEF"}
-                           {:backgroundColor "#FBF6E3"}))}
+                           {:backgroundColor background-color}))}
      (cond
        (= content-type text-content-type)
-       [text {:style {:fontSize   14
-                      :fontFamily "Avenir-Roman"
-                      :color      "#4A5258"}}
+       [text {:style (merge {:fontSize   14
+                             :fontFamily "Avenir-Roman"}
+                            (if outgoing
+                              {:color "#4A5258"}
+                              {:color text-color}))}
         content]
        (= content-type content-type-command)
        [message-content-command content]
@@ -161,7 +166,7 @@
       :seen "Seen"
       :failed "Failed")]])
 
-(defn message-body [{:keys [msg-id content content-type outgoing delivery-status]}]
+(defn message-body [{:keys [msg-id content content-type outgoing delivery-status text-color background-color]}]
   [view {:style (merge {:flexDirection  "column"
                         :width          260
                         :marginVertical 5}
@@ -170,18 +175,22 @@
                           :alignItems "flex-end"}
                          {:alignSelf  "flex-start"
                           :alignItems "flex-start"}))}
-   [message-content {:content-type content-type
-                     :content      content
-                     :outgoing     outgoing}]
+   [message-content {:content-type     content-type
+                     :content          content
+                     :outgoing         outgoing
+                     :text-color       text-color
+                     :background-color background-color}]
    (when (and outgoing delivery-status)
      [message-delivery-status {:delivery-status delivery-status}])])
 
-(defn chat-message [{:keys [msg-id content content-type outgoing delivery-status date new-day] :as msg}]
+(defn chat-message [{:keys [msg-id content content-type outgoing delivery-status date new-day text-color background-color] :as msg}]
   [view {:paddingHorizontal 15}
    (when new-day
      [message-date {:date date}])
-   [message-body {:msg-id          msg-id
-                  :content         content
-                  :content-type    content-type
-                  :outgoing        outgoing
-                  :delivery-status (keyword delivery-status)}]])
+   [message-body {:msg-id           msg-id
+                  :content          content
+                  :content-type     content-type
+                  :outgoing         outgoing
+                  :text-color       text-color
+                  :background-color background-color
+                  :delivery-status  (keyword delivery-status)}]])
