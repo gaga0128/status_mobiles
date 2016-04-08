@@ -9,14 +9,15 @@
                                      set-initialized]]
     [syng-im.models.user-data :as user-data]
     [syng-im.models.contacts :as contacts]
-    [syng-im.models.discoveries :as discoveries]
     [syng-im.models.messages :refer [save-message
                                      update-message!
                                      message-by-id]]
+    [syng-im.models.commands :refer [set-chat-command
+                                     set-chat-command-content
+                                     set-chat-command-request]]
     [syng-im.handlers.server :as server]
     [syng-im.handlers.contacts :as contacts-service]
-    [syng-im.handlers.commands :refer [set-chat-command
-                                       set-chat-command-content]]
+    
     [syng-im.handlers.sign-up :as sign-up-service]
 
     [syng-im.models.chats :refer [create-chat]]
@@ -145,8 +146,9 @@
 (register-handler :send-chat-command
   (fn [db [action chat-id command content]]
     (log/debug action "chat-id" chat-id "command" command "content" content)
-    (let [msg (if (= chat-id "console")
-                (sign-up-service/send-console-command command content)
+    (let [db (set-chat-input-text db nil)
+          msg (if (= chat-id "console")
+                (sign-up-service/send-console-command db command content)
                 ;; TODO handle command, now sends as plain message
                 (let [{msg-id :msg-id
                        {from :from
@@ -190,13 +192,8 @@
 ;; -- Sign up --------------------------------------------------------------
 
 (register-handler :sign-up
-  (fn [db [_ phone-number whisper-identity handler]]
-    (server/sign-up phone-number whisper-identity handler)
-    db))
-
-(register-handler :set-confirmation-code
-  (fn [db [_ value]]
-    (assoc db :confirmation-code value)))
+  (fn [db [_ phone-number handler]]
+    (server/sign-up db phone-number handler)))
 
 (register-handler :sign-up-confirm
   (fn [db [_ confirmation-code handler]]
@@ -223,11 +220,13 @@
       (dispatch [:navigate-to navigator {:view-id :chat}])
       db)))
 
-(register-handler :set-sign-up-chat
+(register-handler :init-console-chat
   (fn [db [_]]
-    (-> db
-        (set-current-chat-id "console")
-        sign-up-service/intro)))
+    (sign-up-service/init db)))
+
+(register-handler :set-signed-up
+  (fn [db [_ signed-up]]
+    (sign-up-service/set-signed-up db signed-up)))
 
 ;; -- Chat --------------------------------------------------------------
 
@@ -242,6 +241,10 @@
 (register-handler :set-chat-command-content
   (fn [db [_ content]]
     (set-chat-command-content db content)))
+
+(register-handler :set-chat-command-request
+  (fn [db [_ handler]]
+    (set-chat-command-request db handler)))
 
 (register-handler :show-contacts
   (fn [db [action navigator]]
@@ -274,12 +277,6 @@
   (fn [db [action from group-id identities group-name]]
     (log/debug action from group-id identities)
     (create-chat db group-id identities true group-name)))
-
-;; -- Discovery --------------------------------------------------------------
-
-(register-handler :generate-discoveries
-                  (fn [db _]
-                    (discoveries/save-discoveries (discoveries/generate-discoveries 10))))
 
 (comment
 

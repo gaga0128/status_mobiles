@@ -12,7 +12,8 @@
                                     :command nil}
              :chats                {}
              :chats-updated-signal 0
-             :new-group            #{}})
+             :new-group            #{}
+             :signed-up            false})
 
 
 (def protocol-initialized-path [:protocol-initialized])
@@ -27,7 +28,6 @@
   [:chats chat-id :command-input :command])
 (defn chat-command-content-path [chat-id]
   [:chats chat-id :command-input :content])
+(defn chat-command-request-path [chat-id]
+  [:chats chat-id :command-request])
 (def new-group-path [:new-group])
-(def updated-discovery-signal-path [:discovery-updated-signal])
-(defn updated-discovery-signal-path [discovery-id]
-  [:discoveries discovery-id :discovery-updated-signal])

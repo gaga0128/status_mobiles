@@ -13,5 +13,3 @@
 (def smile (js/require "./images/smile.png"))
 (def att (js/require "./images/att.png"))
 (def v (js/require "./images/v.png"))
-(def menu (js/require "./images/ic_menu_black_24dp_1x.png"))
-(def search (js.require "./images/ic_search_black_24dp_1x.png"))

@@ -34,9 +34,7 @@
                                   :delivery-status {:type     "string"
                                                     :optional true}}}
                     {:name       :chat-contact
-                     :properties {:identity         "string"
-                                  :text-color       "string"
-                                  :background-color "string"}}
+                     :properties {:identity "string"}}
                     {:name       :chats
                      :primaryKey :chat-id
                      :properties {:chat-id    "string"
@@ -44,24 +42,7 @@
                                   :group-chat "bool"
                                   :timestamp  "int"
                                   :contacts   {:type       "list"
-                                               :objectType "chat-contact"}}}
-                    {:name        :tag
-                     :primaryKey  :name
-                     :properties  {:name         "string"
-                                   :count        {:type     "int"
-                                                  :optional true
-                                                  :default 1}}}
-                    {:name        :discoveries
-                     :primaryKey  :whisper-id
-                     :properties  {:name         "string"
-                                   :status       "string"
-                                   :whisper-id   "string"
-                                   :photo        "string"
-                                   :tags         {:type       "list"
-                                                  :objectType "tag"}
-                                   :last-updated "date"}}
-
-                    ]})
+                                               :objectType "chat-contact"}}}]})
 
 
 (def realm (js/Realm. (clj->js opts)))
@@ -119,11 +100,6 @@
   (some-> (aget result 0)
           (js->clj :keywordize-keys true)))
 
-(defn list-to-array [record list-field]
-  (assoc record list-field (-> (get record list-field)
-                               vals
-                               vec)))
-
 (defn decode-value [{:keys [key value]}]
   (read-string value))
 
@@ -139,7 +115,7 @@
   (.-length objs))
 
 (defn get-list [schema-name]
-  (vals (js->clj (.slice (.objects realm (to-string schema-name)) 0) :keywordize-keys true)))
+  (vals (js->clj (.objects realm (to-string schema-name)) :keywordize-keys true)))
 
 
 (comment
