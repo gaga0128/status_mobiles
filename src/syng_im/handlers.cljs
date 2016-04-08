@@ -12,12 +12,10 @@
     [syng-im.models.messages :refer [save-message
                                      update-message!
                                      message-by-id]]
-    [syng-im.models.commands :refer [set-chat-command
-                                     set-chat-command-content
-                                     set-chat-command-request]]
     [syng-im.handlers.server :as server]
     [syng-im.handlers.contacts :as contacts-service]
-    
+    [syng-im.handlers.commands :refer [set-chat-command
+                                       set-chat-command-content]]
     [syng-im.handlers.sign-up :as sign-up-service]
 
     [syng-im.models.chats :refer [create-chat]]
@@ -146,9 +144,8 @@
 (register-handler :send-chat-command
   (fn [db [action chat-id command content]]
     (log/debug action "chat-id" chat-id "command" command "content" content)
-    (let [db (set-chat-input-text db nil)
-          msg (if (= chat-id "console")
-                (sign-up-service/send-console-command db command content)
+    (let [msg (if (= chat-id "console")
+                (sign-up-service/send-console-command command content)
                 ;; TODO handle command, now sends as plain message
                 (let [{msg-id :msg-id
                        {from :from
@@ -192,8 +189,9 @@
 ;; -- Sign up --------------------------------------------------------------
 
 (register-handler :sign-up
-  (fn [db [_ phone-number handler]]
-    (server/sign-up db phone-number handler)))
+  (fn [db [_ phone-number whisper-identity handler]]
+    (server/sign-up phone-number whisper-identity handler)
+    db))
 
 (register-handler :set-confirmation-code
   (fn [db [_ value]]
@@ -243,10 +241,6 @@
 (register-handler :set-chat-command-content
   (fn [db [_ content]]
     (set-chat-command-content db content)))
-
-(register-handler :set-chat-command-request
-  (fn [db [_ handler]]
-    (set-chat-command-request db handler)))
 
 (register-handler :show-contacts
   (fn [db [action navigator]]

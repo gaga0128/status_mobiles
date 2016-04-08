@@ -9,6 +9,8 @@
             [syng-im.components.react :refer [navigator app-registry]]
             [syng-im.components.contact-list.contact-list :refer [contact-list]]
             [syng-im.components.chat :refer [chat]]
+            [syng-im.components.sign-up :refer [sign-up-view]]
+            [syng-im.components.sign-up-confirm :refer [sign-up-confirm-view]]
             [syng-im.components.chats.chats-list :refer [chats-list]]
             [syng-im.components.chats.new-group :refer [new-group]]
             [syng-im.utils.logging :as log]
@@ -43,7 +45,9 @@
                                      :chat-list (r/as-element [chats-list {:navigator nav}])
                                      :new-group (r/as-element [new-group {:navigator nav}])
                                      :contact-list (r/as-element [contact-list {:navigator nav}])
-                                     :chat (r/as-element [chat {:navigator nav}])))))}])
+                                     :chat (r/as-element [chat {:navigator nav}])
+                                     :sign-up (r/as-element [sign-up-view {:navigator nav}])
+                                     :sign-up-confirm (r/as-element [sign-up-confirm-view {:navigator nav}])))))}])
 
 (defn init []
   (dispatch-sync [:initialize-db])
@@ -52,5 +56,5 @@
   (dispatch [:load-user-phone-number])
   (dispatch [:load-syng-contacts])
   ;; TODO execute on first run only
-  (dispatch [:set-sign-up-chat])
+  ;; (dispatch [:set-sign-up-chat])
   (.registerComponent app-registry "SyngIm" #(r/reactify-component app-root)))
