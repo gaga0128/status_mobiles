@@ -9,7 +9,7 @@
 
 (defn chat-list-item [chat-obj navigator]
   [touchable-highlight {:on-press (fn []
-                                    (dispatch [:show-chat (aget chat-obj "chat-id") navigator :push]))}
+                                    (dispatch [:show-chat (aget chat-obj "chat-id") navigator]))}
    [view {:style {:flexDirection  "row"
                   :width          260
                   :marginVertical 5}}
