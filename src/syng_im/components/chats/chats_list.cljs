@@ -30,11 +30,11 @@
          (when android?
            ;; TODO add IOS version
            [toolbar-android {:logo          res/logo-icon
-                             :title         "Chats"
+                             :title         "Your Chats"
                              :titleColor    "#4A5258"
                              :subtitle      "List of your recent chats"
                              :subtitleColor "#AAB2B2"
-                             :navIcon       res/icon-list
+                             :navIcon       res/nav-back-icon
                              :style         {:backgroundColor "white"
                                              :height          56
                                              :elevation       2}

@@ -13,9 +13,11 @@
     "react-native-action-button",
     "react-native-vector-icons/Ionicons",
     "react-native-circle-checkbox",
-    "react-native-randombytes"
+    "react-native-randombytes",
+    "react-native-carousel-control"
   ],
   "imageDirs": [
     "images"
-  ]
+  ],
+  "iosHost": "localhost"
 }
