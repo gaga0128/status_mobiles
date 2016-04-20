@@ -7,6 +7,7 @@
 
 (defn save-message [chat-id {:keys [from to msg-id content content-type outgoing] :or {outgoing false
                                                                                        to       nil} :as msg}]
+  (log/debug "save-message" chat-id msg)
   (when-not (r/exists? :msgs :msg-id msg-id)
     (r/write
       (fn []
@@ -21,17 +22,17 @@
                          :delivery-status nil} true)))))
 
 (defn get-messages [chat-id]
-  (-> (r/get-by-field :msgs :chat-id chat-id)
-      (r/sorted :timestamp :desc)))
+  (r/sorted (r/get-by-field :msgs :chat-id chat-id) :timestamp :desc))
 
 (defn message-by-id [msg-id]
-  (-> (r/get-by-field :msgs :msg-id msg-id)
-      (r/single-cljs)))
+  (r/single-cljs (r/get-by-field :msgs :msg-id msg-id)))
 
-(defn update-message! [msg]
+(defn update-message! [{:keys [msg-id] :as msg}]
+  (log/debug "update-message!" msg)
   (r/write
     (fn []
-      (r/create :msgs msg true))))
+      (when (r/exists? :msgs :msg-id msg-id)
+        (r/create :msgs msg true)))))
 
 (comment
 
