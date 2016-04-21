@@ -11,7 +11,7 @@
 
 (defn chat-list-item [chat-obj navigator]
   [touchable-highlight {:on-press (fn []
-                                    (dispatch [:show-chat (aget chat-obj "chat-id") navigator]))}
+                                    (dispatch [:show-chat (aget chat-obj "chat-id") navigator :push]))}
    ;; TODO add [photo-path delivery-status new-messages-count online] values to chat-obj
    ;; TODO should chat-obj be clj-map?
    [view {} [chat-list-item-inner-view (merge (js->clj chat-obj :keywordize-keys true)
@@ -20,7 +20,7 @@
                                                :new-messages-count 3
                                                :timestamp          "13:54"
                                                :online             true
-                                               :group-chat true})]]])
+                                               :group-chat         false})]]])
 
 (comment [view {:style {:flexDirection  "row"
                         :width          260
