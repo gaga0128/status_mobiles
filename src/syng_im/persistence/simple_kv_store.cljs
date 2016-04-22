@@ -17,9 +17,8 @@
   (contains-key? [_ key]
     (r/exists? :kv-store :key key))
   (delete [_ key]
-    (r/write (fn []
-               (-> (r/get-by-field :kv-store :key key)
-                   (r/single)
-                   (r/delete))))))
+    (-> (r/get-by-field :kv-store :key key)
+        (r/single)
+        (r/delete))))
 
 (def kv-store (->SimpleKvStore))

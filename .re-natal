@@ -1,7 +1,7 @@
 {
   "name": "SyngIm",
   "interface": "reagent",
-  "androidHost": "localhost",
+  "androidHost": "10.0.3.2",
   "modules": [
     "react-native-contacts",
     "react-native-invertible-scroll-view",
@@ -14,7 +14,7 @@
     "react-native-vector-icons/Ionicons",
     "react-native-circle-checkbox",
     "react-native-randombytes",
-    "dismissKeyboard"
+    "react-native-carousel-control"
   ],
   "imageDirs": [
     "images"

@@ -12,19 +12,10 @@
    [syng-im.components.chat.input.phone :refer [phone-input-view]]
    [syng-im.components.chat.input.password :refer [password-input-view]]
    [syng-im.components.chat.input.money :refer [money-input-view]]
-   [syng-im.components.chat.input.simple-command-staged :refer [simple-command-staged-view]]
    [syng-im.utils.utils :refer [log toast http-post]]
    [syng-im.utils.logging :as log]
    [syng-im.resources :as res]
    [reagent.core :as r]))
-
-(defn staged-command-view [stage-command]
-  [simple-command-staged-view stage-command])
-
-(defn staged-commands-view [staged-commands]
-  [view {:style {:marginBottom 12}}
-   (for [command staged-commands]
-     ^{:key command} [staged-command-view command])])
 
 (defn default-command-input-view [command]
   [simple-command-input-view command {}])
@@ -38,14 +29,10 @@
     [default-command-input-view command]))
 
 (defn chat-message-new []
-  (let [command-atom (subscribe [:get-chat-command])
-        staged-commands-atom (subscribe [:get-chat-staged-commands])]
+  (let [command-atom (subscribe [:get-chat-command])]
     (fn []
-      (let [command @command-atom
-            staged-commands @staged-commands-atom]
+      (let [command @command-atom]
         [view
-         (when (and staged-commands (< 0 (count staged-commands)))
-           [staged-commands-view staged-commands])
          (if command
            [special-input-view command]
            [plain-message-input-view])]))))
