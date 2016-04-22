@@ -14,9 +14,10 @@
     "react-native-vector-icons/Ionicons",
     "react-native-circle-checkbox",
     "react-native-randombytes",
-    "dismissKeyboard"
+    "react-native-carousel-control"
   ],
   "imageDirs": [
     "images"
-  ]
+  ],
+  "iosHost": "localhost"
 }

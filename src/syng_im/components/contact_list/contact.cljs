@@ -11,4 +11,4 @@
   (let [{:keys [whisper-identity]} contact]
     [touchable-highlight {:onPress (fn []
                                      (show-chat navigator whisper-identity))}
-     [view {} [contact-inner-view contact]]]))
+     [contact-inner-view contact]]))
