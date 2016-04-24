@@ -14,9 +14,14 @@
     "react-native-vector-icons/Ionicons",
     "react-native-circle-checkbox",
     "react-native-randombytes",
+    "dismissKeyboard"
   ],
   "imageDirs": [
     "images"
   ],
-  "iosHost": "localhost"
+  "iosHost": "localhost",
+  "envRoots": {
+    "dev": "env/dev",
+    "prod": "env/prod"
+  }
 }
