@@ -10,7 +10,6 @@
                                               touchable-highlight
                                               list-view
                                               list-item]]
-            [syng-im.components.styles :refer [font]]
             [syng-im.utils.listview :refer [to-datasource]]
             [syng-im.utils.utils :refer [log toast http-post]]
             [syng-im.utils.logging :as log]))
@@ -35,7 +34,7 @@
      [text {:style {:marginTop -2
                     :marginHorizontal 10
                     :fontSize         14
-                    :fontFamily       font
+                    :fontFamily       "Avenir-Roman"
                     :color            "white"}}
       (:text suggestion)]]
     [text {:style {:flex       1
@@ -44,7 +43,7 @@
                    :left       190
                    :lineHeight 18
                    :fontSize   14
-                   :fontFamily font
+                   :fontFamily "Avenir-Roman"
                    :color      "black"}}
      (:description suggestion)]]])
 

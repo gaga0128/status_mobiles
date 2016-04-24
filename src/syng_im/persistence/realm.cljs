@@ -1,6 +1,6 @@
 (ns syng-im.persistence.realm
   (:require [cljs.reader :refer [read-string]]
-            [syng-im.utils.logging :as log]
+            [syng-im.utils.debug :refer [log]]
             [syng-im.utils.types :refer [to-string]])
   (:refer-clojure :exclude [exists?]))
 
@@ -41,12 +41,28 @@
                      :primaryKey :chat-id
                      :properties {:chat-id    "string"
                                   :name       "string"
-                                  :group-chat {:type    "bool"
-                                               :indexed true}
-                                  :is-active  "bool"
+                                  :group-chat "bool"
                                   :timestamp  "int"
                                   :contacts   {:type       "list"
-                                               :objectType "chat-contact"}}}]})
+                                               :objectType "chat-contact"}}}
+                    {:name        :tag
+                     :primaryKey  :name
+                     :properties  {:name         "string"
+                                   :count        {:type     "int"
+                                                  :optional true
+                                                  :default 1}}}
+                    {:name        :discoveries
+                     :primaryKey  :whisper-id
+                     :properties  {:name         "string"
+                                   :status       "string"
+                                   :whisper-id   "string"
+                                   :photo        "string"
+                                   :location     "string"
+                                   :tags         {:type       "list"
+                                                  :objectType "tag"}
+                                   :last-updated "date"}}
+
+                    ]})
 
 
 (def realm (js/Realm. (clj->js opts)))
@@ -81,6 +97,11 @@
                                       value))]
     query))
 
+(defn get-by-filter [schema-name filter]
+  (let [_ (log filter)]
+  (-> (.objects realm (name schema-name))
+      (.filtered filter))))
+
 (defn get-by-field [schema-name field value]
   (let [q (to-query schema-name :eq field value)]
     (-> (.objects realm (name schema-name))
@@ -93,9 +114,6 @@
   (.sorted results (to-string field-name) (if (= order :asc)
                                             false
                                             true)))
-
-(defn filtered [results filter-query]
-  (.filtered results filter-query))
 
 (defn page [results from to]
   (js/Array.prototype.slice.call results from to))
@@ -116,7 +134,8 @@
   (read-string value))
 
 (defn delete [obj]
-  (.delete realm obj))
+  (write (fn []
+           (.delete realm obj))))
 
 (defn exists? [schema-name field value]
   (> (.-length (get-by-field schema-name field value))
@@ -126,9 +145,27 @@
   (.-length objs))
 
 (defn get-list [schema-name]
-  (vals (js->clj (.objects realm (to-string schema-name)) :keywordize-keys true)))
+  (vals (js->clj (.slice (.objects realm (to-string schema-name)) 0) :keywordize-keys true)))
 
 
 (comment
+
+  (write #(.create realm "msgs" (clj->js {:msg-id          "12"
+                                          :content         "sdfd"
+                                          :from            "sdfsd"
+                                          :chat-id         "56"
+                                          :content-type    "fg"
+                                          :timestamp       2
+                                          :outgoing        true
+                                          :to              "sfs"
+                                          :delivery-status "seen"}) true))
+
+  (.addListener realm "change" (fn [& args]
+                                 (log/debug args)))
+
+  ;realm.addListener('change', () => {
+  ;                                   // Update UI
+  ;                                   ...
+  ;                                   });
 
   )
