@@ -156,7 +156,9 @@
          [image {:source (:icon command)
                  :style {:position "absolute"
                          :top      4
-                         :right    0}}]
+                         :right    0
+                         :width    12
+                         :height   13}}]
          [text {:style {:marginTop        5
                         :marginHorizontal 0
                         :fontSize         14
@@ -176,8 +178,7 @@
       (let [commands @commands-atom
             {:keys [command content]} (parse-command-request-msg-content commands content)]
         [touchable-highlight {:onPress (fn []
-                                         (set-chat-command msg-id command))
-                              :underlay-color :transparent}
+                                         (set-chat-command msg-id command))}
          [view {:style {:paddingRight 16}}
           [view {:style (merge {:borderRadius 14
                                 :padding      12}
@@ -200,7 +201,9 @@
            [image {:source (:request-icon command)
                    :style  {:position "absolute"
                             :top      9
-                            :left     10}}]]
+                            :left     10
+                            :width    12
+                            :height   13}}]]
           [text {:style {:marginTop  2
                          :fontFamily font
                          :fontSize   12
@@ -248,11 +251,13 @@
                  :marginTop     2
                  :marginBottom  8}}
    [image {:source (case delivery-status
-                     :delivered res/icon-ok-small
-                     :seen res/icon-ok-small
-                     :seen-by-everyone res/icon-ok-small
-                     :failed res/delivery-failed-icon)
-           :style  {:marginTop 6}}]
+                     :delivered        {:uri "icon_ok_small"}
+                     :seen             {:uri "icon_ok_small"}
+                     :seen-by-everyone {:uri "icon_ok_small"}
+                     :failed           res/delivery-failed-icon)
+           :style  {:marginTop 6
+                    :width     9
+                    :height    7}}]
    [text {:style {:fontFamily font
                   :fontSize   12
                   :color      text2-color

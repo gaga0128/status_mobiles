@@ -21,8 +21,7 @@
 
 (defn suggestion-list-item [suggestion]
   [touchable-highlight {:onPress (fn []
-                                   (set-command-input (keyword (:command suggestion))))
-                        :underlay-color :transparent}
+                                   (set-command-input (keyword (:command suggestion))))}
    [view {:style {:flexDirection    "row"
                   :marginVertical   1
                   :marginHorizontal 0

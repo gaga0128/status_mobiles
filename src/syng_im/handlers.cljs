@@ -25,8 +25,7 @@
                                          handle-command
                                          get-command-handler
                                          load-commands
-                                         apply-staged-commands
-                                         check-suggestion]]
+                                         apply-staged-commands]]
    [syng-im.handlers.sign-up :as sign-up-service]
 
    [syng-im.models.chats :refer [create-chat
@@ -393,10 +392,7 @@
 
 (register-handler :set-chat-input-text
   (fn [db [_ text]]
-    (let [{:keys [command]} (check-suggestion db text)]
-      (-> db
-          (set-chat-input-text text)
-          (set-chat-command command)))))
+    (set-chat-input-text db text)))
 
 (register-handler :set-chat-command
   (fn [db [_ command-key]]

@@ -29,7 +29,7 @@
                        :backgroundColor color-white}}
          (when android?
            ;; TODO add IOS version
-           [toolbar-android {:navIcon          res/icon-back
+           [toolbar-android {:navIcon          {:uri "icon_back"}
                              :style            {:backgroundColor color-white
                                                 :height          56
                                                 :elevation       2}
@@ -81,13 +81,15 @@
                          :fontSize     14
                          :lineHeight   20}}
            "Members"]
-          [touchable-highlight {:on-press (fn [])
-                                :underlay-color :transparent}
+          [touchable-highlight {:on-press (fn []
+                                            )}
            [view {:style {:flexDirection "row"
                           :marginBottom  16}}
-            [image {:style {:marginVertical   19
-                            :marginHorizontal 3}
-                    :source res/icon-add-gray}]
+            [image {:source {:uri "icon_add_gray"}
+                    :style  {:marginVertical   19
+                             :marginHorizontal 3
+                             :width            17
+                             :height           17}}]
             [text {:style {:marginTop    18
                            :marginLeft   32
                            :color        text2-color

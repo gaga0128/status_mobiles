@@ -38,10 +38,7 @@
 
 (register-sub :get-suggestions
   (fn [db _]
-    (let [input-text (->> (current-chat-id @db)
-                          db/chat-input-text-path
-                          (get-in @db)
-                          (reaction))]
+    (let [input-text (reaction (get-in @db (db/chat-input-text-path (current-chat-id @db))))]
       (reaction (get-suggestions @db @input-text)))))
 
 (register-sub :get-commands

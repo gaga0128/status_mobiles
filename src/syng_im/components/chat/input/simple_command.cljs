@@ -68,22 +68,20 @@
           message]
          (if (< 0 (count message))
            [touchable-highlight {:on-press (fn []
-                                             (send-command chat-id command message))
-                                 :underlay-color :transparent}
+                                             (send-command chat-id command message))}
             [view {:style {:marginTop       10
                            :marginRight     10
                            :width           36
                            :height          36
                            :borderRadius    50
                            :backgroundColor color-blue}}
-             [image {:source res/icon-send
+             [image {:source {:uri "icon_send"}
                      :style  {:marginTop   10.5
                               :marginLeft  12
                               :width       15
                               :height      15}}]]]
            [touchable-highlight {:on-press (fn []
-                                             (cancel-command-input))
-                                 :underlay-color :transparent}
+                                             (cancel-command-input))}
             [view {:style {:marginTop       10
                            :marginRight     10
                            :width           36

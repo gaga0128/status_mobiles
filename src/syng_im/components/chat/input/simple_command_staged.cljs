@@ -47,8 +47,7 @@
                                          :top         7
                                          :right       4}
                                  :onPress (fn []
-                                            (cancel-command-input chat-id staged-command))
-                                 :underlay-color :transparent}
+                                            (cancel-command-input chat-id staged-command))}
             [image {:source res/icon-close-gray
                     :style  {:width  10
                              :height 10}}]]]

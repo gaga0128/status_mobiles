@@ -5,7 +5,8 @@
                                      view
                                      image
                                      text
-                                     text-input]]
+                                     text-input
+                                     touchable-highlight]]
    [syng-im.components.styles :refer [color-white]]
    [syng-im.components.chat.plain-message-input :refer [plain-message-input-view]]
    [syng-im.components.chat.input.simple-command :refer [simple-command-input-view]]
