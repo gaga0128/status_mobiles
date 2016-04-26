@@ -5,7 +5,6 @@
                                               view
                                               text
                                               image
-                                              touchable-highlight
                                               navigator
                                               toolbar-android]]
             [syng-im.components.realm :refer [list-view]]
@@ -136,7 +135,7 @@
                        :fontSize   12
                        :fontFamily font}}
          "Active a minute ago"])]
-     (when (not group?)
+     (when-not group?
        [view {:style {:position "absolute"
                       :top      10
                       :right    66}}

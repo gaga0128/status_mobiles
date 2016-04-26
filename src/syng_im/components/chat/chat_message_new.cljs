@@ -5,8 +5,7 @@
                                      view
                                      image
                                      text
-                                     text-input
-                                     touchable-highlight]]
+                                     text-input]]
    [syng-im.components.styles :refer [color-white]]
    [syng-im.components.chat.plain-message-input :refer [plain-message-input-view]]
    [syng-im.components.chat.input.simple-command :refer [simple-command-input-view]]
@@ -48,7 +47,7 @@
             staged-commands @staged-commands-atom]
         [view {:style {:backgroundColor color-white
                        :elevation       4}}
-         (when (and staged-commands (< 0 (count staged-commands)))
+         (when (and staged-commands (pos? (count staged-commands)))
            [staged-commands-view staged-commands])
          (if command
            [special-input-view command]
