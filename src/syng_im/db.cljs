@@ -9,12 +9,11 @@
              :identity-password    "replace-me-with-user-entered-password"
              :contacts             []
              :chat                 {:current-chat-id "0x0479a5ed1f38cadfad1db6cd56c4b659b0ebe052bbe9efa950f6660058519fa4ca6be2dda66afa80de96ab00eb97a2605d5267a1e8f4c2a166ab551f6826608cdd"
-                                    :command         nil}
+                                    :command nil}
              :chats                {}
              :chats-updated-signal 0
-             :new-group            #{}
-             :new-participants     #{}
-             :signed-up            false})
+             :name                 "My Name"
+             :new-group            #{}})
 
 
 (def protocol-initialized-path [:protocol-initialized])
@@ -25,17 +24,11 @@
   [:chats chat-id :chat-updated-signal])
 (defn chat-input-text-path [chat-id]
   [:chats chat-id :input-text])
-(defn chat-staged-commands-path [chat-id]
-  [:chats chat-id :staged-commands])
 (defn chat-command-path [chat-id]
   [:chats chat-id :command-input :command])
-(defn chat-command-to-msg-id-path [chat-id]
-  [:chats chat-id :command-input :to-msg-id])
 (defn chat-command-content-path [chat-id]
   [:chats chat-id :command-input :content])
-(defn chat-command-requests-path [chat-id]
-  [:chats chat-id :command-requests])
-(defn chat-command-request-path [chat-id msg-id]
-  [:chats chat-id :command-requests msg-id])
 (def new-group-path [:new-group])
-(def new-participants-path [:new-participants])
+(def updated-discoveries-signal-path [:discovery-updated-signal])
+(defn updated-discovery-signal-path [whisper-id]
+  [:discoveries whisper-id :discovery-updated-signal])

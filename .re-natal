@@ -13,8 +13,7 @@
     "react-native-action-button",
     "react-native-vector-icons/Ionicons",
     "react-native-circle-checkbox",
-    "react-native-randombytes",
-    "dismissKeyboard"
+    "react-native-randombytes"
   ],
   "imageDirs": [
     "images"

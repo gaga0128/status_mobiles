@@ -11,7 +11,7 @@
 
 (defn- get-contact-name [phone-contact]
   (cstr/join " "
-             (remove cstr/blank?
+             (filter #(not (cstr/blank? %))
                      [(:givenName phone-contact)
                       (:middleName phone-contact)
                       (:familyName phone-contact)])))
