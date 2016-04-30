@@ -16,5 +16,3 @@
 (def add-icon (js/require "./images/add.png"))
 (def trash-icon (js/require "./images/trash.png"))
 (def leave-icon (js/require "./images/leave.png"))
-
-(def icon-close-gray (js/require "./images/icon_close_gray.png"))

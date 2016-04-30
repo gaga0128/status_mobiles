@@ -10,6 +10,5 @@
 (defn contact-view [{:keys [navigator contact]}]
   (let [{:keys [whisper-identity]} contact]
     [touchable-highlight {:onPress (fn []
-                                     (show-chat navigator whisper-identity))
-                          :underlay-color :transparent}
-     [view {} [contact-inner-view contact]]]))
+                                     (show-chat navigator whisper-identity))}
+     [contact-inner-view contact]]))

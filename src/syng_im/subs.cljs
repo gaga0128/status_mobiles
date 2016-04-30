@@ -7,82 +7,62 @@
             [syng-im.models.chats :refer [chats-list
                                           chats-updated?
                                           chat-by-id]]
-            [syng-im.models.messages :refer [get-messages
-                                             get-chat-last-message]]
+            [syng-im.models.messages :refer [get-messages]]
             [syng-im.models.contacts :refer [contacts-list
                                              contacts-list-exclude
                                              contacts-list-include]]
-            [syng-im.models.commands :refer [get-commands
-                                             get-chat-command
-                                             get-chat-command-content
-                                             get-chat-command-request
-                                             parse-command-msg-content
-                                             parse-command-request-msg-content]]
             [syng-im.handlers.suggestions :refer [get-suggestions]]))
 
 ;; -- Chat --------------------------------------------------------------
 
 (register-sub :get-chat-messages
   (fn [db _]
-    (let [chat-id (reaction (current-chat-id @db))
-          chat-updated (reaction (chat-updated? @db @chat-id))]
+    (let [chat-id      (-> (current-chat-id @db)
+                           (reaction))
+          chat-updated (-> (chat-updated? @db @chat-id)
+                           (reaction))]
       (reaction
         (let [_ @chat-updated]
           (get-messages @chat-id))))))
 
 (register-sub :get-current-chat-id
   (fn [db _]
-    (reaction (current-chat-id @db))))
+    (-> (current-chat-id @db)
+        (reaction))))
 
 (register-sub :get-suggestions
   (fn [db _]
-    (let [input-text (->> (current-chat-id @db)
-                          db/chat-input-text-path
-                          (get-in @db)
-                          (reaction))]
-      (reaction (get-suggestions @db @input-text)))))
-
-(register-sub :get-commands
-              (fn [db _]
-                (reaction (get-commands @db))))
+    (let [input-text (reaction (get-in @db (db/chat-input-text-path (current-chat-id @db))))]
+      (reaction (get-suggestions @input-text)))))
 
 (register-sub :get-chat-input-text
   (fn [db _]
     (reaction (get-in @db (db/chat-input-text-path (current-chat-id @db))))))
 
-(register-sub :get-chat-staged-commands
-              (fn [db _]
-                (reaction (get-in @db (db/chat-staged-commands-path (current-chat-id @db))))))
-
 (register-sub :get-chat-command
   (fn [db _]
-    (reaction (get-chat-command @db))))
+    (reaction (get-in @db (db/chat-command-path (current-chat-id @db))))))
 
 (register-sub :get-chat-command-content
   (fn [db _]
-    (reaction (get-chat-command-content @db))))
-
-(register-sub :chat-command-request
-  (fn [db _]
-    (reaction (get-chat-command-request @db))))
-
-(register-sub :get-chat-last-message
-  (fn [db _]
-    (reaction (get-chat-last-message @db (current-chat-id @db)))))
+    (reaction (get-in @db (db/chat-command-content-path (current-chat-id @db))))))
 
 ;; -- Chats list --------------------------------------------------------------
 
 (register-sub :get-chats
   (fn [db _]
-    (let [chats-updated (reaction (chats-updated? @db))]
+    (let [chats-updated (-> (chats-updated? @db)
+                            (reaction))]
       (reaction
         (let [_ @chats-updated]
           (chats-list))))))
 
 (register-sub :get-current-chat
   (fn [db _]
-    (let [current-chat-id (reaction (current-chat-id @db))
-          chat-updated    (reaction (chat-updated? @db @current-chat-id))]
+    (let [current-chat-id (-> (current-chat-id @db)
+                              (reaction))
+          chat-updated    (-> (chat-updated? @db @current-chat-id)
+                              (reaction))]
       (reaction
         (let [_ @chat-updated]
           (when-let [chat-id @current-chat-id]
@@ -90,11 +70,11 @@
 
 ;; -- User data --------------------------------------------------------------
 
-;; (register-sub
-;;   :get-user-phone-number
-;;   (fn [db _]
-;;     (reaction
-;;       (get @db :user-phone-number))))
+(register-sub
+  :get-user-phone-number
+  (fn [db _]
+    (reaction
+      (get @db :user-phone-number))))
 
 (register-sub
   :get-user-identity
@@ -109,16 +89,16 @@
       (get @db :loading))))
 
 (register-sub
- :signed-up
- (fn [db _]
-   (reaction
-    (get @db :signed-up))))
+  :get-confirmation-code
+  (fn [db _]
+    (reaction
+      (get @db :confirmation-code))))
 
 (register-sub
   :get-contacts
   (fn [db _]
     (reaction
-     (get @db :contacts))))
+      (get @db :contacts))))
 
 (register-sub :all-contacts
   (fn [db _]
@@ -127,9 +107,11 @@
 
 (register-sub :all-new-contacts
   (fn [db _]
-    (let [current-chat-id (reaction (current-chat-id @db))
-          chat (reaction (when-let [chat-id @current-chat-id]
-                           (chat-by-id chat-id)))]
+    (let [current-chat-id (-> (current-chat-id @db)
+                              (reaction))
+          chat            (-> (when-let [chat-id @current-chat-id]
+                                (chat-by-id chat-id))
+                              (reaction))]
       (reaction
         (when @chat
           (let [current-participants (->> @chat
@@ -139,9 +121,11 @@
 
 (register-sub :current-chat-contacts
   (fn [db _]
-    (let [current-chat-id (reaction (current-chat-id @db))
-          chat (reaction (when-let [chat-id @current-chat-id]
-                           (chat-by-id chat-id)))]
+    (let [current-chat-id (-> (current-chat-id @db)
+                              (reaction))
+          chat            (-> (when-let [chat-id @current-chat-id]
+                                (chat-by-id chat-id))
+                              (reaction))]
       (reaction
         (when @chat
           (let [current-participants (->> @chat
