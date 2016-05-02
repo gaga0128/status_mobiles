@@ -134,9 +134,10 @@
   (fn [db [action {chat-id :from
                    msg-id  :msg-id :as msg}]]
     (log/debug action "msg" msg)
-    (let [db (create-chat db chat-id [chat-id] false)]
-      (save-message chat-id msg)
-      (signal-chat-updated db chat-id))))
+    (save-message chat-id msg)
+    (-> db
+        (create-chat chat-id [chat-id] false)
+        (signal-chat-updated chat-id))))
 
 (register-handler :group-received-msg
   (fn [db [action {chat-id :group-id :as msg}]]
