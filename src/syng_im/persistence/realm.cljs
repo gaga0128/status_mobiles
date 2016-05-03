@@ -1,5 +1,6 @@
 (ns syng-im.persistence.realm
   (:require [cljs.reader :refer [read-string]]
+            [syng-im.utils.logging :as log]
             [syng-im.utils.types :refer [to-string]])
   (:refer-clojure :exclude [exists?]))
 
@@ -31,39 +32,24 @@
                                                     :indexed true}
                                   :outgoing        "bool"
                                   :delivery-status {:type     "string"
-                                                    :optional true}}}
+                                                    :optional true}
+                                  :same-author     "bool"
+                                  :same-direction  "bool"}}
                     {:name       :chat-contact
                      :properties {:identity         "string"
                                   :text-color       "string"
                                   :background-color "string"}}
                     {:name       :chats
                      :primaryKey :chat-id
-                     :properties {:chat-id    "string"
-                                  :name       "string"
-                                  :group-chat {:type    "bool"
+                     :properties {:chat-id     "string"
+                                  :name        "string"
+                                  :group-chat  {:type    "bool"
                                                :indexed true}
-                                  :is-active  "bool"
-                                  :timestamp  "int"
-                                  :contacts   {:type       "list"
-                                               :objectType "chat-contact"}}}
-                    {:name        :tag
-                     :primaryKey  :name
-                     :properties  {:name         "string"
-                                   :count        {:type     "int"
-                                                  :optional true
-                                                  :default 0}}}
-                    {:name        :discoveries
-                     :primaryKey  :whisper-id
-                     :properties  {:name         "string"
-                                   :status       "string"
-                                   :whisper-id   "string"
-                                   :photo        "string"
-                                   :location     "string"
-                                   :tags         {:type       "list"
-                                                  :objectType "tag"}
-                                   :last-updated "date"}}
-
-                    ]})
+                                  :is-active   "bool"
+                                  :timestamp   "int"
+                                  :contacts    {:type       "list"
+                                                :objectType "chat-contact"}
+                                  :last-msg-id "string"}}]})
 
 
 (def realm (js/Realm. (clj->js opts)))
@@ -98,14 +84,9 @@
                                       value))]
     query))
 
-(defn get-by-filter [schema-name filter]
-  (-> (.objects realm (name schema-name))
-      (.filtered filter)))
-
 (defn get-by-field [schema-name field value]
   (let [q (to-query schema-name :eq field value)]
-    (-> (.objects realm (name schema-name))
-        (.filtered q))))
+    (.filtered (.objects realm (name schema-name)) q)))
 
 (defn get-all [schema-name]
   (.objects realm (to-string schema-name)))
@@ -129,9 +110,7 @@
           (js->clj :keywordize-keys true)))
 
 (defn list-to-array [record list-field]
-  (assoc record list-field (-> (get record list-field)
-                               vals
-                               vec)))
+  (update-in record [list-field] (comp vec vals)))
 
 (defn decode-value [{:keys [key value]}]
   (read-string value))
@@ -140,14 +119,13 @@
   (.delete realm obj))
 
 (defn exists? [schema-name field value]
-  (> (.-length (get-by-field schema-name field value))
-     0))
+  (pos? (.-length (get-by-field schema-name field value))))
 
 (defn get-count [objs]
   (.-length objs))
 
 (defn get-list [schema-name]
-  (vals (js->clj (.slice (.objects realm (to-string schema-name)) 0) :keywordize-keys true)))
+  (vals (js->clj (.objects realm (to-string schema-name)) :keywordize-keys true)))
 
 
 (comment
