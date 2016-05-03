@@ -5,7 +5,8 @@
                                               text
                                               image
                                               touchable-highlight
-                                              navigator]]
+                                              navigator
+                                              toolbar-android]]
             [syng-im.components.realm :refer [list-view]]
             [syng-im.utils.logging :as log]
             [syng-im.navigation :refer [nav-pop]]
@@ -15,47 +16,8 @@
             [syng-im.components.chats.chat-list-item :refer [chat-list-item]]
             [syng-im.components.action-button :refer [action-button
                                                       action-button-item]]
-            [syng-im.components.styles :refer [font
-                                               title-font
-                                               color-white
-                                               color-black
-                                               color-blue
-                                               text1-color
-                                               text2-color]]
             [syng-im.components.icons.ionicons :refer [icon]]))
 
-(defn toolbar []
-  [view {:style {:flexDirection   "row"
-                 :backgroundColor color-white
-                 :height          56
-                 :elevation       2}}
-   [touchable-highlight {:on-press (fn []
-                                     )
-                         :underlay-color :transparent}
-    [view {:width  56
-           :height 56}
-     [image {:source {:uri "icon_hamburger"}
-             :style  {:marginTop  22
-                      :marginLeft 20
-                      :width      16
-                      :height     12}}]]]
-   [view {:style {:flex 1
-                  :alignItems "center"
-                  :justifyContent "center"}}
-    [text {:style {:marginTop  -2.5
-                   :color      text1-color
-                   :fontSize   16
-                   :fontFamily font}}
-     "Chats"]]
-   [touchable-highlight {:on-press (fn []
-                                     )
-                         :underlay-color :transparent}
-    [view {:width  56
-           :height 56}
-     [image {:source {:uri "icon_search"}
-             :style  {:margin 19.5
-                      :width  17
-                      :height 17}}]]]])
 
 (defn chats-list [{:keys [navigator]}]
   (let [chats (subscribe [:get-chats])]
@@ -65,12 +27,24 @@
             datasource (to-realm-datasource chats)]
         [view {:style {:flex            1
                        :backgroundColor "white"}}
-         [toolbar]
+         (when android?
+           ;; TODO add IOS version
+           [toolbar-android {:logo          res/logo-icon
+                             :title         "Your Chats"
+                             :titleColor    "#4A5258"
+                             :subtitle      "List of your recent chats"
+                             :subtitleColor "#AAB2B2"
+                             :navIcon       res/nav-back-icon
+                             :style         {:backgroundColor "white"
+                                             :height          56
+                                             :elevation       2}
+                             :onIconClicked (fn []
+                                              (nav-pop navigator))}])
          [list-view {:dataSource datasource
                      :renderRow  (fn [row section-id row-id]
                                    (r/as-element [chat-list-item row navigator]))
                      :style      {:backgroundColor "white"}}]
-         [action-button {:buttonColor color-blue}
+         [action-button {:buttonColor "rgba(231,76,60,1)"}
           [action-button-item {:title       "New Chat"
                                :buttonColor "#9b59b6"
                                :onPress     (fn []

@@ -1,12 +1,10 @@
 (ns syng-im.models.chats
   (:require [syng-im.persistence.realm :as r]
-            [syng-im.utils.random :as random :refer [timestamp]]
+            [syng-im.utils.random :refer [timestamp]]
             [clojure.string :refer [join blank?]]
             [syng-im.db :as db]
             [syng-im.utils.logging :as log]
-            [syng-im.constants :refer [group-chat-colors
-                                       content-type-status]]
-            [syng-im.models.messages :refer [save-message]]
+            [syng-im.constants :refer [group-chat-colors]]
             [syng-im.persistence.realm-queries :refer [include-query]]))
 
 (defn signal-chats-updated [db]
@@ -33,18 +31,6 @@
   (or (chat-name-from-contacts identities)
       chat-id))
 
-(defn add-status-message [chat-id]
-  ;; TODO Get real status
-  (save-message chat-id
-                {:from         "Status"
-                 :to           nil
-                 :msg-id       (random/id)
-                 :content      (str "The brash businessman’s braggadocio "
-                                    "and public exchange with candidates "
-                                    "in the US presidential election")
-                 :content-type content-type-status
-                 :outgoing     false}))
-
 (defn create-chat
   ([db chat-id identities group-chat?]
    (create-chat db chat-id identities group-chat? nil))
@@ -60,18 +46,17 @@
                                   {:identity         ident
                                    :background-color background
                                    :text-color       text}) identities group-chat-colors)]
-             (r/create :chats {:chat-id     chat-id
-                               :is-active   true
-                               :name        chat-name
-                               :group-chat  group-chat?
-                               :timestamp   (timestamp)
-                               :contacts    contacts
-                               :last-msg-id ""}))))
-       (add-status-message chat-id)
+             (r/create :chats {:chat-id    chat-id
+                               :is-active  true
+                               :name       chat-name
+                               :group-chat group-chat?
+                               :timestamp  (timestamp)
+                               :contacts   contacts}))))
        (signal-chats-updated db)))))
 
 (defn chats-list []
-  (r/sorted (r/get-all :chats) :timestamp :desc))
+  (-> (r/get-all :chats)
+      (r/sorted :timestamp :desc)))
 
 (defn chat-by-id [chat-id]
   (-> (r/get-by-field :chats :chat-id chat-id)
@@ -84,11 +69,13 @@
       (let [contacts      (-> (r/get-by-field :chats :chat-id chat-id)
                               (r/single)
                               (aget "contacts"))
-            colors-in-use (set (.map contacts (fn [object index collection]
+            colors-in-use (->> (.map contacts (fn [object index collection]
                                                 {:text-color       (aget object "text-color")
-                                                 :background-color (aget object "background-color")})))
-            colors (filter (fn [color]
-                             (not (contains? colors-in-use color))) group-chat-colors)
+                                                 :background-color (aget object "background-color")}))
+                               (set))
+            colors        (->> group-chat-colors
+                               (filter (fn [color]
+                                         (not (contains? colors-in-use color)))))
             new-contacts  (mapv (fn [ident {:keys [background text]}]
                                   {:identity         ident
                                    :background-color background
@@ -100,16 +87,18 @@
   (r/write
     (fn []
       (let [query (include-query :identity identities)
-            chat (r/single (r/get-by-field :chats :chat-id chat-id))]
+            chat  (-> (r/get-by-field :chats :chat-id chat-id)
+                      (r/single))]
         (-> (aget chat "contacts")
             (r/filtered query)
             (r/delete))))))
 
 (defn active-group-chats []
-  (let [results (r/filtered (r/get-all :chats)
-                            "group-chat = true && is-active = true")]
-    (js->clj (.map results (fn [object index collection]
-                             (aget object "chat-id"))))))
+  (let [results (-> (r/get-all :chats)
+                    (r/filtered "group-chat = true && is-active = true"))]
+    (->> (.map results (fn [object index collection]
+                         (aget object "chat-id")))
+         (js->clj))))
 
 
 (defn set-chat-active [chat-id active?]
@@ -118,7 +107,7 @@
                  (r/single)
                  (aset "is-active" active?)))))
 
-#_(comment
+(comment
   (active-group-chats)
 
 

@@ -12,6 +12,8 @@
 (def toolbar-android (r/adapt-react-class (.-ToolbarAndroid js/React)))
 (def list-view (r/adapt-react-class (.-ListView js/React)))
 (def text-input (r/adapt-react-class (.-TextInput js/React)))
+(def scroll-view (r/adapt-react-class (.-ScrollView js/React)))
+(def touchable-without-feedback (r/adapt-react-class (.-TouchableWithoutFeedback js/React)))
 
 (def platform (.. js/React -Platform -OS))
 
@@ -19,8 +21,6 @@
 
 (defn list-item [component]
   (r/as-element component))
-
-(def dismiss-keyboard (js/require "dismissKeyboard"))
 
 (comment
   (.-width (.get (.. js/React -Dimensions) "window"))
