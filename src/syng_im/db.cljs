@@ -16,8 +16,9 @@
              :show-actions         false
              :new-group            #{}
              :new-participants     #{}
-             :signed-up            false})
-
+             :signed-up            false
+             :name                 "My Name"
+             :current-tag          nil})
 
 (def protocol-initialized-path [:protocol-initialized])
 (def identity-password-path [:identity-password])
@@ -42,3 +43,8 @@
 (def show-actions-path [:show-actions])
 (def new-group-path [:new-group])
 (def new-participants-path [:new-participants])
+(def updated-discoveries-signal-path [:discovery-updated-signal])
+(defn updated-discovery-signal-path [whisper-id]
+  [:discoveries whisper-id :discovery-updated-signal])
+(def current-tag-path [:current-tag])
+(def updated-current-tag-signal-path [:current-tag-updated-signal])
