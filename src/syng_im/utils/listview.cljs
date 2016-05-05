@@ -3,9 +3,11 @@
   (:require [syng-im.components.realm]))
 
 (defn to-datasource [items]
-  (clone-with-rows (data-source {:rowHasChanged not=}) items))
+  (-> (data-source {:rowHasChanged (fn [row1 row2]
+                                     (not= row1 row2))})
+      (clone-with-rows items)))
 
 (defn to-realm-datasource [items]
-  (-> (cljs.core/clj->js {:rowHasChanged not=})
-      (js/RealmReactNative.ListView.DataSource.)
+  (-> (js/RealmReactNative.ListView.DataSource. (cljs.core/clj->js {:rowHasChanged (fn [row1 row2]
+                                                                                  (not= row1 row2))}))
       (clone-with-rows items)))
