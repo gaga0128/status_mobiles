@@ -43,12 +43,13 @@
    [view {:style {:backgroundColor   color-light-blue-transparent
                   :height            24
                   :borderRadius      50
-                  :alignSelf         :center
+                  :alignSelf         "center"
                   :marginTop         20
                   :marginBottom      20
                   :paddingTop        5
                   :paddingHorizontal 12}}
-    [text {:style (assoc style-sub-text :textAlign :center)}
+    [text {:style (merge style-sub-text
+                         {:textAlign      "center"})}
      date]]])
 
 (defn contact-photo [{:keys [photo-path]}]
@@ -62,7 +63,7 @@
 
 (defn contact-online [{:keys [online]}]
   (when online
-    [view {:position        :absolute
+    [view {:position        "absolute"
            :top             44
            :left            44
            :width           24
@@ -71,14 +72,14 @@
            :backgroundColor online-color
            :borderWidth     2
            :borderColor     color-white}
-     [view {:position        :absolute
+     [view {:position        "absolute"
             :top             8
             :left            5
             :width           4
             :height          4
             :borderRadius    50
             :backgroundColor color-white}]
-     [view {:position        :absolute
+     [view {:position        "absolute"
             :top             8
             :left            11
             :width           4
@@ -87,11 +88,11 @@
             :backgroundColor color-white}]]))
 
 
-(defn message-content-status [{:keys [from content]}]
-  [view {:style {:flex       1
-                 :alignSelf  :center
-                 :alignItems :center
-                 :width      249}}
+(defn message-content-status [from content]
+  [view {:style {:flex         1
+                 :alignSelf    "center"
+                 :alignItems   "center"
+                 :width        249}}
    [view {:style {:marginTop 20}}
     [contact-photo {}]
     [contact-online {:online true}]]
@@ -104,13 +105,13 @@
                   :fontFamily font
                   :fontSize   14
                   :lineHeight 20
-                  :textAlign  :center
+                  :textAlign  "center"
                   :color      text2-color}}
     content]])
 
-(defn message-content-audio [_]
-  [view {:style {:flexDirection :row
-                 :alignItems    :center}}
+(defn message-content-audio [{:keys [content-type content-type]}]
+  [view {:style {:flexDirection "row"
+                 :alignItems    "center"}}
    [view {:style {:width        33
                   :height       33
                   :borderRadius 50
@@ -123,18 +124,18 @@
                   :width      120
                   :height     26
                   :elevation  1}}
-    [view {:style {:position        :absolute
+    [view {:style {:position        "absolute"
                    :top             4
                    :width           120
                    :height          2
                    :backgroundColor "#EC7262"}}]
-    [view {:style {:position        :absolute
+    [view {:style {:position        "absolute"
                    :left            0
                    :top             0
                    :width           2
                    :height          10
                    :backgroundColor "#4A5258"}}]
-    [text {:style {:position      :absolute
+    [text {:style {:position      "absolute"
                    :left          1
                    :top           11
                    :fontFamily    font
@@ -149,26 +150,25 @@
   (let [commands-atom (subscribe [:get-commands])]
     (fn [content]
       (let [commands @commands-atom
-            {:keys [command content]}
-            (parse-command-msg-content commands content)]
-        [view {:style {:flexDirection :column}}
-         [view {:style {:flexDirection :row
+            {:keys [command content]} (parse-command-msg-content commands content)]
+        [view {:style {:flexDirection "column"}}
+         [view {:style {:flexDirection "row"
                         :marginRight   32}}
           [view {:style {:backgroundColor   (:color command)
                          :height            24
                          :borderRadius      50
                          :paddingTop        3
                          :paddingHorizontal 12}}
-           [text {:style {:fontSize   12
-                          :fontFamily font
-                          :color      color-white}}
+           [text {:style {:fontSize         12
+                          :fontFamily       font
+                          :color            color-white}}
             (:text command)]]]
          [image {:source (:icon command)
-                 :style  {:position :absolute
-                          :top      4
-                          :right    0
-                          :width    12
-                          :height   13}}]
+                 :style {:position "absolute"
+                         :top      4
+                         :right    0
+                         :width    12
+                         :height   13}}]
          [text {:style (merge style-message-text
                               {:marginTop        8
                                :marginHorizontal 0})}
@@ -180,14 +180,13 @@
 (defn set-chat-command [msg-id command]
   (dispatch [:set-response-chat-command msg-id (:command command)]))
 
-
-(defn message-content-command-request
-  [{:keys [msg-id content outgoing group-chat from]}]
+(defn message-content-command-request [msg-id from content outgoing group-chat]
   (let [commands-atom (subscribe [:get-commands])]
-    (fn [{:keys [msg-id content outgoing group-chat from]}]
+    (fn [msg-id from content outgoing group-chat]
       (let [commands @commands-atom
             {:keys [command content]} (parse-command-request-msg-content commands content)]
-        [touchable-highlight {:onPress        #(set-chat-command msg-id command)
+        [touchable-highlight {:onPress (fn []
+                                         (set-chat-command msg-id command))
                               :underlay-color :transparent}
          [view {:style {:paddingRight 16}}
           [view {:style (merge {:borderRadius    14
@@ -200,7 +199,7 @@
               from])
            [text {:style style-message-text}
             content]]
-          [view {:style {:position        :absolute
+          [view {:style {:position        "absolute"
                          :top             12
                          :right           0
                          :width           32
@@ -208,14 +207,14 @@
                          :borderRadius    50
                          :backgroundColor (:color command)}}
            [image {:source (:request-icon command)
-                   :style  {:position :absolute
+                   :style  {:position "absolute"
                             :top      9
                             :left     10
                             :width    12
                             :height   13}}]]
           (when (:request-text command)
-            [view {:style {:marginTop 4
-                           :height    14}}
+            [view {:style {:marginTop       4
+                           :height          14}}
              [text {:style style-sub-text}
               (:request-text command)]])]]))))
 
@@ -228,105 +227,41 @@
                          {:color color-white}))}
    content])
 
-
-#_(defn message-content [{:keys [msg-id from content-type content outgoing
-                                 group-chat selected]}]
-    (if (= content-type content-type-command-request)
-      [message-content-command-request msg-id from content outgoing group-chat]
-      [view {:style (merge {:borderRadius    14
-                            :padding         12
-                            :backgroundColor color-white}
-                           (when (= content-type content-type-command)
-                             {:paddingTop    10
-                              :paddingBottom 14})
-                           (if outgoing
-                             (when (and group-chat (= content-type text-content-type))
-                               {:backgroundColor color-blue})
-                             (when selected
-                               {:backgroundColor selected-message-color})))}
-       (when (and group-chat (not outgoing))
-         [text {:style (merge style-sub-text
-                              {:marginBottom 2})}
-          from])
-       (cond
-         (or (= content-type text-content-type)
-             (= content-type content-type-status))
-         [message-content-plain content outgoing group-chat]
-         (= content-type content-type-command)
-         [message-content-command content]
-         :else [message-content-audio {:content      content
-                                       :content-type content-type}])]))
-
-(defn message-view
-  [{:keys [content-type outgoing background-color group-chat selected]} content]
-  [view {:style (merge {:borderRadius 14
-                        :padding      12}
-                       (if outgoing
-                         (if (and group-chat (= content-type text-content-type))
-                           {:backgroundColor color-blue}
-                           {:backgroundColor color-white})
-                         (if selected
-                           {:backgroundColor selected-message-color}
-                           {:backgroundColor background-color})))}
-   #_(when (and group-chat (not outgoing))
-       [text {:style {:marginTop  0
-                      :fontSize   12
-                      :fontFamily font}}
-        "Justas"])
-   content])
-
-(defmulti message-content (fn [_ message]
-                            (message :content-type)))
-
-(defmethod message-content content-type-command-request
-  [wrapper message]
-  [wrapper message [message-content-command-request message]])
-
-(defn text-message
-  [{:keys [content outgoing text-color group-chat] :as message}]
-  [message-view message
-   [text {:style {:marginTop  (if (and group-chat (not outgoing))
-                                4
-                                0)
-                  :fontSize   14
-                  :fontFamily font
-                  :color      (cond
-                                (and outgoing group-chat) color-white
-                                outgoing text1-color
-                                :else text-color)}}
-    content]])
-
-(defmethod message-content text-content-type
-  [wrapper message]
-  [wrapper message [text-message message]])
-
-(defmethod message-content content-type-status
-  [_ message]
-  ;; todo should it be rendered as text message?
-  [message-content-status message]
-  #_[text-message message])
-
-(defmethod message-content content-type-command
-  [wrapper {:keys [content] :as message}]
-  [wrapper message
-   [message-view message [message-content-command content]]])
-
-(defmethod message-content :default
-  [wrapper {:keys [content-type content] :as message}]
-  [wrapper message
-   [message-view message
-    [message-content-audio {:content      content
-                            :content-type content-type}]]])
+(defn message-content [{:keys [msg-id from content-type content outgoing group-chat selected]}]
+  (if (= content-type content-type-command-request)
+    [message-content-command-request msg-id from content outgoing group-chat]
+    [view {:style (merge {:borderRadius    14
+                          :padding         12
+                          :backgroundColor color-white}
+                         (when (= content-type content-type-command)
+                           {:paddingTop    10
+                            :paddingBottom 14})
+                         (if outgoing
+                           (when (and group-chat (= content-type text-content-type))
+                             {:backgroundColor color-blue})
+                           (when selected
+                             {:backgroundColor selected-message-color})))}
+     (when (and group-chat (not outgoing))
+       [text {:style (merge style-sub-text
+                            {:marginBottom 2})}
+        from])
+     (cond
+       (or (= content-type text-content-type)
+           (= content-type content-type-status))
+       [message-content-plain content outgoing group-chat]
+       (= content-type content-type-command)
+       [message-content-command content]
+       :else [message-content-audio {:content      content
+                                     :content-type content-type}])]))
 
 (defn message-delivery-status [{:keys [delivery-status]}]
-  [view {:style {:flexDirection :row
+  [view {:style {:flexDirection "row"
                  :marginTop     2}}
-
    [image {:source (case delivery-status
-                     :delivered {:uri :icon_ok_small}
-                     :seen {:uri :icon_ok_small}
-                     :seen-by-everyone {:uri :icon_ok_small}
-                     :failed res/delivery-failed-icon)
+                     :delivered        {:uri "icon_ok_small"}
+                     :seen             {:uri "icon_ok_small"}
+                     :seen-by-everyone {:uri "icon_ok_small"}
+                     :failed           res/delivery-failed-icon)
            :style  {:marginTop 6
                     :width     9
                     :height    7}}]
@@ -349,12 +284,11 @@
                     :width        24
                     :height       24}}]])
 
-
-(defn incoming-group-message-body
-  [{:keys [selected new-day same-author same-direction last-msg typing]}
-   content]
+(defn incoming-group-message-body [{:keys [msg-id from content content-type outgoing
+                                           delivery-status selected new-day same-author
+                                           same-direction last-msg typing]}]
   (let [delivery-status :seen-by-everyone]
-    [view {:style {:flexDirection :column}}
+    [view {:style {:flexDirection "column"}}
      (when selected
        [text {:style {:marginTop  18
                       :marginLeft 40
@@ -362,13 +296,13 @@
                       :fontSize   12
                       :color      text2-color}}
         "Mar 7th, 15:22"])
-     [view {:style (merge {:flexDirection :row
-                           :alignSelf     :flex-start
+     [view {:style (merge {:flexDirection "row"
+                           :alignSelf     "flex-start"
                            :marginTop     (cond
-                                            new-day 0
-                                            same-author 4
+                                            new-day        0
+                                            same-author    4
                                             same-direction 20
-                                            :else 10)
+                                            :else          10)
                            :paddingRight  8
                            :paddingLeft   8}
                           (when (and last-msg (not typing))
@@ -376,50 +310,71 @@
       [view {:style {:width 24}}
        (when (not same-author)
          [member-photo {}])]
-      [view {:style {:flexDirection :column
+      [view {:style {:flexDirection "column"
                      :width         260
                      :paddingLeft   8
-                     :alignItems    :flex-start}}
-       content
+                     :alignItems "flex-start"}}
+       [message-content {:msg-id           msg-id
+                         :from             from
+                         :content-type     content-type
+                         :content          content
+                         :outgoing         outgoing
+                         :group-chat       true
+                         :selected         selected}]
        ;; TODO show for last or selected
        (when (and selected delivery-status)
          [message-delivery-status {:delivery-status delivery-status}])]]]))
 
-(defn message-body
-  [{:keys [outgoing new-day same-author same-direction last-msg typing]}
-   content]
-  (let [delivery-status :seen
-        align           (if outgoing :flex-end :flex-start)]
-    [view {:style (merge {:flexDirection :column
+(defn message-body [{:keys [msg-id content content-type outgoing delivery-status
+                            group-chat new-day same-author same-direction last-msg typing]}]
+  (let [delivery-status :seen]
+    [view {:style (merge {:flexDirection "column"
                           :width         260
                           :paddingTop    (cond
-                                           new-day 0
-                                           same-author 4
+                                           new-day        0
+                                           same-author    4
                                            same-direction 20
-                                           :else 10)
+                                           :else          10)
                           :paddingRight  8
-                          :paddingLeft   8
-                          :alignSelf     align
-                          :alignItems    align}
+                          :paddingLeft   8}
+                         (if outgoing
+                           {:alignSelf  "flex-end"
+                            :alignItems "flex-end"}
+                           {:alignItems "flex-start"
+                            :alignSelf  "flex-start"})
                          (when (and last-msg (not typing))
                            {:paddingBottom 20}))}
-     content
+     [message-content {:msg-id           msg-id
+                       :content-type     content-type
+                       :content          content
+                       :outgoing         outgoing
+                       :group-chat       group-chat}]
      (when (and outgoing delivery-status)
        [message-delivery-status {:delivery-status delivery-status}])]))
 
-(defn chat-message
-  [{:keys [msg-id outgoing delivery-status date new-day group-chat]
-    :as   message}
-   last-msg-id]
+(defn chat-message [{:keys [msg-id from content content-type outgoing delivery-status
+                            date new-day group-chat selected same-author same-direction
+                            last-msg typing] :as msg}
+                    last-msg-id]
   [view {}
    (when new-day
      [message-date {:date date}])
-   (let [msg-data
-         (merge message {:delivery-status (keyword delivery-status)
-                         :last-msg        (= last-msg-id msg-id)})]
+   (let [msg-data {:msg-id           msg-id
+                   :from             from
+                   :content          content
+                   :content-type     content-type
+                   :outgoing         outgoing
+                   :delivery-status  (keyword delivery-status)
+                   :group-chat       group-chat
+                   :selected         selected
+                   :new-day          new-day
+                   :same-author      same-author
+                   :same-direction   same-direction
+                   :last-msg         (= last-msg-id msg-id)
+                   :typing           typing}]
      [view {}
-      [message-content
-       (if (and group-chat (not outgoing))
-         incoming-group-message-body
-         message-body)
-       msg-data]])])
+      (when (= content-type content-type-status)
+        [message-content-status from content])
+      (if (and group-chat (not outgoing))
+        [incoming-group-message-body msg-data]
+        [message-body msg-data])])])
