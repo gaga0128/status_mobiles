@@ -12,27 +12,31 @@
                                                text1-color
                                                text2-color]]
             [syng-im.utils.utils :refer [log toast http-post]]
-            [syng-im.resources :as res]))
+            [syng-im.utils.logging :as log]
+            [syng-im.resources :as res]
+            [reagent.core :as r]))
 
 (defn cancel-command-input []
-  (dispatch [:cancel-command]))
+  (dispatch [:set-chat-command nil]))
 
 (defn set-input-message [message]
   (dispatch [:set-chat-command-content message]))
 
-(defn send-command []
-  (dispatch [:stage-command])
+(defn send-command [chat-id command text]
+  (dispatch [:stage-command chat-id command text])
   (cancel-command-input))
 
 (defn simple-command-input-view [command input-options]
-  (let [message-atom (subscribe [:get-chat-command-content])]
+  (let [chat-id-atom (subscribe [:get-current-chat-id])
+        message-atom (subscribe [:get-chat-command-content])]
     (fn [command input-options]
-      (let [message @message-atom]
-        [view {:style {:flexDirection   :row
-                       :height          56
-                       :backgroundColor color-white
-                       :elevation       4}}
-         [view {:style {:flexDirection   :column
+      (let [chat-id @chat-id-atom
+            message @message-atom]
+        [view {:style {:flexDirection     "row"
+                       :height            56
+                       :backgroundColor   color-white
+                       :elevation         4}}
+         [view {:style {:flexDirection   "column"
                         :marginTop       16
                         :marginBottom    16
                         :marginLeft      16
@@ -46,7 +50,7 @@
                          :fontFamily       font
                          :color            color-white}}
            (:text command)]]
-         [text-input (merge {:underlineColorAndroid :transparent
+         [text-input (merge {:underlineColorAndroid "transparent"
                              :style                 {:flex       1
                                                      :marginLeft 8
                                                      :marginTop  7
@@ -56,33 +60,36 @@
                              :autoFocus             true
                              :placeholder           "Type"
                              :placeholderTextColor  text2-color
-                             :onChangeText          set-input-message
-                             :onSubmitEditing       send-command}
+                             :onChangeText          (fn [new-text]
+                                                      (set-input-message new-text))
+                             :onSubmitEditing       (fn [e]
+                                                      (send-command chat-id command message))}
                             input-options)
           message]
          (if (pos? (count message))
-           [touchable-highlight
-            {:on-press       send-command
-             :underlay-color :transparent}
+           [touchable-highlight {:on-press (fn []
+                                             (send-command chat-id command message))
+                                 :underlay-color :transparent}
             [view {:style {:marginTop       10
                            :marginRight     10
                            :width           36
                            :height          36
                            :borderRadius    50
                            :backgroundColor color-blue}}
-             [image {:source {:uri :icon_send}
-                     :style  {:marginTop  10.5
-                              :marginLeft 12
-                              :width      15
-                              :height     15}}]]]
-           [touchable-highlight {:on-press       cancel-command-input
+             [image {:source {:uri "icon_send"}
+                     :style  {:marginTop   10.5
+                              :marginLeft  12
+                              :width       15
+                              :height      15}}]]]
+           [touchable-highlight {:on-press (fn []
+                                             (cancel-command-input))
                                  :underlay-color :transparent}
-            [view {:style {:marginTop   10
-                           :marginRight 10
-                           :width       36
-                           :height      36}}
+            [view {:style {:marginTop       10
+                           :marginRight     10
+                           :width           36
+                           :height          36}}
              [image {:source res/icon-close-gray
-                     :style  {:marginTop  10.5
-                              :marginLeft 12
-                              :width      12
-                              :height     12}}]]])]))))
+                     :style  {:marginTop   10.5
+                              :marginLeft  12
+                              :width       12
+                              :height      12}}]]])]))))
