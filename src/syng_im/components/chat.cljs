@@ -128,7 +128,8 @@
         subtitle])]]])
 
 (defn actions-list-view [navigator chat]
-  (when-let [actions (if (:group-chat chat)
+  (when-let [actions (when (and (:group-chat chat)
+                                (:is-active chat))
                        [{:title      "Add Contact to chat"
                          :icon       "icon_menu_group"
                          :icon-style {:width  25
@@ -150,12 +151,7 @@
                          :icon       "icon_settings"
                          :icon-style {:width  20
                                       :height 13}
-                         :handler    (fn [] )}]
-                       [{:title      "Profile"
-                         :icon       "icon_menu_group"
-                         :icon-style {:width  25
-                                      :height 19}
-                         :handler    #(dispatch [:show-profile navigator (:chat-id chat)])}])]
+                         :handler    (fn [] )}])]
     [view {:style {:backgroundColor toolbar-background1
                    :elevation       2
                    :position        "absolute"

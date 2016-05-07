@@ -31,6 +31,7 @@ A Clojure library designed to ... well, that part is up to you.
     adb reverse tcp:3449 tcp:3449
     react-native run-android
 
+>>>>>>> origin/develop
 
 ## License
 

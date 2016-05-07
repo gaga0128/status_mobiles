@@ -1,7 +1,6 @@
 (ns syng-im.models.contacts
   (:require [cljs.core.async :as async :refer [chan put! <! >!]]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]
-            [syng-im.db :as db]
             [syng-im.utils.utils :refer [log toast]]
             [syng-im.persistence.realm :as realm]
             [syng-im.persistence.realm :as r]
@@ -108,14 +107,6 @@
 
 (defn contact-by-identity [identity]
   (r/single-cljs (r/get-by-field :contacts :whisper-identity identity)))
-
-;;;;;;;;;;;;;;;;;;;;----------------------------------------------
-
-(defn set-contact-identity [db contact-id]
-  (assoc-in db db/contact-identity-path contact-id))
-
-(defn contact-identity [db]
-  (get-in db db/contact-identity-path))
 
 (comment
 

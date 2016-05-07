@@ -2,6 +2,7 @@
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :refer [register-sub]]
             [syng-im.db :as db]
+            [syng-im.subscriptions.discovery :as discovery]
             [syng-im.models.chat :refer [current-chat-id
                                          chat-updated?]]
             [syng-im.models.chats :refer [chats-list
@@ -10,9 +11,7 @@
             [syng-im.models.messages :refer [get-messages]]
             [syng-im.models.contacts :refer [contacts-list
                                              contacts-list-exclude
-                                             contacts-list-include
-                                             contact-identity
-                                             contact-by-identity]]
+                                             contacts-list-include]]
             [syng-im.models.commands :refer [get-commands
                                              get-chat-command
                                              get-chat-command-content
@@ -85,6 +84,8 @@
           (when-let [chat-id @current-chat-id]
             (chat-by-id chat-id)))))))
 
+
+
 ;; -- User data --------------------------------------------------------------
 
 ;; (register-sub
@@ -126,11 +127,6 @@
   (fn [db _]
     (reaction
       (contacts-list))))
-
-(register-sub :contact
-   (fn [db _]
-     (let [identity (reaction (get-in @db db/contact-identity-path))]
-       (reaction (contact-by-identity @identity)))))
 
 (register-sub :all-new-contacts
   (fn [db _]
