@@ -45,27 +45,12 @@
                                   :name        "string"
                                   :group-chat  {:type    "bool"
                                                :indexed true}
-                                  :is-active  "bool"
-                                  :timestamp  "int"
-                                  :contacts   {:type       "list"
-                                               :objectType "chat-contact"}
-                                  :last-msg-id "string"}}
-                    {:name        :tag
-                     :primaryKey  :name
-                     :properties  {:name         "string"
-                                   :count        {:type     "int"
-                                                  :optional true
-                                                  :default 0}}}
-                    {:name        :discoveries
-                     :primaryKey  :whisper-id
-                     :properties  {:name         "string"
-                                   :status       "string"
-                                   :whisper-id   "string"
-                                   :photo        "string"
-                                   :location     "string"
-                                   :tags         {:type       "list"
-                                                  :objectType "tag"}
-                                   :last-updated "date"}}]})
+                                  :is-active   "bool"
+                                  :timestamp   "int"
+                                  :contacts    {:type       "list"
+                                                :objectType "chat-contact"}
+                                  :last-msg-id "string"}}]})
+
 
 (def realm (js/Realm. (clj->js opts)))
 
@@ -98,10 +83,6 @@
                                       (str "\"" value "\"")
                                       value))]
     query))
-
-(defn get-by-filter [schema-name filter]
-  (-> (.objects realm (name schema-name))
-      (.filtered filter)))
 
 (defn get-by-field [schema-name field value]
   (let [q (to-query schema-name :eq field value)]
@@ -150,7 +131,6 @@
 (defn get-list [schema-name]
   (vals (js->clj (.objects realm (to-string schema-name)) :keywordize-keys true)))
 
-
-(comment
-
-  )
+(defn collection->map [collection]
+  (-> (.map collection (fn [object _ _] object))
+      (js->clj :keywordize-keys true)))
