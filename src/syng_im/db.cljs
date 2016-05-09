@@ -26,7 +26,6 @@
 
 (def protocol-initialized-path [:protocol-initialized])
 (def identity-password-path [:identity-password])
-(def contact-identity-path [:contact-identity])
 (def current-chat-id-path [:current-chat-id])
 (def updated-chats-signal-path [:chats-updated-signal])
 (defn updated-chat-signal-path [chat-id]
