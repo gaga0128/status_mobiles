@@ -1,16 +1,21 @@
-(ns syng-im.participants.views.contact
-  (:require [re-frame.core :refer [subscribe dispatch dispatch-sync]]
+(ns syng-im.components.chats.new-participant-contact
+  (:require [syng-im.resources :as res]
+            [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [syng-im.components.react :refer [view]]
             [syng-im.components.contact-list.contact-inner :refer [contact-inner-view]]
             [syng-im.components.item-checkbox :refer [item-checkbox]]
-            [reagent.core :as r]
-            [syng-im.participants.styles :as st]))
+            [syng-im.utils.logging :as log]
+            [reagent.core :as r]))
 
-(defn participant-contact [{:keys [whisper-identity] :as contact}]
-  ;; todo must be moved to handlers
+(defn new-participant-contact [{:keys [whisper-identity] :as contact} navigator]
   (let [checked (r/atom false)]
-    (fn [{:keys [whisper-identity] :as contact}]
-      [view st/participant-container
+    (fn []
+      [view {:style {:flexDirection "row"
+                     :marginTop     5
+                     :marginBottom  5
+                     :paddingLeft   15
+                     :paddingRight  15
+                     :height        75}}
        [item-checkbox {:onToggle (fn [checked?]
                                    (reset! checked checked?)
                                    (dispatch [:select-new-participant whisper-identity checked?]))

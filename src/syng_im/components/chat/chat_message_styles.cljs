@@ -1,4 +1,4 @@
-(ns syng-im.chat.styles.message
+(ns syng-im.components.chat.chat-message-styles
   (:require [syng-im.components.styles :refer [font
                                                color-light-blue-transparent
                                                color-white
@@ -312,3 +312,18 @@
 (def new-message-container
   {:backgroundColor color-white
    :elevation       4})
+
+(def participants-container
+  {:flex            1
+   :backgroundColor :white})
+
+(def participants-list
+  {:backgroundColor :white})
+
+(def new-participant-image
+  {:width  20
+   :height 18})
+
+(def remove-participants-image
+  {:width  22
+   :height 30})
