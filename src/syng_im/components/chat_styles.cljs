@@ -1,4 +1,4 @@
-(ns syng-im.chat.styles.chat
+(ns syng-im.components.chat-styles
   (:require [syng-im.components.styles :refer [font
                                                title-font
                                                color-white

@@ -1,6 +1,6 @@
-(ns syng-im.chat.views.password
+(ns syng-im.components.chat.input.password
   (:require
-   [syng-im.chat.views.command
+   [syng-im.components.chat.input.simple-command
     :refer [simple-command-input-view]]))
 
 (defn password-input-view [command]

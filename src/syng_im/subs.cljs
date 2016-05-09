@@ -2,6 +2,7 @@
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :refer [register-sub]]
             [syng-im.db :as db]
+            [syng-im.components.discovery.subs :as discovery]
             [syng-im.models.chat :refer [current-chat-id
                                          chat-updated?]]
             [syng-im.models.chats :refer [chats-list
@@ -75,6 +76,8 @@
     (let [current-chat-id (current-chat-id @db)]
       (reaction (get-in @db [:chats current-chat-id])))))
 
+
+
 ;; -- User data --------------------------------------------------------------
 
 ;; (register-sub
@@ -102,9 +105,9 @@
       (get @db :signed-up))))
 
 (register-sub
-  :show-actions
-  (fn [db _]
-    (reaction (get-in @db db/show-actions-path))))
+ :show-actions
+ (fn [db _]
+   (reaction (get-in @db db/show-actions-path))))
 
 (register-sub
   :get-contacts
@@ -153,16 +156,16 @@
 
 (register-sub :navigation-stack
   (fn [db _]
-    (reaction (:navigation-stack @db))))
+    (:navigation-stack @db)))
 
 (register-sub :db
   (fn [db _] (reaction @db)))
 
 (register-sub :chat-properties
-  (fn [db [_ properties]]
+  (fn [{:keys [current-chat-id] :as db} [_ properties]]
     (->> properties
          (map (fn [k]
                 [k (-> @db
-                       (get-in [:chats (:current-chat-id @db) k])
+                       (get-in [:cgats current-chat-id k])
                        (reaction))]))
          (into {}))))

@@ -1,4 +1,4 @@
-(ns syng-im.chat.screen
+(ns syng-im.components.chat
   (:require [clojure.string :as s]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [syng-im.components.react :refer [view
@@ -11,15 +11,15 @@
                                               list-view
                                               list-item
                                               android?]]
-            [syng-im.chat.styles.chat :as st]
+            [syng-im.components.chat-styles :as st]
             [syng-im.utils.logging :as log]
             [syng-im.resources :as res]
             [syng-im.constants :refer [content-type-status]]
             [syng-im.utils.listview :refer [to-datasource
                                             to-datasource2]]
             [syng-im.components.invertible-scroll-view :refer [invertible-scroll-view]]
-            [syng-im.chat.views.message :refer [chat-message]]
-            [syng-im.chat.views.new-message :refer [chat-message-new]]))
+            [syng-im.components.chat.chat-message :refer [chat-message]]
+            [syng-im.components.chat.chat-message-new :refer [chat-message-new]]))
 
 (defn contacts-by-identity [contacts]
   (->> contacts
@@ -177,6 +177,7 @@
         [list-view {:renderRow             (message-row contacts' group-chat)
                     :renderScrollComponent #(invertible-scroll-view (js->clj %))
                     :onEndReached          #(dispatch [:load-more-messages])
+                    :enableEmptySections   true
                     :dataSource            (to-datasource2 @messages)}]))))
 
 (defn chat []

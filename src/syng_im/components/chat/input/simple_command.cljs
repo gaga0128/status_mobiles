@@ -1,4 +1,4 @@
-(ns syng-im.chat.views.command
+(ns syng-im.components.chat.input.simple-command
   (:require [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [syng-im.components.react :refer [view
                                               image
@@ -7,7 +7,7 @@
                                               text-input
                                               touchable-highlight]]
             [syng-im.resources :as res]
-            [syng-im.chat.styles.input :as st]))
+            [syng-im.components.chat.input.input-styles :as st]))
 
 (defn cancel-command-input []
   (dispatch [:cancel-command]))

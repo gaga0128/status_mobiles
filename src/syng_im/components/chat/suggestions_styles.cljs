@@ -1,4 +1,4 @@
-(ns syng-im.chat.styles.suggestions
+(ns syng-im.components.chat.suggestions-styles
   (:require [syng-im.components.styles :refer [font color-white]]))
 
 (def suggestion-item-container

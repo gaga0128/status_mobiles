@@ -1,11 +1,11 @@
-(ns syng-im.chat.views.plain-input
+(ns syng-im.components.chat.plain-message-input
   (:require [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [syng-im.components.react :refer [view
                                               icon
                                               touchable-highlight
                                               text-input]]
-            [syng-im.chat.views.suggestions :refer [suggestions-view]]
-            [syng-im.chat.styles.plain-input :as st]))
+            [syng-im.components.chat.suggestions :refer [suggestions-view]]
+            [syng-im.components.chat.plain-message-input-styles :as st]))
 
 (defn set-input-message [message]
   (dispatch [:set-chat-input-text message]))

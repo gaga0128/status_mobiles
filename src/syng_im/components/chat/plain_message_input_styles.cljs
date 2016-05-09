@@ -1,4 +1,4 @@
-(ns syng-im.chat.styles.plain-input
+(ns syng-im.components.chat.plain-message-input-styles
   (:require [syng-im.components.styles :refer [font
                                                text2-color
                                                color-white
