@@ -62,7 +62,8 @@
           message]
          (if (pos? (count message))
            [touchable-highlight
-            {:on-press send-command}
+            {:on-press       send-command
+             :underlay-color :transparent}
             [view {:style {:marginTop       10
                            :marginRight     10
                            :width           36
@@ -74,7 +75,8 @@
                               :marginLeft 12
                               :width      15
                               :height     15}}]]]
-           [touchable-highlight {:on-press cancel-command-input}
+           [touchable-highlight {:on-press       cancel-command-input
+                                 :underlay-color :transparent}
             [view {:style {:marginTop   10
                            :marginRight 10
                            :width       36

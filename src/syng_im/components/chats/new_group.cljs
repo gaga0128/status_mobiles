@@ -68,7 +68,8 @@
                          :fontSize     14
                          :lineHeight   20}}
            "Members"]
-          [touchable-highlight {:on-press (fn [])}
+          [touchable-highlight {:on-press (fn [])
+                                :underlay-color :transparent}
            [view {:style {:flexDirection "row"
                           :marginBottom  16}}
             [image {:source {:uri "icon_add_gray"}
@@ -84,6 +85,7 @@
                            :lineHeight   20}}
              "Add members"]]]
           [list-view {:dataSource contacts-ds
+                      :enableEmptySections true
                       :renderRow  (fn [row section-id row-id]
                                     (r/as-element [new-group-contact (js->clj row :keywordize-keys true) navigator]))
                       :style      {:backgroundColor "white"}}]]]))))
