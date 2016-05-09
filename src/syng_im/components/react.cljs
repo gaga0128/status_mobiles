@@ -1,6 +1,5 @@
 (ns syng-im.components.react
-  (:require [reagent.core :as r]
-            [syng-im.components.styles :as st]))
+  (:require [reagent.core :as r]))
 
 (set! js/window.React (js/require "react-native"))
 
@@ -9,26 +8,13 @@
 (def text (r/adapt-react-class (.-Text js/React)))
 (def view (r/adapt-react-class (.-View js/React)))
 (def image (r/adapt-react-class (.-Image js/React)))
-(def touchable-highlight-class (r/adapt-react-class (.-TouchableHighlight js/React)))
-(defn touchable-highlight [props content]
-  [touchable-highlight-class
-   (merge {:underlay-color :transparent} props)
-   content])
+(def touchable-highlight (r/adapt-react-class (.-TouchableHighlight js/React)))
 (def toolbar-android (r/adapt-react-class (.-ToolbarAndroid js/React)))
 (def list-view (r/adapt-react-class (.-ListView js/React)))
-(def text-input-class (r/adapt-react-class (.-TextInput js/React)))
-(defn text-input [props text]
-  [text-input-class (merge
-                      {:underlineColorAndroid :transparent
-                       :placeholderTextColor  st/text2-color
-                       :placeholder           "Type"}
-                      props)
-   text])
-
-
-(defn icon [n style]
-  [image {:source {:uri (keyword (str "icon_" (name n)))}
-          :style  style}])
+(def scroll-view (r/adapt-react-class (.-ScrollView js/React)))
+(def text-input (r/adapt-react-class (.-TextInput js/React)))
+(def drawer-layout-android (r/adapt-react-class (.-DrawerLayoutAndroid js/React)))
+(def touchable-opacity (r/adapt-react-class (.-TouchableOpacity js/React)))
 
 (def platform (.. js/React -Platform -OS))
 
