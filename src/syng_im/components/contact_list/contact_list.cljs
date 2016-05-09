@@ -43,10 +43,9 @@
     (fn []
       (let [contacts-ds (get-data-source @contacts)]
         [view {:style {:flex            1
-                       :backgroundColor "white"}}
+                       :backgroundColor color-white}}
          [contact-list-toolbar navigator]
          (when contacts-ds
            [list-view {:dataSource contacts-ds
-                       :enableEmptySections true
                        :renderRow  (partial render-row navigator)
                        :style      {:backgroundColor "white"}}])]))))

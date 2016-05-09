@@ -65,6 +65,5 @@
                          :backgroundColor  color-white
                          :borderRadius     5}}
            [list-view {:dataSource (to-datasource suggestions)
-                       :enableEmptySections true
                        :renderRow  render-row
                        :style      {}}]])))))
