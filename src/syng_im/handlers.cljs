@@ -29,7 +29,6 @@
                                           apply-staged-commands
                                           check-suggestion]]
     [syng-im.handlers.sign-up :as sign-up-service]
-    [syng-im.components.discovery.handlers :as discovery]
     [syng-im.models.chats :refer [chat-exists?
                                   create-chat
                                   chat-add-participants
@@ -445,13 +444,23 @@
   (fn [db [_ value]]
     (contacts/load-syng-contacts db)))
 
+(register-handler :show-profile
+  (fn [db [action identity]]
+    (log/debug action)
+    (let [db (contacts/set-contact-identity db identity)]
+      (dispatch [:navigate-to :profile])
+      db)))
+
 ;; -- Chats --------------------------------------------------------------
 
 (register-handler :show-chat
   (fn [db [action chat-id navigator nav-type]]
     (log/debug action "chat-id" chat-id)
-    (let [db (set-current-chat-id db chat-id)]
-      (dispatch [:navigate-to navigator {:view-id :chat} nav-type])
+    (let [db (-> db
+                 (create-chat chat-id [chat-id] false)
+                 (set-current-chat-id chat-id))]
+      ;; (dispatch [:navigate-to navigator {:view-id :chat} nav-type])
+      (dispatch [:navigate-to :chat])
       db)))
 
 (register-handler :init-console-chat
@@ -552,9 +561,9 @@
       db)))
 
 (register-handler :show-group-new
-  (fn [db [action navigator]]
+  (fn [db [action]]
     (log/debug action)
-    (nav-push navigator {:view-id :new-group})
+    (dispatch [:navigate-to :new-group])
     (clear-new-group db)))
 
 (register-handler :select-for-new-group
