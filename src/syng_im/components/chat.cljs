@@ -96,9 +96,9 @@
         subtitle])]]])
 
 (defn actions-list-view []
-  (let [{:keys [group-chat chat-id]}
-        (subscribe [:chat-properties [:group-chat :chat-id]])]
-    (when-let [actions (if @group-chat
+  (let [{:keys [group-chat active]}
+        (subscribe [:chat-properties [:group-chat :name :contacts :active]])]
+    (when-let [actions (when (and @group-chat @active)
                          [{:title      "Add Contact to chat"
                            :icon       :menu_group
                            :icon-style {:width  25
@@ -123,12 +123,7 @@
                            :icon       :settings
                            :icon-style {:width  20
                                         :height 13}
-                           :handler    (fn [])}]
-                         [{:title      "Profile"
-                           :icon       :menu_group
-                           :icon-style {:width  25
-                                        :height 19}
-                           :handler    #(dispatch [:show-profile @chat-id])}])]
+                           :handler    (fn [])}])]
       [view st/actions-wrapper
        [view st/actions-separator]
        [view st/actions-view
@@ -182,6 +177,7 @@
         [list-view {:renderRow             (message-row contacts' group-chat)
                     :renderScrollComponent #(invertible-scroll-view (js->clj %))
                     :onEndReached          #(dispatch [:load-more-messages])
+                    :enableEmptySections   true
                     :dataSource            (to-datasource2 @messages)}]))))
 
 (defn chat []

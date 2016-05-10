@@ -43,9 +43,6 @@
 (defn set-chat-input-text [db text]
   (assoc-in db (db/chat-input-text-path (current-chat-id db)) text))
 
-(defn get-chat-input-text [db]
-  (get-in db (db/chat-input-text-path (current-chat-id db))))
-
 (comment
 
   (swap! re-frame.db/app-db (fn [db]
