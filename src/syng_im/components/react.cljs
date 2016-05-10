@@ -16,7 +16,6 @@
    content])
 (def toolbar-android (r/adapt-react-class (.-ToolbarAndroid js/React)))
 (def list-view (r/adapt-react-class (.-ListView js/React)))
-(def scroll-view (r/adapt-react-class (.-ScrollView js/React)))
 (def text-input-class (r/adapt-react-class (.-TextInput js/React)))
 (defn text-input [props text]
   [text-input-class (merge
@@ -25,8 +24,6 @@
                        :placeholder           "Type"}
                       props)
    text])
-(def drawer-layout-android (r/adapt-react-class (.-DrawerLayoutAndroid js/React)))
-(def touchable-opacity (r/adapt-react-class (.-TouchableOpacity js/React)))
 
 
 (defn icon [n style]

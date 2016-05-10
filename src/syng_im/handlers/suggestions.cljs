@@ -1,9 +1,7 @@
 (ns syng-im.handlers.suggestions
   (:require [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [syng-im.db :as db]
-            [syng-im.models.chat :refer [current-chat-id
-                                         set-chat-input-text
-                                         get-chat-input-text]]
+            [syng-im.models.chat :refer [current-chat-id]]
             [syng-im.models.commands :refer [commands
                                              suggestions
                                              get-commands
@@ -64,7 +62,3 @@
           [suggestion] (filter #(= suggestion-text' (:text %))
                                (get-commands db))]
       suggestion)))
-
-(defn switch-command-suggestions [db]
-  (let [text (get-chat-input-text db)]
-    (set-chat-input-text db (if (suggestion? text) nil "!"))))
