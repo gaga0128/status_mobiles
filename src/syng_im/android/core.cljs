@@ -10,11 +10,11 @@
             [syng-im.components.contact-list.contact-list :refer [contact-list]]
             [syng-im.components.discovery.discovery :refer [discovery]]
             [syng-im.components.discovery.discovery-tag :refer [discovery-tag]]
-            [syng-im.components.chat :refer [chat]]
+            [syng-im.chat.screen :refer [chat]]
             [syng-im.components.chats.chats-list :refer [chats-list]]
             [syng-im.components.chats.new-group :refer [new-group]]
-            [syng-im.components.chat.new-participants :refer [new-participants]]
-            [syng-im.components.chat.remove-participants :refer [remove-participants]]
+            [syng-im.participants.views.create :refer [new-participants]]
+            [syng-im.participants.views.remove :refer [remove-participants]]
             [syng-im.utils.logging :as log]
             [syng-im.utils.utils :refer [toast]]
             [syng-im.navigation :as nav]
@@ -29,14 +29,14 @@
                        ;; this listener and handle application's closing
                        ;; in handlers
                        (let [stack (subscribe [:navigation-stack])]
-                         (when (< 1 (count stack))
+                         (when (< 1 (count @stack))
                            (dispatch [:navigate-back])
                            true)))]
     (add-event-listener "hardwareBackPress" new-listener)))
 
 (defn app-root []
   (let [signed-up (subscribe [:signed-up])
-        view-id (subscribe [:view-id])]
+        view-id   (subscribe [:view-id])]
     (fn []
       (case (if @signed-up @view-id :chat)
         :discovery [discovery]

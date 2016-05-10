@@ -5,6 +5,7 @@
                                       view
                                       text
                                       image]]
+    [syng-im.resources :as res]
     [syng-im.components.discovery.styles :as st]
     [reagent.core :as r])
   )
@@ -18,6 +19,6 @@
                   ]
                  [view {:style st/popular-list-item-avatar-container}
                   [image {:style st/popular-list-item-avatar
-                          :source {:uri "icon_avatar"}}]
+                          :source res/user-no-photo}]
                   ]
                  ]))
