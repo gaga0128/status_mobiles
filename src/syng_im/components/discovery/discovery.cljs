@@ -13,7 +13,6 @@
     [syng-im.components.toolbar :refer [toolbar]]
     [syng-im.components.discovery.discovery-popular :refer [discovery-popular]]
     [syng-im.components.discovery.discovery-recent :refer [discovery-recent]]
-    [syng-im.resources :as res]
     [syng-im.components.discovery.styles :as st]
     [syng-im.persistence.realm :as realm]))
 
@@ -26,18 +25,17 @@
       [])))
 
 (defn title-content [showSearch]
-  [view st/discovery-toolbar-content
-   (if showSearch
-     [text-input {:underlineColorAndroid "transparent"
-                  :style                 st/discovery-search-input
-                  :autoFocus             true
-                  :placeholder           "Type your search tags here"
-                  :onSubmitEditing       (fn [e]
-                                           (let [search (aget e "nativeEvent" "text")
-                                                 hashtags (get-hashtags search)]
-                                             (dispatch [:broadcast-status search hashtags])))}]
-     [view
-      [text {:style st/discovery-title} "Discover"]])])
+  (if showSearch
+    [text-input {:underlineColorAndroid "transparent"
+                 :style                 st/discovery-search-input
+                 :autoFocus             true
+                 :placeholder           "Type your search tags here"
+                 :onSubmitEditing       (fn [e]
+                                          (let [search (aget e "nativeEvent" "text")
+                                                hashtags (get-hashtags search)]
+                                            (dispatch [:broadcast-status search hashtags])))}]
+    [view
+     [text {:style st/discovery-title} "Discover"]]))
 
 (defn create-fake-discovery []
   (let [number (rand-int 999)]
@@ -63,7 +61,7 @@
                                                :height     12}}
                               :handler create-fake-discovery}
                  :title     "Add Participants"
-                 :custom-content [title-content @showSearch]
+                 :content   (title-content @showSearch)
                  :action    {:image {:source {:uri "icon_search"}
                                      :style  {:width  17
                                               :height 17}}

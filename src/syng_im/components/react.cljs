@@ -26,8 +26,6 @@
                        :placeholder           "Type"}
                       props)
    text])
-(def drawer-layout-android (r/adapt-react-class (.-DrawerLayoutAndroid js/React)))
-(def touchable-opacity (r/adapt-react-class (.-TouchableOpacity js/React)))
 
 
 (defn icon [n style]

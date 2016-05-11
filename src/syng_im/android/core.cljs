@@ -7,18 +7,15 @@
             [syng-im.handlers]
             [syng-im.subs]
             [syng-im.components.react :refer [navigator app-registry]]
-            [syng-im.components.contact-list.contact-list :refer [contact-list]]
+            [syng-im.contacts.screen :refer [contact-list]]
             [syng-im.components.discovery.discovery :refer [discovery]]
             [syng-im.components.discovery.discovery-tag :refer [discovery-tag]]
-            [syng-im.components.chat :refer [chat]]
-            [syng-im.components.chats.chats-list :refer [chats-list]]
-            [syng-im.components.chats.new-group :refer [new-group]]
-            [syng-im.components.chat.new-participants :refer [new-participants]]
-            [syng-im.components.chat.remove-participants :refer [remove-participants]]
-            [syng-im.components.profile :refer [profile my-profile]]
-            [syng-im.utils.logging :as log]
+            [syng-im.chat.screen :refer [chat]]
+            [syng-im.chats-list.screen :refer [chats-list]]
+            [syng-im.new-group.screen :refer [new-group]]
+            [syng-im.participants.views.create :refer [new-participants]]
+            [syng-im.participants.views.remove :refer [remove-participants]]
             [syng-im.utils.utils :refer [toast]]
-            [syng-im.navigation :as nav]
             [syng-im.utils.encryption]))
 
 (def back-button-handler (cljs/atom {:nav     nil
@@ -37,7 +34,7 @@
 
 (defn app-root []
   (let [signed-up (subscribe [:signed-up])
-        view-id (subscribe [:view-id])]
+        view-id   (subscribe [:view-id])]
     (fn []
       (case (if @signed-up @view-id :chat)
         :discovery [discovery]
@@ -47,9 +44,7 @@
         :chat-list [chats-list]
         :new-group [new-group]
         :contact-list [contact-list]
-        :chat [chat]
-        :profile [profile]
-        :my-profile [my-profile]))))
+        :chat [chat]))))
 
 (defn init []
   (dispatch-sync [:initialize-db])

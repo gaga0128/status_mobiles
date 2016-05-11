@@ -24,11 +24,6 @@
 
 ;; discovery.cljs
 
-(def discovery-toolbar-content
-  {:flex           1
-   :alignItems     :center
-   :justifyContent :center})
-
 (def discovery-search-input
   {:flex       1
    :marginLeft 18
