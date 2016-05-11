@@ -23,10 +23,11 @@
 (defn new-group-toolbar [navigator group-name]
   [toolbar {:navigator navigator
             :title     "New group chat"
-            :action    {:image   {:source res/v ;; {:uri "icon_search"}
-                                  :style  {:width  20
-                                           :height 18}}
-                        :handler #(dispatch [:create-new-group group-name])}}])
+            :action    {:image {:source res/v ;; {:uri "icon_search"}
+                                :style  {:width  20
+                                         :height 18}}
+                        :handler (fn []
+                                   (dispatch [:create-new-group group-name navigator]))}}])
 
 (defn new-group [{:keys [navigator]}]
   (let [contacts   (subscribe [:all-contacts])
