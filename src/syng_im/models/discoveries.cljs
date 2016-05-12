@@ -7,7 +7,10 @@
             [syng-im.db :as db]))
 
 (defn signal-discoveries-updated [db]
-  (update-in db db/updated-discoveries-signal-path #(if % (inc %) 0)))
+  (update-in db db/updated-discoveries-signal-path (fn [current]
+                                               (if current
+                                                 (inc current)
+                                                 0))))
 
 (defn discoveries-updated? [db]
   (get-in db db/updated-discoveries-signal-path))

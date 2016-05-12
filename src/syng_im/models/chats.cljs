@@ -1,13 +1,25 @@
 (ns syng-im.models.chats
   (:require [clojure.set :refer [difference]]
+            [re-frame.core :refer [dispatch]]
             [syng-im.persistence.realm :as r]
             [syng-im.utils.random :as random :refer [timestamp]]
             [clojure.string :refer [join blank?]]
+            [syng-im.db :as db]
             [syng-im.utils.logging :as log]
             [syng-im.constants :refer [content-type-status]]
             [syng-im.models.messages :refer [save-message]]
-            [syng-im.persistence.realm-queries :refer [include-query]]))
+            [syng-im.persistence.realm-queries :refer [include-query]]
+            [syng-im.models.chat :refer [signal-chat-updated
+                                         get-group-settings]]))
 
+(defn signal-chats-updated [db]
+  (update-in db db/updated-chats-signal-path (fn [current]
+                                               (if current
+                                                 (inc current)
+                                                 0))))
+
+(defn chats-updated? [db]
+  (get-in db db/updated-chats-signal-path))
 
 (defn chat-name-from-contacts [identities]
   (let [chat-name (->> identities
@@ -43,6 +55,8 @@
   ([{:keys [last-msg-id] :as chat}]
    (let [chat (assoc chat :last-msg-id (or last-msg-id ""))]
      (r/write #(r/create :chats chat))))
+  ([db chat-id identities group-chat?]
+   (create-chat db chat-id identities group-chat? nil))
   ([db chat-id identities group-chat? chat-name]
    (if (chat-exists? chat-id)
      db
@@ -61,7 +75,20 @@
                                :contacts    contacts
                                :last-msg-id ""}))))
        (add-status-message chat-id)
-       db))))
+       (signal-chats-updated db)))))
+
+(defn save-chat [db]
+  (let [chat-settings (get-group-settings db)
+        chat-id (:chat-id chat-settings)]
+    (r/write
+     (fn []
+       ;; TODO UNDONE contacts
+       (r/create :chats (select-keys chat-settings [:chat-id :name]) true)))
+    ;; TODO update chat in db atom
+    (dispatch [:initialize-chats])
+    (-> db
+        (signal-chats-updated)
+        (signal-chat-updated chat-id))))
 
 (defn chat-contacts [chat-id]
   (-> (r/get-by-field :chats :chat-id chat-id)
@@ -84,7 +111,8 @@
                           :is-active true
                           :name      group-name
                           :contacts  contacts} true))))
-  db)
+  (-> (signal-chats-updated db)
+      (signal-chat-updated group-id)))
 
 (defn normalize-contacts
   [chats]
@@ -123,13 +151,13 @@
             chat  (r/single (r/get-by-field :chats :chat-id chat-id))]
         (-> (aget chat "contacts")
             (r/filtered query)
-            (.forEach (fn [object _ _]
+            (.forEach (fn [object index collection]
                         (aset object "is-in-chat" false))))))))
 
 (defn active-group-chats []
   (let [results (r/filtered (r/get-all :chats)
                             "group-chat = true && is-active = true")]
-    (js->clj (.map results (fn [object _ _]
+    (js->clj (.map results (fn [object index collection]
                              (aget object "chat-id"))))))
 
 

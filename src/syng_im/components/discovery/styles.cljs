@@ -17,12 +17,17 @@
    :borderBottomColor "#eff2f3"})
 
 (def row
-  {:flexDirection :row})
+  {:flexDirection "row"})
 
 (def column
   {:flexDirection "column"})
 
 ;; discovery.cljs
+
+(def discovery-toolbar-content
+  {:flex           1
+   :alignItems     :center
+   :justifyContent :center})
 
 (def discovery-search-input
   {:flex       1
@@ -34,8 +39,8 @@
 
 (def discovery-title
   {:color      "#000000de"
-   :alignSelf :center
-   :textAlign  :center
+   :alignSelf "center"
+   :textAlign  "center"
    :fontFamily "sans-serif"
    :fontSize   16})
 
@@ -71,8 +76,8 @@
    :fontSize   14
    :paddingRight 5
    :paddingBottom 2
-   :alignItems :center
-   :justifyContent :center})
+   :alignItems "center"
+   :justifyContent "center"})
 
 (def tag-name-container
   {:flexDirection "column"
@@ -86,8 +91,8 @@
    :fontSize   12
    :paddingRight 5
    :paddingBottom 2
-   :alignItems :center
-   :justifyContent :center})
+   :alignItems "center"
+   :justifyContent "center"})
 
 (def tag-count-container
   {:flex 0.2
@@ -98,18 +103,18 @@
 
 (def popular-list-container
   {:flex 1
-   :backgroundColor :white
+   :backgroundColor "white"
    :paddingLeft 10
    :paddingTop 16})
 
 (def popular-list
-  {:backgroundColor :white
+  {:backgroundColor "white"
    :paddingTop 13})
 
 ;; discover_popular_list_item.cjls
 
 (def popular-list-item
-  {:flexDirection :row
+  {:flexDirection "row"
    :paddingTop 10
    :paddingBottom 10})
 
@@ -132,7 +137,7 @@
 (def popular-list-item-avatar-container
   {:flex 0.2
    :flexDirection "column"
-   :alignItems :center
+   :alignItems "center"
    :paddingTop 5})
 
 (def popular-list-item-avatar
@@ -144,7 +149,7 @@
 ;; discovery_recent
 
 (def recent-list
-  {:backgroundColor :white
+  {:backgroundColor "white"
    :paddingLeft 15})
 
 ;; discovery_tag

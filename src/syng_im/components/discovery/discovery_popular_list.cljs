@@ -9,6 +9,7 @@
                                       text
                                       image]]
     [reagent.core :as r]
+    [syng-im.components.realm :refer [list-view]]
     [syng-im.components.discovery.styles :as st]
     [syng-im.utils.listview :refer [to-realm-datasource]]
     [syng-im.components.discovery.discovery-popular-list-item :refer [discovery-popular-list-item] ])
