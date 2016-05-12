@@ -122,23 +122,27 @@
                            :icon       :menu_group
                            :icon-style {:width  25
                                         :height 19}
-                           :handler    #(dispatch [:show-add-participants])}
+                           :handler    nil #_#(dispatch [:show-add-participants
+                                                         navigator])}
                           {:title      "Remove Contact from chat"
                            :subtitle   "Alex, John"
                            :icon       :search_gray_copy
                            :icon-style {:width  17
                                         :height 17}
-                           :handler    #(dispatch [:show-remove-participants])}
+                           :handler    nil #_#(dispatch
+                                               [:show-remove-participants navigator])}
                           {:title      "Leave Chat"
                            :icon       :muted
                            :icon-style {:width  18
                                         :height 21}
-                           :handler    #(dispatch [:leave-group-chat])}
+                           :handler    nil #_#(dispatch [:leave-group-chat
+                                                         navigator])}
                           {:title      "Settings"
+                           :subtitle   "Not implemented"
                            :icon       :settings
                            :icon-style {:width  20
                                         :height 13}
-                           :handler    #(dispatch [:show-group-settings])}]
+                           :handler    (fn [])}]
                          [{:title      "Profile"
                            :custom-icon [menu-item-icon-profile]
                            :icon       :menu_group
@@ -150,13 +154,15 @@
                            :icon       :search_gray_copy
                            :icon-style {:width  17
                                         :height 17}
-                           :handler    nil}
+                           :handler    nil #_#(dispatch
+                                               [:show-remove-participants navigator])}
                           {:title      "Notifications and sounds"
                            :subtitle   "!not implemented"
                            :icon       :muted
                            :icon-style {:width  18
                                         :height 21}
-                           :handler    nil}
+                           :handler    nil #_#(dispatch [:leave-group-chat
+                                                         navigator])}
                           {:title      "Settings"
                            :subtitle   "!not implemented"
                            :icon       :settings
