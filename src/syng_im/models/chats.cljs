@@ -1,5 +1,6 @@
 (ns syng-im.models.chats
   (:require [clojure.set :refer [difference]]
+            [re-frame.core :refer [dispatch]]
             [syng-im.persistence.realm :as r]
             [syng-im.utils.random :as random :refer [timestamp]]
             [clojure.string :refer [join blank?]]
@@ -8,7 +9,9 @@
             [syng-im.constants :refer [content-type-status]]
             [syng-im.models.messages :refer [save-message]]
             [syng-im.persistence.realm-queries :refer [include-query]]
-            [syng-im.models.chat :refer [signal-chat-updated]]))
+            [syng-im.models.chat :refer [current-chat
+                                         signal-chat-updated
+                                         get-group-settings]]))
 
 (defn signal-chats-updated [db]
   (update-in db db/updated-chats-signal-path (fn [current]
@@ -75,6 +78,20 @@
        (add-status-message chat-id)
        (signal-chats-updated db)))))
 
+(defn save-chat [db]
+  (let [chat-settings (get-group-settings db)
+        chat-id       (:chat-id chat-settings)]
+    (r/write
+     (fn []
+       ;; TODO UNDONE contacts
+       (r/create :chats
+                 (select-keys chat-settings [:chat-id :name]) true)))
+    ;; TODO update chat in db atom
+    (dispatch [:initialize-chats])
+    (-> db
+        (signal-chats-updated)
+        (signal-chat-updated chat-id))))
+
 (defn chat-contacts [chat-id]
   (-> (r/get-by-field :chats :chat-id chat-id)
       (r/single)
@@ -127,8 +144,11 @@
           (if-let [contact-exists (.find contacts (fn [object index collection]
                                                     (= contact-identity (aget object "identity"))))]
             (aset contact-exists "is-in-chat" true)
-            (.push contacts (clj->js {:identity contact-identity}))))))))
+            (.push contacts (clj->js {:identity contact-identity})))))))
+  ;; TODO temp. Update chat in db atom
+  (dispatch [:initialize-chats]))
 
+;; TODO deprecated? (is there need to remove multiple member at once?)
 (defn chat-remove-participants [chat-id identities]
   (r/write
     (fn []
@@ -138,6 +158,19 @@
             (r/filtered query)
             (.forEach (fn [object index collection]
                         (aset object "is-in-chat" false))))))))
+
+(defn chat-remove-member [db identity]
+  (let [chat    (current-chat db)]
+    (r/write
+     (fn []
+       (r/create :chats
+                 (update chat :contacts
+                         (fn [members]
+                           (filter #(not= (:identity %) identity) members)))
+                 true)))
+    ;; TODO temp. Update chat in db atom
+    (dispatch [:initialize-chats])
+    db))
 
 (defn active-group-chats []
   (let [results (r/filtered (r/get-all :chats)

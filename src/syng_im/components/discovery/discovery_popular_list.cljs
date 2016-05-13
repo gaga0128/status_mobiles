@@ -26,12 +26,12 @@
                                   :key rowID}])]
     elem))
 
-(defn discovery-popular-list [tag count]
+(defn discovery-popular-list [tag count navigator]
   (let [discoveries (subscribe [:get-discoveries-by-tag tag 3])]
     [view {:style st/popular-list-container}
      [view st/row
       [view st/tag-name-container
-       [touchable-highlight {:onPress #(dispatch [:show-discovery-tag tag])}
+       [touchable-highlight {:onPress #(dispatch [:show-discovery-tag tag navigator :push])}
         [text {:style st/tag-name}
          (str " #" (name tag))]]]
       [view {:style st/tag-count-container}

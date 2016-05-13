@@ -7,6 +7,9 @@
 (defn current-chat-id [db]
   (get-in db db/current-chat-id-path))
 
+(defn current-chat [db]
+  (get-in db [:chats (current-chat-id db)]))
+
 (defn signal-chat-updated [db chat-id]
   (update-in db (db/updated-chat-signal-path chat-id) (fn [current]
                                                         (if current
@@ -15,6 +18,14 @@
 
 (defn chat-updated? [db chat-id]
   (get-in db (db/updated-chat-signal-path chat-id)))
+
+(defn get-group-settings [db]
+  (get-in db db/group-settings-path))
+
+(defn set-group-settings [db]
+  (let [group-chat (current-chat db)]
+    (assoc-in db db/group-settings-path
+              (select-keys group-chat [:chat-id :name :contacts]))))
 
 (defn update-new-group-selection [db identity add?]
   (update-in db db/new-group-path (fn [new-group]
