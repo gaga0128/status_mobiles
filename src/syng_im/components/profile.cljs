@@ -76,10 +76,10 @@
            "REPORT USER"]]]]])))
 
 (defn my-profile []
-  (let [username     (subscribe [:username])
-        phone-number (subscribe [:phone-number])
-        email        (subscribe [:email])
-        status       (subscribe [:status])]
+  (let [username     (subscribe [:get :username])
+        phone-number (subscribe [:get :phone-number])
+        email        (subscribe [:get :email])
+        status       (subscribe [:get :status])]
     (fn []
       [scroll-view {:style st/profile}
        [touchable-highlight {:style    st/back-btn-touchable
