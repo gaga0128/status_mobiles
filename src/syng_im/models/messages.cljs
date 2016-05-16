@@ -1,5 +1,6 @@
 (ns syng-im.models.messages
   (:require [syng-im.persistence.realm :as r]
+            [re-frame.core :refer [dispatch]]
             [cljs.reader :refer [read-string]]
             [syng-im.utils.random :refer [timestamp]]
             [syng-im.db :as db]
@@ -15,6 +16,10 @@
 (defn- str-to-map
   [s]
   (keywordize-keys (apply hash-map (split s #"[;=]"))))
+
+(defn select-chat-last-message [chat]
+  (when-let [last-msg-id (:last-msg-id chat)]
+    (r/single-cljs (r/get-by-field :msgs :msg-id last-msg-id))))
 
 (defn save-message
   [chat-id {:keys [from to msg-id content content-type outgoing
@@ -37,8 +42,9 @@
                            :outgoing        outgoing
                            :timestamp       (timestamp)
                            :delivery-status nil
-                           :same-author     same-author
-                           :same-direction  same-direction} true))))))
+                           ;; TODO 'some?' is temp
+                           :same-author     (some? same-author)
+                           :same-direction  (some? same-direction)} true))))))
 
 (defn get-messages [chat-id]
   (->> (-> (r/get-by-field :msgs :chat-id chat-id)
@@ -51,9 +57,19 @@
                 (update message :content str-to-map)
                 message)))))
 
+(defn message-by-id [msg-id]
+  (r/single-cljs (r/get-by-field :msgs :msg-id msg-id)))
+
 (defn update-message! [{:keys [msg-id] :as msg}]
   (log/debug "update-message!" msg)
   (r/write
     (fn []
       (when (r/exists? :msgs :msg-id msg-id)
         (r/create :msgs msg true)))))
+
+(defn clear-history [chat-id]
+  (r/write
+   (fn []
+     (r/delete (r/get-by-field :msgs :chat-id chat-id))))
+  ;; TODO temp. Update chat in db atom
+  (dispatch [:initialize-chats]))
