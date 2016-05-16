@@ -1,4 +1,4 @@
-(ns syng-im.components.carousel.carousel
+(ns syng-im.components.carousel
   (:require [syng-im.components.react :refer [android?
                                               view
                                               scroll-view

@@ -1,12 +1,26 @@
 (ns syng-im.models.chats
   (:require [clojure.set :refer [difference]]
+            [re-frame.core :refer [dispatch]]
             [syng-im.persistence.realm :as r]
             [syng-im.utils.random :as random :refer [timestamp]]
             [clojure.string :refer [join blank?]]
+            [syng-im.db :as db]
             [syng-im.utils.logging :as log]
             [syng-im.constants :refer [content-type-status]]
             [syng-im.models.messages :refer [save-message]]
-            [syng-im.persistence.realm-queries :refer [include-query]]))
+            [syng-im.persistence.realm-queries :refer [include-query]]
+            [syng-im.models.chat :refer [current-chat-id
+                                         current-chat
+                                         signal-chat-updated]]))
+
+(defn signal-chats-updated [db]
+  (update-in db db/updated-chats-signal-path (fn [current]
+                                               (if current
+                                                 (inc current)
+                                                 0))))
+
+(defn chats-updated? [db]
+  (get-in db db/updated-chats-signal-path))
 
 (defn chat-name-from-contacts [identities]
   (let [chat-name (->> identities
@@ -42,6 +56,8 @@
   ([{:keys [last-msg-id] :as chat}]
    (let [chat (assoc chat :last-msg-id (or last-msg-id ""))]
      (r/write #(r/create :chats chat))))
+  ([db chat-id identities group-chat?]
+   (create-chat db chat-id identities group-chat? nil))
   ([db chat-id identities group-chat? chat-name]
    (if (chat-exists? chat-id)
      db
@@ -60,7 +76,23 @@
                                :contacts    contacts
                                :last-msg-id ""}))))
        (add-status-message chat-id)
-       db))))
+       (signal-chats-updated db)))))
+
+(defn set-group-chat-name [db name]
+  (let [chat-id (current-chat-id db)]
+    (r/write (fn []
+               (-> (r/get-by-field :chats :chat-id chat-id)
+                   (r/single)
+                   (aset "name" name))))
+    (assoc-in db (db/chat-name-path chat-id) name)))
+
+(defn set-chat-color [db color]
+  (let [chat-id (current-chat-id db)]
+    (r/write (fn []
+               (-> (r/get-by-field :chats :chat-id chat-id)
+                   (r/single)
+                   (aset "color" color))))
+    (assoc-in db (db/chat-color-path chat-id) color)))
 
 (defn chat-contacts [chat-id]
   (-> (r/get-by-field :chats :chat-id chat-id)
@@ -83,7 +115,8 @@
                           :is-active true
                           :name      group-name
                           :contacts  contacts} true))))
-  db)
+  (-> (signal-chats-updated db)
+      (signal-chat-updated group-id)))
 
 (defn normalize-contacts
   [chats]
@@ -113,8 +146,11 @@
           (if-let [contact-exists (.find contacts (fn [object index collection]
                                                     (= contact-identity (aget object "identity"))))]
             (aset contact-exists "is-in-chat" true)
-            (.push contacts (clj->js {:identity contact-identity}))))))))
+            (.push contacts (clj->js {:identity contact-identity})))))))
+  ;; TODO temp. Update chat in db atom
+  (dispatch [:initialize-chats]))
 
+;; TODO deprecated? (is there need to remove multiple member at once?)
 (defn chat-remove-participants [chat-id identities]
   (r/write
     (fn []
@@ -122,13 +158,26 @@
             chat  (r/single (r/get-by-field :chats :chat-id chat-id))]
         (-> (aget chat "contacts")
             (r/filtered query)
-            (.forEach (fn [object _ _]
+            (.forEach (fn [object index collection]
                         (aset object "is-in-chat" false))))))))
+
+(defn chat-remove-member [db identity]
+  (let [chat (current-chat db)]
+    (r/write
+     (fn []
+       (r/create :chats
+                 (update chat :contacts
+                         (fn [members]
+                           (filter #(not= (:identity %) identity) members)))
+                 true)))
+    ;; TODO temp. Update chat in db atom
+    (dispatch [:initialize-chats])
+    db))
 
 (defn active-group-chats []
   (let [results (r/filtered (r/get-all :chats)
                             "group-chat = true && is-active = true")]
-    (js->clj (.map results (fn [object _ _]
+    (js->clj (.map results (fn [object index collection]
                              (aget object "chat-id"))))))
 
 
