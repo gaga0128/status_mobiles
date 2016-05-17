@@ -8,11 +8,11 @@
             [syng-im.constants :refer [text-content-type
                                        content-type-command]]
             [syng-im.utils.random :as random]
-            [syng-im.components.react :as r]
-            [syng-im.handlers.sign-up :as sign-up-service]
+            [syng-im.chat.sign-up :as sign-up-service]
             [syng-im.models.chats :as chats]
             [syng-im.navigation.handlers :as nav]
-            [syng-im.models.chats :as c]))
+            [syng-im.models.chats :as c]
+            [syng-im.utils.handlers :as u]))
 
 (register-handler :set-show-actions
   (fn [db [_ show-actions]]
@@ -71,17 +71,18 @@
   ((enrich update-command) update-text))
 
 (register-handler :send-group-chat-msg
-  (fn [db [_ chat-id text]]
-    (let [{msg-id       :msg-id
-           {from :from} :msg} (api/send-group-user-msg {:group-id chat-id
-                                                        :content  text})
-          msg {:msg-id       msg-id
-               :from         from
-               :to           nil
-               :content      text
-               :content-type text-content-type
-               :outgoing     true}]
-      (messages/save-message chat-id msg))))
+  (u/side-effect!
+    (fn [_ [_ chat-id text]]
+      (let [{msg-id       :msg-id
+             {from :from} :msg} (api/send-group-user-msg {:group-id chat-id
+                                                          :content  text})
+            msg {:msg-id       msg-id
+                 :from         from
+                 :to           nil
+                 :content      text
+                 :content-type text-content-type
+                 :outgoing     true}]
+        (messages/save-message chat-id msg)))))
 
 (defn console? [s]
   (= "console" s))
@@ -196,7 +197,6 @@
       ((enrich add-commands))
       ((enrich clear-input))
       ((enrich clear-staged-commands))
-      ((after (fn [_ _] (r/dismiss-keyboard!))))
       ((after send-message!))
       ((after save-message-to-realm!))
       ((after save-commands-to-realm!))
@@ -235,7 +235,6 @@
 (register-handler :set-signed-up
   (fn [db [_ signed-up]]
     (sign-up-service/set-signed-up db signed-up)))
-
 
 (defn load-messages!
   ([db] (load-messages! db nil))
@@ -289,15 +288,9 @@
       ((after store-message!))))
 
 (register-handler :group-received-msg
-  (fn [db [_ {chat-id :group-id :as msg}]]
-    (messages/save-message chat-id msg)
-    db))
-
-(defn load-chat!
-  [{:keys [chats current-chat-id] :as db}]
-  (when-not (chats current-chat-id)
-    (c/create-chat {}))
-  db)
+  (u/side-effect!
+    (fn [_ [_ {chat-id :group-id :as msg}]]
+      (messages/save-message chat-id msg))))
 
 (defmethod nav/preload-data! :chat
   [{:keys [current-chat-id] :as db} [_ _ id]]

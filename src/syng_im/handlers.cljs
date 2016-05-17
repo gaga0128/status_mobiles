@@ -11,13 +11,10 @@
     [syng-im.models.protocol :refer [update-identity
                                      set-initialized]]
     [syng-im.models.contacts :as contacts]
-    [syng-im.models.messages :refer [save-message
-                                     update-message!
-                                     clear-history]]
+    [syng-im.models.messages :refer [save-message update-message!]]
     [syng-im.models.commands :refer [set-commands]]
     [syng-im.handlers.server :as server]
     [syng-im.chat.suggestions :refer [load-commands]]
-    [syng-im.handlers.sign-up :as sign-up-service]
     [syng-im.models.chats :refer [chat-exists?
                                   create-chat
                                   chat-add-participants
@@ -35,7 +32,6 @@
     [syng-im.utils.crypt :refer [gen-random-bytes]]
     [syng-im.utils.random :as random]
     syng-im.chat.handlers
-    [syng-im.group-settings.handlers :refer [delete-chat]]
     [syng-im.navigation.handlers :as nav]
     syng-im.discovery.handlers
     syng-im.contacts.handlers))
@@ -215,14 +211,12 @@
                       :delivery-status :failed})))
 
 (register-handler :leave-group-chat
-  (fn [db [action]]
+  (fn [db [action navigator]]
     (log/debug action)
     (let [chat-id (:current-chat-id db)]
       (api/leave-group-chat chat-id)
       (set-chat-active chat-id false)
-      (left-chat-msg chat-id)
-      (delete-chat chat-id)
-      (dispatch [:navigate-back]))))
+      (left-chat-msg chat-id))))
 
 ;; -- User data --------------------------------------------------------------
 (register-handler :load-user-phone-number
@@ -259,7 +253,7 @@
     (let [identities (vec (:new-participants db))
           chat-id    (:current-chat-id db)]
       (chat-add-participants chat-id identities)
-      (dispatch [:navigate-back])
+      (nav-pop navigator)
       (doseq [ident identities]
         (api/group-add-participant chat-id ident))
       db)))

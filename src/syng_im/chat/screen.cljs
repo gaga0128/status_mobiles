@@ -132,10 +132,11 @@
                                         :height 21}
                            :handler    #(dispatch [:leave-group-chat])}
                           {:title      "Settings"
+                           :subtitle   "Not implemented"
                            :icon       :settings
                            :icon-style {:width  20
                                         :height 13}
-                           :handler    #(dispatch [:show-group-settings])}]
+                           :handler    (fn [])}]
                          [{:title      "Profile"
                            :custom-icon [menu-item-icon-profile]
                            :icon       :menu_group
@@ -147,13 +148,15 @@
                            :icon       :search_gray_copy
                            :icon-style {:width  17
                                         :height 17}
-                           :handler    nil}
+                           :handler    nil #_#(dispatch
+                                               [:show-remove-participants navigator])}
                           {:title      "Notifications and sounds"
                            :subtitle   "!not implemented"
                            :icon       :muted
                            :icon-style {:width  18
                                         :height 21}
-                           :handler    nil}
+                           :handler    nil #_#(dispatch [:leave-group-chat
+                                                         navigator])}
                           {:title      "Settings"
                            :subtitle   "!not implemented"
                            :icon       :settings
@@ -224,11 +227,12 @@
                 :dataSource            (to-datasource messages)}]))
 
 (defview chat []
-  [group-chat [:chat :group-chat]
+  [is-active [:chat :is-active]
+   group-chat [:chat :group-chat]
    show-actions-atom [:show-actions]]
   [view st/chat-view
    [chat-toolbar]
    [messages-view group-chat]
    (when group-chat [typing-all])
-   [chat-message-new]
+   (when is-active [chat-message-new])
    (when show-actions-atom [actions-view])])
