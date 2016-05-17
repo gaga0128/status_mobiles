@@ -9,11 +9,10 @@
                                        content-type-command]]
             [syng-im.utils.random :as random]
             [syng-im.components.react :as r]
-            [syng-im.chat.sign-up :as sign-up-service]
+            [syng-im.handlers.sign-up :as sign-up-service]
             [syng-im.models.chats :as chats]
             [syng-im.navigation.handlers :as nav]
-            [syng-im.models.chats :as c]
-            [syng-im.utils.handlers :as u]))
+            [syng-im.models.chats :as c]))
 
 (register-handler :set-show-actions
   (fn [db [_ show-actions]]
@@ -72,18 +71,17 @@
   ((enrich update-command) update-text))
 
 (register-handler :send-group-chat-msg
-  (u/side-effect!
-    (fn [_ [_ chat-id text]]
-      (let [{msg-id       :msg-id
-             {from :from} :msg} (api/send-group-user-msg {:group-id chat-id
-                                                          :content  text})
-            msg {:msg-id       msg-id
-                 :from         from
-                 :to           nil
-                 :content      text
-                 :content-type text-content-type
-                 :outgoing     true}]
-        (messages/save-message chat-id msg)))))
+  (fn [db [_ chat-id text]]
+    (let [{msg-id       :msg-id
+           {from :from} :msg} (api/send-group-user-msg {:group-id chat-id
+                                                        :content  text})
+          msg {:msg-id       msg-id
+               :from         from
+               :to           nil
+               :content      text
+               :content-type text-content-type
+               :outgoing     true}]
+      (messages/save-message chat-id msg))))
 
 (defn console? [s]
   (= "console" s))
@@ -238,6 +236,7 @@
   (fn [db [_ signed-up]]
     (sign-up-service/set-signed-up db signed-up)))
 
+
 (defn load-messages!
   ([db] (load-messages! db nil))
   ([db _]
@@ -290,9 +289,15 @@
       ((after store-message!))))
 
 (register-handler :group-received-msg
-  (u/side-effect!
-    (fn [_ [_ {chat-id :group-id :as msg}]]
-      (messages/save-message chat-id msg))))
+  (fn [db [_ {chat-id :group-id :as msg}]]
+    (messages/save-message chat-id msg)
+    db))
+
+(defn load-chat!
+  [{:keys [chats current-chat-id] :as db}]
+  (when-not (chats current-chat-id)
+    (c/create-chat {}))
+  db)
 
 (defmethod nav/preload-data! :chat
   [{:keys [current-chat-id] :as db} [_ _ id]]

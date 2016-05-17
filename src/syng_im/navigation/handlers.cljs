@@ -1,6 +1,5 @@
 (ns syng-im.navigation.handlers
-  (:require [re-frame.core :refer [register-handler dispatch debug enrich
-                                   after]]))
+  (:require [re-frame.core :refer [register-handler dispatch debug enrich]]))
 
 (defn push-view [db view-id]
   (-> db
@@ -58,7 +57,7 @@
     (push-view db :contact-list)))
 
 (defn clear-new-participants [db]
-  (assoc-in db :new-participants #{}))
+  (assoc db :new-participants #{}))
 
 (register-handler :show-remove-participants
   (fn [db _]
@@ -72,10 +71,14 @@
         (push-view :add-participants)
         clear-new-participants)))
 
-(defn show-profile
-  [db [_ identity]]
-  (-> db
-      (assoc :contact-identity identity)
-      (push-view :profile)))
+(register-handler :show-profile
+  (debug
+    (fn [db [_ identity]]
+      (let [db (assoc db :contact-identity identity)]
+        (dispatch [:navigate-to :profile])
+        db))))
 
-(register-handler :show-profile show-profile)
+(register-handler :show-my-profile
+  (fn [db _]
+    (dispatch [:navigate-to :my-profile])
+    db))

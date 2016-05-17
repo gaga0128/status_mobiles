@@ -46,15 +46,18 @@
         @username]]
       [view st/menu-items-container
        [menu-item {:name    "Profile"
-                   :handler #(dispatch [:navigate-to :my-profile])}]
+                   :handler (fn []
+                              (dispatch [:show-my-profile]))}]
        [menu-item {:name    "Settings"
                    :handler (fn []
                               ;; TODO not implemented
                               )}]
        [menu-item {:name    "Discovery"
-                   :handler #(dispatch [:navigate-to :discovery])}]
+                   :handler (fn []
+                              (dispatch [:navigate-to :discovery]))}]
        [menu-item {:name    "Contacts"
-                   :handler #(dispatch [:show-contacts navigator])}]
+                   :handler (fn []
+                              (dispatch [:show-contacts navigator]))}]
        [menu-item {:name    "Invite friends"
                    :handler (fn []
                               ;; TODO not implemented

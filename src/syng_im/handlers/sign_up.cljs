@@ -1,5 +1,4 @@
-(ns syng-im.chat.sign-up
-  ;syng-im.handlers.sign-up
+(ns syng-im.handlers.sign-up
   (:require [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [syng-im.persistence.simple-kv-store :as kv]
             [syng-im.protocol.state.storage :as s]
