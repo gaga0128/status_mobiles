@@ -24,20 +24,16 @@
   (r/sorted (r/get-all :contacts) :name :asc))
 
 (defn contacts-list-exclude [exclude-idents]
-  (if (empty? exclude-idents)
-    (contacts-list)
-    (let [query (exclude-query :whisper-identity exclude-idents)]
-      (-> (r/get-all :contacts)
-          (r/filtered query)
-          (r/sorted :name :asc)))))
+  (let [query (exclude-query :whisper-identity exclude-idents)]
+    (-> (r/get-all :contacts)
+        (r/filtered query)
+        (r/sorted :name :asc))))
 
 (defn contacts-list-include [include-indents]
-  (if (empty? include-indents)
-    ()
-    (let [query (include-query :whisper-identity include-indents)]
-      (-> (r/get-all :contacts)
-          (r/filtered query)
-          (r/sorted :name :asc)))))
+  (let [query (include-query :whisper-identity include-indents)]
+    (-> (r/get-all :contacts)
+        (r/filtered query)
+        (r/sorted :name :asc))))
 
 (defn contact-by-identity [identity]
   (r/single-cljs (r/get-by-field :contacts :whisper-identity identity)))
