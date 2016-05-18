@@ -2,8 +2,7 @@
 
 (def font "sans-serif")
 ;; (def font "Avenir-Roman")
-(def font-medium "sans-serif-medium")
-(def title-font font-medium)
+(def title-font "sans-serif-medium")
 
 (def color-blue "#7099e6")
 (def color-blue-transparent "#7099e632")

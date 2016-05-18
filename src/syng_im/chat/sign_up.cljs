@@ -6,8 +6,6 @@
             [syng-im.models.chats :as c]
             [syng-im.utils.utils :refer [log on-error http-post toast]]
             [syng-im.utils.random :as random]
-            [syng-im.utils.sms-listener :refer [add-sms-listener
-                                                remove-sms-listener]]
             [syng-im.utils.phone-number :refer [format-phone-number]]
             [syng-im.constants :refer [text-content-type
                                        content-type-command
@@ -39,22 +37,19 @@
   (dispatch [:set-signed-up true]))
 
 (defn sync-contacts []
-  ;; TODO 'on-sync-contacts' is never called
   (dispatch [:sync-contacts on-sync-contacts]))
 
 (defn on-send-code-response [body]
   (dispatch [:received-msg
              {:msg-id       (random/id)
-              :content      (:message body)
+              ;; todo replace by real check
+              :content      (if (= "1111" body)
+                              "Confirmed"
+                              "Wrong code")
               :content-type text-content-type
               :outgoing     false
               :from         "console"
-              :to           "me"}])
-  (when (:confirmed body)
-    (dispatch [:stop-listening-confirmation-code-sms])
-    (sync-contacts)
-    ;; TODO should be called after sync-contacts?
-    (dispatch [:set-signed-up true])))
+              :to           "me"}]))
 
 ; todo fn name is not too smart, but...
 (defn command-content
@@ -75,19 +70,6 @@
                 :outgoing     false
                 :from         "console"
                 :to           "me"}])))
-
-(defn handle-sms [{body :body}]
-  (when-let [matches (re-matches #"(\d{4})" body)]
-    (dispatch [:sign-up-confirm (second matches)])))
-
-(defn start-listening-confirmation-code-sms [db]
-  (when (not (:confirmation-code-sms-listener db))
-    (assoc db :confirmation-code-sms-listener (add-sms-listener handle-sms))))
-
-(defn stop-listening-confirmation-code-sms [db]
-  (when-let [listener (:confirmation-code-sms-listener db)]
-    (remove-sms-listener listener)
-    (dissoc db :confirmation-code-sms-listener)))
 
 ;; -- Saving password ----------------------------------------
 (defn save-password [password]

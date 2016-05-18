@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import com.github.ethereum.go_ethereum.cmd.Geth;
 import com.bitgo.randombytes.RandomBytesPackage;
-import com.centaurwarchief.smslistener.SmsListener;
 
 import java.util.Arrays;
 import java.util.List;
@@ -79,8 +78,7 @@ public class MainActivity extends ReactActivity {
                 new VectorIconsPackage(),
                 new ReactNativeContacts(),
                 new ReactNativeI18n(),
-                new RandomBytesPackage(),
-                new SmsListener(this)
+                new RandomBytesPackage()
         );
     }
 }
