@@ -1,6 +1,6 @@
  (ns ^:figwheel-no-load env.android.main
   (:require [reagent.core :as r]
-            [status-im.android.core :as core]
+            [syng-im.android.core :as core]
             [figwheel.client :as figwheel :include-macros true]))
 
  (enable-console-print!)
