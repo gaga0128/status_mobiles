@@ -1,5 +1,6 @@
 (ns syng-im.models.chats
   (:require [clojure.set :refer [difference]]
+            [re-frame.core :refer [dispatch]]
             [syng-im.persistence.realm :as r]
             [syng-im.utils.random :as random :refer [timestamp]]
             [clojure.string :refer [join blank?]]
@@ -43,8 +44,7 @@
    (let [chat (assoc chat :last-msg-id (or last-msg-id ""))]
      (r/write #(r/create :chats chat))))
   ([db chat-id identities group-chat? chat-name]
-   (if (chat-exists? chat-id)
-     db
+   (when-not (chat-exists? chat-id)
      (let [chat-name (or chat-name
                          (get-chat-name chat-id identities))
            _         (log/debug "creating chat" chat-name)]
@@ -59,8 +59,7 @@
                                :timestamp   (timestamp)
                                :contacts    contacts
                                :last-msg-id ""}))))
-       (add-status-message chat-id)
-       db))))
+       (add-status-message chat-id)))))
 
 (defn chat-contacts [chat-id]
   (-> (r/get-by-field :chats :chat-id chat-id)
@@ -113,8 +112,11 @@
           (if-let [contact-exists (.find contacts (fn [object index collection]
                                                     (= contact-identity (aget object "identity"))))]
             (aset contact-exists "is-in-chat" true)
-            (.push contacts (clj->js {:identity contact-identity}))))))))
+            (.push contacts (clj->js {:identity contact-identity})))))))
+  ;; TODO temp. Update chat in db atom
+  (dispatch [:initialize-chats]))
 
+;; TODO deprecated? (is there need to remove multiple member at once?)
 (defn chat-remove-participants [chat-id identities]
   (r/write
     (fn []
@@ -130,7 +132,6 @@
                             "group-chat = true && is-active = true")]
     (js->clj (.map results (fn [object _ _]
                              (aget object "chat-id"))))))
-
 
 (defn set-chat-active [chat-id active?]
   (r/write (fn []
