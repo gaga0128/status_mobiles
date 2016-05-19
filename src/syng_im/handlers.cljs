@@ -2,7 +2,6 @@
   (:require
     [re-frame.core :refer [register-handler after dispatch debug enrich]]
     [schema.core :as s :include-macros true]
-    [syng-im.persistence.realm :as r]
     [syng-im.db :refer [app-db schema]]
     [syng-im.persistence.simple-kv-store :as kv]
     [syng-im.protocol.state.storage :as storage]
@@ -12,9 +11,7 @@
     [syng-im.models.protocol :refer [update-identity
                                      set-initialized]]
     [syng-im.models.contacts :as contacts]
-    [syng-im.models.messages :refer [save-message
-                                     update-message!
-                                     clear-history]]
+    [syng-im.models.messages :refer [save-message update-message!]]
     [syng-im.models.commands :refer [set-commands]]
     [syng-im.handlers.server :as server]
     [syng-im.chat.suggestions :refer [load-commands]]
@@ -34,13 +31,10 @@
                                 nav-pop]]
     [syng-im.utils.crypt :refer [gen-random-bytes]]
     [syng-im.utils.random :as random]
-    [syng-im.utils.handlers :as u]
     syng-im.chat.handlers
-    [syng-im.group-settings.handlers :refer [delete-chat]]
-    syng-im.navigation.handlers
+    [syng-im.navigation.handlers :as nav]
     syng-im.discovery.handlers
-    syng-im.contacts.handlers
-    syng-im.new-group.handlers))
+    syng-im.contacts.handlers))
 
 ;; -- Middleware ------------------------------------------------------------
 ;;
@@ -63,37 +57,45 @@
     (fn [db [_ k v]]
       (assoc db k v))))
 
+(defn preload-data!
+  [{:keys [view-id] :as db} _]
+  (nav/preload-data! db [nil view-id]))
+
 (register-handler :initialize-db
   (fn [_ _]
     (assoc app-db
       :signed-up (storage/get kv/kv-store :signed-up))))
 
+(register-handler :set-loading
+  (fn [db [_ value]]
+    (assoc db :loading value)))
+
 (register-handler :initialize-crypt
-  (u/side-effect!
-    (fn [_ _]
-      (log/debug "initializing crypt")
-      (gen-random-bytes 1024 (fn [{:keys [error buffer]}]
-                               (if error
-                                 (do
-                                   (log/error "Failed to generate random bytes to initialize sjcl crypto")
-                                   (dispatch [:notify-user {:type  :error
-                                                            :error error}]))
-                                 (do
-                                   (->> (.toString buffer "hex")
-                                        (.toBits (.. js/ecc -sjcl -codec -hex))
-                                        (.addEntropy (.. js/ecc -sjcl -random)))
-                                   (dispatch [:crypt-initialized]))))))))
+  (fn [db _]
+    (log/debug "initializing crypt")
+    (gen-random-bytes 1024 (fn [{:keys [error buffer]}]
+                             (if error
+                               (do
+                                 (log/error "Failed to generate random bytes to initialize sjcl crypto")
+                                 (dispatch [:notify-user {:type  :error
+                                                          :error error}]))
+                               (do
+                                 (->> (.toString buffer "hex")
+                                      (.toBits (.. js/ecc -sjcl -codec -hex))
+                                      (.addEntropy (.. js/ecc -sjcl -random)))
+                                 (dispatch [:crypt-initialized])))))
+    db))
 
 (register-handler :crypt-initialized
-  (u/side-effect!
-    (fn [_ _]
-      (log/debug "crypt initialized"))))
+  (fn [db _]
+    (log/debug "crypt initialized")
+    db))
 
 (register-handler :load-commands
-  (u/side-effect!
-    (fn [_ [action]]
-      (log/debug action)
-      (load-commands))))
+  (fn [db [action]]
+    (log/debug action)
+    (load-commands)
+    db))
 
 (register-handler :set-commands
   (fn [db [action commands]]
@@ -103,9 +105,9 @@
 ;; -- Protocol --------------------------------------------------------------
 
 (register-handler :initialize-protocol
-  (u/side-effect!
-    (fn [db [_]]
-      (init-protocol (make-handler db)))))
+  (fn [db [_]]
+    (init-protocol (make-handler db))
+    db))
 
 (register-handler :protocol-initialized
   (fn [db [_ identity]]
@@ -168,62 +170,53 @@
                          :content-type text-content-type}))
 
 (register-handler :group-chat-invite-acked
-  (u/side-effect!
-    (fn [_ [action from group-id ack-msg-id]]
-      (log/debug action from group-id ack-msg-id)
-      (joined-chat-msg group-id from ack-msg-id))))
+  (fn [db [action from group-id ack-msg-id]]
+    (log/debug action from group-id ack-msg-id)
+    (joined-chat-msg group-id from ack-msg-id)))
 
 (register-handler :participant-removed-from-group
-  (u/side-effect!
-    (fn [_ [action from group-id identity msg-id]]
-      (log/debug action msg-id from group-id identity)
-      (chat-remove-participants group-id [identity])
-      (participant-removed-from-group-msg group-id identity from msg-id))))
+  (fn [db [action from group-id identity msg-id]]
+    (log/debug action msg-id from group-id identity)
+    (chat-remove-participants group-id [identity])
+    (participant-removed-from-group-msg group-id identity from msg-id)))
 
 (register-handler :you-removed-from-group
-  (u/side-effect!
-    (fn [_ [action from group-id msg-id]]
-      (log/debug action msg-id from group-id)
-      (you-removed-from-group-msg group-id from msg-id)
-      (set-chat-active group-id false))))
+  (fn [db [action from group-id msg-id]]
+    (log/debug action msg-id from group-id)
+    (you-removed-from-group-msg group-id from msg-id)
+    (set-chat-active group-id false)))
 
 (register-handler :participant-left-group
-  (u/side-effect!
-    (fn [_ [action from group-id msg-id]]
-      (log/debug action msg-id from group-id)
-      (when-not (= (api/my-identity) from)
-        (participant-left-group-msg group-id from msg-id)))))
+  (fn [db [action from group-id msg-id]]
+    (log/debug action msg-id from group-id)
+    (if (= (api/my-identity) from)
+      db
+      (participant-left-group-msg group-id from msg-id))))
 
 (register-handler :participant-invited-to-group
-  (u/side-effect!
-    (fn [_ [action from group-id identity msg-id]]
-      (log/debug action msg-id from group-id identity)
-      (participant-invited-to-group-msg group-id identity from msg-id))))
+  (fn [db [action from group-id identity msg-id]]
+    (log/debug action msg-id from group-id identity)
+    (participant-invited-to-group-msg group-id identity from msg-id)))
 
 (register-handler :acked-msg
-  (u/side-effect!
-    (fn [_ [action from msg-id]]
-      (log/debug action from msg-id)
-      (update-message! {:msg-id          msg-id
-                        :delivery-status :delivered}))))
+  (fn [db [action from msg-id]]
+    (log/debug action from msg-id)
+    (update-message! {:msg-id          msg-id
+                      :delivery-status :delivered})))
 
 (register-handler :msg-delivery-failed
-  (u/side-effect!
-    (fn [_ [action msg-id]]
-      (log/debug action msg-id)
-      (update-message! {:msg-id          msg-id
-                        :delivery-status :failed}))))
+  (fn [db [action msg-id]]
+    (log/debug action msg-id)
+    (update-message! {:msg-id          msg-id
+                      :delivery-status :failed})))
 
 (register-handler :leave-group-chat
-  (u/side-effect!
-    (fn [db [action]]
-      (log/debug action)
-      (let [chat-id (:current-chat-id db)]
-        (api/leave-group-chat chat-id)
-        (set-chat-active chat-id false)
-        (left-chat-msg chat-id)
-        (delete-chat chat-id)
-        (dispatch [:navigate-back])))))
+  (fn [db [action navigator]]
+    (log/debug action)
+    (let [chat-id (:current-chat-id db)]
+      (api/leave-group-chat chat-id)
+      (set-chat-active chat-id false)
+      (left-chat-msg chat-id))))
 
 ;; -- User data --------------------------------------------------------------
 (register-handler :load-user-phone-number
@@ -260,32 +253,33 @@
     (let [identities (vec (:new-participants db))
           chat-id    (:current-chat-id db)]
       (chat-add-participants chat-id identities)
-      (dispatch [:navigate-back])
+      (nav-pop navigator)
       (doseq [ident identities]
         (api/group-add-participant chat-id ident))
       db)))
 
-(defn chat-remove-member [db]
-  (let [chat     (get-in db [:chats (:current-chat-id db)])
-        identity (:group-settings-selected-member db)]
-    (r/write
-     (fn []
-       (r/create :chats
-                 (update chat :contacts
-                         (fn [members]
-                           (filter #(not= (:identity %) identity) members)))
-                 true)))
-    ;; TODO temp. Update chat in db atom
-    (dispatch [:initialize-chats])
-    db))
+(defn update-new-group-selection [db identity add?]
+  (update-in db :new-group (fn [new-group]
+                             (if add?
+                               (conj new-group identity)
+                               (disj new-group identity)))))
 
-(register-handler :chat-remove-member
-  (fn [db [action]]
-    (let [chat-id  (:current-chat-id db)
-          identity (:group-settings-selected-member db)
-          db       (chat-remove-member db)]
-      (dispatch [:select-group-chat-member nil])
-      ;; TODO fix and uncomment
-      (api/group-remove-participant chat-id identity)
-      (removed-participant-msg chat-id identity)
+(register-handler :select-for-new-group
+  (fn [db [_ identity add?]]
+    (update-new-group-selection db identity add?)))
+
+(register-handler :create-new-group
+  (fn [db [action group-name]]
+    (log/debug action)
+    (let [identities (vec (:new-group db))
+          group-id   (api/start-group-chat identities group-name)
+          db         (create-chat db group-id identities true group-name)]
+      (dispatch [:show-chat group-id :replace])
       db)))
+
+(register-handler :group-chat-invite-received
+  (fn [db [action from group-id identities group-name]]
+    (log/debug action from group-id identities)
+    (if (chat-exists? group-id)
+      (re-join-group-chat db group-id identities group-name)
+      (create-chat db group-id identities true group-name))))

@@ -8,9 +8,11 @@
             [syng-im.constants :refer [text-content-type
                                        content-type-command]]
             [syng-im.utils.random :as random]
+            [syng-im.components.react :as r]
             [syng-im.chat.sign-up :as sign-up-service]
             [syng-im.models.chats :as chats]
             [syng-im.navigation.handlers :as nav]
+            [syng-im.models.chats :as c]
             [syng-im.utils.handlers :as u]))
 
 (register-handler :set-show-actions
@@ -68,6 +70,20 @@
 
 (register-handler :set-chat-input-text
   ((enrich update-command) update-text))
+
+(register-handler :send-group-chat-msg
+  (u/side-effect!
+    (fn [_ [_ chat-id text]]
+      (let [{msg-id       :msg-id
+             {from :from} :msg} (api/send-group-user-msg {:group-id chat-id
+                                                          :content  text})
+            msg {:msg-id       msg-id
+                 :from         from
+                 :to           nil
+                 :content      text
+                 :content-type text-content-type
+                 :outgoing     true}]
+        (messages/save-message chat-id msg)))))
 
 (defn console? [s]
   (= "console" s))
@@ -153,15 +169,10 @@
   (assoc-in db [:chats current-chat-id :staged-commands] []))
 
 (defn send-message!
-  [{:keys [new-message current-chat-id] :as db} _]
+  [{:keys [new-message current-chat-id]} _]
   (when (and new-message (not-console? current-chat-id))
-    (let [{:keys [group-chat]} (get-in db [:chats current-chat-id])
-          content (:content new-message)]
-      (if group-chat
-        (api/send-group-user-msg {:group-id current-chat-id
-                                  :content  content})
-        (api/send-user-msg {:to      current-chat-id
-                            :content content})))))
+    (api/send-user-msg {:to      current-chat-id
+                        :content (:content new-message)})))
 
 (defn save-message-to-realm!
   [{:keys [new-message current-chat-id]} _]
@@ -187,6 +198,7 @@
       ((enrich add-commands))
       ((enrich clear-input))
       ((enrich clear-staged-commands))
+      ((after (fn [_ _] (r/dismiss-keyboard!))))
       ((after send-message!))
       ((after save-message-to-realm!))
       ((after save-commands-to-realm!))
@@ -194,7 +206,8 @@
 
 (register-handler :unstage-command
   (fn [db [_ staged-command]]
-    (commands/unstage-command db staged-command)))
+    (let []
+      (commands/unstage-command db staged-command))))
 
 (register-handler :set-chat-command
   (fn [db [_ command-key]]
@@ -296,7 +309,11 @@
               :group-chat false
               :is-active  true
               :timestamp  (.getTime (js/Date.))
-              :contacts   [{:identity contcat-id}]}]
+              ;; todo how to choose color?
+              ;; todo do we need to have some color for not group chat?
+              :contacts   [{:identity         contcat-id
+                            :text-color       :#FFFFFF
+                            :background-color :#AB7967}]}]
     (assoc db :new-chat chat)))
 
 (defn add-chat [{:keys [new-chat] :as db} [_ chat-id]]
@@ -316,7 +333,8 @@
   (-> prepare-chat
       ((enrich add-chat))
       ((after save-chat!))
-      ((after open-chat!))))
+      ((after open-chat!))
+      debug))
 
 (register-handler :switch-command-suggestions
   (fn [db [_]]
