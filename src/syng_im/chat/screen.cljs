@@ -32,13 +32,19 @@
       (assoc msg :text-color text-color
                  :background-color background-color))))
 
-(defn chat-photo [{:keys [photo-path]}]
-  [view {:margin       10
-         :borderRadius 50}
-   [image {:source (if (s/blank? photo-path)
-                     res/user-no-photo
-                     {:uri photo-path})
-           :style  st/chat-photo}]])
+(defview default-chat-icon []
+  [name  [:chat :name]
+   color [:chat :color]]
+  [view (st/default-chat-icon color)
+   [text {:style st/default-chat-icon-text} (nth name 0)]])
+
+(defview chat-photo []
+  [photo-path [:chat-photo]]
+  (if photo-path
+    [view st/contact-photo-container
+     [image {:source {:uri photo-path}
+             :style  st/chat-photo}]]
+    [default-chat-icon]))
 
 (defn contact-online [{:keys [online]}]
   (when online
@@ -132,11 +138,10 @@
                                         :height 21}
                            :handler    #(dispatch [:leave-group-chat])}
                           {:title      "Settings"
-                           :subtitle   "Not implemented"
                            :icon       :settings
                            :icon-style {:width  20
                                         :height 13}
-                           :handler    (fn [])}]
+                           :handler    #(dispatch [:show-group-settings])}]
                          [{:title      "Profile"
                            :custom-icon [menu-item-icon-profile]
                            :icon       :menu_group
@@ -148,15 +153,13 @@
                            :icon       :search_gray_copy
                            :icon-style {:width  17
                                         :height 17}
-                           :handler    nil #_#(dispatch
-                                               [:show-remove-participants navigator])}
+                           :handler    nil}
                           {:title      "Notifications and sounds"
                            :subtitle   "!not implemented"
                            :icon       :muted
                            :icon-style {:width  18
                                         :height 21}
-                           :handler    nil #_#(dispatch [:leave-group-chat
-                                                         navigator])}
+                           :handler    nil}
                           {:title      "Settings"
                            :subtitle   "!not implemented"
                            :icon       :settings
@@ -227,12 +230,11 @@
                 :dataSource            (to-datasource messages)}]))
 
 (defview chat []
-  [is-active [:chat :is-active]
-   group-chat [:chat :group-chat]
+  [group-chat [:chat :group-chat]
    show-actions-atom [:show-actions]]
   [view st/chat-view
    [chat-toolbar]
    [messages-view group-chat]
    (when group-chat [typing-all])
-   (when is-active [chat-message-new])
+   [chat-message-new]
    (when show-actions-atom [actions-view])])

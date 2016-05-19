@@ -9,7 +9,6 @@
             [syng-im.contacts.views.contact :refer [contact-view]]
             [syng-im.components.styles :refer [toolbar-background2]]
             [syng-im.components.toolbar :refer [toolbar]]
-            [syng-im.components.main-tabs :refer [main-tabs]]
             [syng-im.contacts.styles :as st]
             [syng-im.utils.listview :as lw]))
 
@@ -33,5 +32,4 @@
      [list-view {:dataSource          (lw/to-datasource contacts)
                  :enableEmptySections true
                  :renderRow           render-row
-                 :style               st/contacts-list}])
-   [main-tabs]])
+                 :style               st/contacts-list}])])
