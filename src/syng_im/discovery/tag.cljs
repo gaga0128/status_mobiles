@@ -17,8 +17,7 @@
 
 (defn title-content [tag]
   [view st/tag-title-container
-   [view {:style st/tag-container}
-    [text {:style st/tag-title} (str " #" tag)]]])
+   [text {:style st/tag-title} (str " #" tag)]])
 
 (defn discovery-tag []
   (let [tag         (subscribe [:get :current-tag])
@@ -32,7 +31,7 @@
                                           :style  st/icon-back}
                                 :handler #(dispatch [:navigate-back])}
                    :title      "Add Participants"
-                   :custom-content    (title-content @tag)
+                   :content    (title-content @tag)
                    :action     {:image   {:source {:uri :icon_search}
                                           :style  st/icon-search}
                                 :handler (fn [])}}]
