@@ -23,7 +23,6 @@
                                    :style  st/hamburger-icon}
                          :handler open-drawer}
             :title      "Chats"
-            ;; TODO implement search
             :action     {:image   {:source {:uri :icon_search}
                                    :style  st/search-icon}
                          :handler (fn [])}}])

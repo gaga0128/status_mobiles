@@ -11,10 +11,7 @@
             [status-im.chat.sign-up :as sign-up-service]
             [status-im.models.chats :as chats]
             [status-im.navigation.handlers :as nav]
-            [status-im.utils.handlers :as u]
-            [status-im.handlers.server :as server]
-            [status-im.utils.phone-number :refer [format-phone-number]]
-            [status-im.utils.datetime :as time]))
+            [status-im.utils.handlers :as u]))
 
 (register-handler :set-show-actions
   (fn [db [_ show-actions]]
@@ -100,14 +97,13 @@
         {:keys [command]} (suggestions/check-suggestion db (str text " "))
         message (check-author-direction
                   db current-chat-id
-                  {:msg-id          (random/id)
-                   :chat-id         current-chat-id
-                   :content         text
-                   :to              current-chat-id
-                   :from            identity
-                   :content-type    text-content-type
-                   :outgoing        true
-                   :timestamp       (time/now-ms)})]
+                  {:msg-id       (random/id)
+                   :chat-id      current-chat-id
+                   :content      text
+                   :to           current-chat-id
+                   :from         identity
+                   :content-type text-content-type
+                   :outgoing     true})]
     (if command
       (commands/set-chat-command db command)
       (assoc db :new-message (when-not (str/blank? text) message)))))
@@ -215,22 +211,15 @@
     (assoc db :password-saved true)))
 
 (register-handler :sign-up
-  (fn [db [_ phone-number]]
-    ;; todo save phone number to db
-    (let [formatted (format-phone-number phone-number)]
-      (-> db
-          (assoc :user-phone-number formatted)
-          sign-up-service/start-listening-confirmation-code-sms
-          (server/sign-up formatted sign-up-service/on-sign-up-response)))))
-
-(register-handler :stop-listening-confirmation-code-sms
-  (fn [db [_]]
-    (sign-up-service/stop-listening-confirmation-code-sms db)))
+  (-> (fn [db [_ phone-number]]
+        ;; todo save phone number to db
+        (assoc db :user-phone-number phone-number))
+      ((after (fn [& _] (sign-up-service/on-sign-up-response))))))
 
 (register-handler :sign-up-confirm
   (fn [db [_ confirmation-code]]
-    (server/sign-up-confirm confirmation-code sign-up-service/on-send-code-response)
-    db))
+    (sign-up-service/on-send-code-response confirmation-code)
+    (sign-up-service/set-signed-up db true)))
 
 (register-handler :set-signed-up
   (fn [db [_ signed-up]]

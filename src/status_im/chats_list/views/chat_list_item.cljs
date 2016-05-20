@@ -11,7 +11,10 @@
 (defn chat-list-item [{:keys [chat-id] :as chat}]
   [touchable-highlight
    {:on-press #(dispatch [:show-chat chat-id :push])}
+   ;; TODO add [photo-path delivery-status new-messages-count online] values to chat-obj
    [view [chat-list-item-inner-view (merge chat
-                                           ;; TODO stub data
-                                           {:new-messages-count 3
+                                           {:photo-path         nil
+                                            :delivery-status    :seen
+                                            :new-messages-count 3
+                                            :timestamp          "13:54"
                                             :online             true})]]])

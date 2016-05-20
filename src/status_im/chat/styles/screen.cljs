@@ -20,12 +20,6 @@
    :backgroundColor toolbar-background1
    :elevation       2})
 
-(def action
-  {:width          56
-   :height         56
-   :alignItems     :center
-   :justifyContent :center})
-
 (def icon-view
   {:width  56
    :height 56})
@@ -54,8 +48,10 @@
    :height    9})
 
 (def up-icon
-  {:width  14
-   :height 8})
+  {:marginTop  23
+   :marginLeft 21
+   :width      14
+   :height     8})
 
 (def members
   {:marginTop  -0.5
@@ -112,6 +108,28 @@
    :fontSize   12
    :fontFamily font})
 
+(def online-view
+  {:position        :absolute
+   :top             30
+   :left            30
+   :width           20
+   :height          20
+   :borderRadius    50
+   :backgroundColor online-color
+   :borderWidth     2
+   :borderColor     color-white})
+
+(def online-dot
+  {:position        :absolute
+   :top             6
+   :width           4
+   :height          4
+   :borderRadius    50
+   :backgroundColor color-white})
+
+(def online-dot-left (merge online-dot {:left 3}))
+(def online-dot-right (merge online-dot {:left 9}))
+
 (def typing-all
   {:marginBottom 20})
 
@@ -135,6 +153,11 @@
    :fontFamily font
    :color      text2-color})
 
+(def chat-photo
+  {:borderRadius 50
+   :width        36
+   :height       36})
+
 (def actions-overlay
   {:position :absolute
    :top      0
@@ -144,3 +167,34 @@
 
 (def overlay-highlight
   {:flex 1})
+
+;;----- Menu item Profile ----------------
+
+(def menu-item-profile-contact-photo
+  {:marginTop    13
+   :marginLeft   16
+   :borderRadius 50
+   :width        24
+   :height       24})
+
+(def menu-item-profile-online-view
+  {:position        :absolute
+   :top             26
+   :left            29
+   :width           15
+   :height          15
+   :borderRadius    50
+   :backgroundColor online-color
+   :borderWidth     2
+   :borderColor     color-white})
+
+(def menu-item-profile-online-dot
+  {:position        :absolute
+   :top             4
+   :width           3
+   :height          3
+   :borderRadius    50
+   :backgroundColor color-white})
+
+(def menu-item-profile-online-dot-left (merge menu-item-profile-online-dot {:left 1.7}))
+(def menu-item-profile-online-dot-right (merge menu-item-profile-online-dot {:left 6.3}))
