@@ -1,5 +1,4 @@
 (ns status-im.participants.views.contact
-  (:require-macros [status-im.utils.views :refer [defview]])
   (:require [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [status-im.components.react :refer [view]]
             [status-im.contacts.views.contact-inner :refer [contact-inner-view]]
@@ -7,17 +6,14 @@
             [reagent.core :as r]
             [status-im.participants.styles :as st]))
 
-;; todo duplication
-(defn on-toggle [whisper-identity]
-  (fn [checked?]
-    (let [action (if checked? :select-participant :deselect-participant)]
-      (dispatch [action whisper-identity]))))
-
-(defview participant-contact
-  [{:keys [whisper-identity] :as contact}]
-  [checked [:is-participant-selected? whisper-identity]]
-  [view st/participant-container
-   [item-checkbox {:onToggle (on-toggle whisper-identity)
-                   :checked  checked
-                   :size     30}]
-   [contact-inner-view contact]])
+(defn participant-contact [{:keys [whisper-identity] :as contact}]
+  ;; todo must be moved to handlers
+  (let [checked (r/atom false)]
+    (fn [{:keys [whisper-identity] :as contact}]
+      [view st/participant-container
+       [item-checkbox {:onToggle (fn [checked?]
+                                   (reset! checked checked?)
+                                   (dispatch [:select-new-participant whisper-identity checked?]))
+                       :checked  @checked
+                       :size     30}]
+       [contact-inner-view contact]])))

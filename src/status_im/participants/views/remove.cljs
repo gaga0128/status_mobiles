@@ -1,5 +1,4 @@
 (ns status-im.participants.views.remove
-  (:require-macros [status-im.utils.views :refer [defview]])
   (:require [re-frame.core :refer [subscribe dispatch]]
             [status-im.resources :as res]
             [status-im.components.react :refer [view text-input text image
@@ -14,20 +13,21 @@
 
 (defn remove-participants-toolbar []
   [toolbar
-   {:title  "Remove Participants"
-    :action {:handler #(do (dispatch [:remove-participants])
-                           (dispatch [:navigate-back]))
-             :image   {:source res/trash-icon            ;; {:uri "icon_search"}
-                       :style  st/remove-participants-image}}}])
+   {:title     "Remove Participants"
+    :action    {:handler #(dispatch [:remove-selected-participants])
+                :image   {:source res/trash-icon            ;; {:uri "icon_search"}
+                          :style  st/remove-participants-image}}}])
 
 (defn remove-participants-row
   [row _ _]
   (r/as-element [participant-contact row]))
 
-(defview remove-participants []
-  [contacts [:current-chat-contacts]]
-  [view st/participants-container
-   [remove-participants-toolbar]
-   [list-view {:dataSource (to-datasource contacts)
-               :renderRow  remove-participants-row
-               :style      st/participants-list}]])
+(defn remove-participants []
+  (let [contacts (subscribe [:current-chat-contacts])]
+    (fn []
+      (let [contacts-ds (to-datasource @contacts)]
+        [view st/participants-container
+         [remove-participants-toolbar]
+         [list-view {:dataSource contacts-ds
+                     :renderRow  remove-participants-row
+                     :style      st/participants-list}]]))))

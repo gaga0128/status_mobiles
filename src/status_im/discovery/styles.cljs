@@ -46,7 +46,7 @@
 
 (def discovery-toolbar
   {:backgroundColor "#eef2f5"
-   :elevation 0})
+   :elevation       0})
 
 (def discovery-subtitle
   {:color      "#8f838c93"
@@ -80,10 +80,10 @@
    :justifyContent :center})
 
 (def tag-name-container
-  {:flexDirection "column"
+  {:flexDirection   "column"
    :backgroundColor "#eef2f5"
-   :borderRadius 5
-   :padding 4})
+   :borderRadius    5
+   :padding         4})
 
 (def tag-count
   {:color "#838c93"
@@ -95,11 +95,11 @@
    :justifyContent :center})
 
 (def tag-count-container
-  {:flex 0.2
+  {:flex          0.2
    :flexDirection "column"
-   :alignItems "flex-end"
-   :paddingTop 10
-   :paddingRight 9})
+   :alignItems    "flex-end"
+   :paddingTop    10
+   :paddingRight  9})
 
 (def popular-list-container
   {:flex 1
@@ -119,32 +119,32 @@
    :paddingBottom 10})
 
 (def popular-list-item-status
-  {:color "black"
+  {:color      "black"
    :fontFamily "sans-serif"
    :lineHeight 22
-   :fontSize 14})
+   :fontSize   14})
 
 (def popular-list-item-name
-  {:color "black"
+  {:color      "black"
    :fontFamily "sans-serif-medium"
-   :fontSize 14
+   :fontSize   14
    :lineHeight 24})
 
 (def popular-list-item-name-container
-  {:flex 0.8
+  {:flex          0.8
    :flexDirection "column"})
 
 (def popular-list-item-avatar-container
-  {:flex 0.2
+  {:flex          0.2
    :flexDirection "column"
    :alignItems :center
    :paddingTop 5})
 
 (def popular-list-item-avatar
-  {:resizeMode "contain"
+  {:resizeMode   "contain"
    :borderRadius 150
-   :width 40
-   :height 40})
+   :width        40
+   :height       40})
 
 ;; discovery_recent
 
@@ -158,22 +158,27 @@
   {:flex            1
    :backgroundColor "#eef2f5"})
 
+(def tag-title-container
+  {:flex 1
+   :alignItems "center"
+   :justifyContent "center"})
+
 (def tag-title
-  {:color "#7099e6"
-   :fontFamily "sans-serif-medium"
-   :fontSize   14
-   :paddingRight 5
+  {:color         "#7099e6"
+   :fontFamily    "sans-serif-medium"
+   :fontSize      14
+   :paddingRight  5
    :paddingBottom 2})
 
-(def tag-title-container
+(def tag-container
   {:backgroundColor "#eef2f5"
-   :flexWrap :wrap
-   :borderRadius 5
-   :padding 4})
+   :flexWrap        :wrap
+   :borderRadius    5
+   :padding         4})
 
 (def icon-back
-  {:width      8
-   :height     14})
+  {:width  8
+   :height 14})
 
 (def icon-search
   {:width  17

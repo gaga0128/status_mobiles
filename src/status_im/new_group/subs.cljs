@@ -1,7 +1,9 @@
 (ns status-im.new-group.subs
   (:require-macros [reagent.ratom :refer [reaction]])
-  (:require [re-frame.core :refer [register-sub]]
-            [status-im.utils.subs :as u]))
+  (:require [re-frame.core :refer [register-sub]]))
 
 (register-sub :is-contact-selected?
-  (u/contains-sub :selected-contacts))
+  (fn [db [_ id]]
+    (-> (:selected-contacts @db)
+        (contains? id)
+        (reaction))))

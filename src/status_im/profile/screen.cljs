@@ -32,7 +32,7 @@
 
 (defn message-user [identity]
   (when identity
-    (dispatch [:navigate-to :chat identity])))
+    (dispatch [:show-chat identity :push])))
 
 (defview profile []
   [{:keys [name whisper-identity phone-number]} [:contact]]
