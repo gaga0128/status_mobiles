@@ -1,7 +1,6 @@
 (ns status-im.new-group.handlers
   (:require [status-im.protocol.api :as api]
             [re-frame.core :refer [register-handler after dispatch debug enrich]]
-            [status-im.components.styles :refer [default-chat-color]]
             [status-im.models.chats :as chats]
             [clojure.string :as s]))
 
@@ -38,7 +37,6 @@
                     (group-name-from-contacts db))]
     (assoc db :new-chat {:chat-id        new-group-id
                          :name           chat-name
-                         :color          default-chat-color
                          :group-chat     true
                          :is-active      true
                          :timestamp      (.getTime (js/Date.))

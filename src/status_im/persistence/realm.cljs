@@ -1,6 +1,5 @@
 (ns status-im.persistence.realm
   (:require [cljs.reader :refer [read-string]]
-            [status-im.components.styles :refer [default-chat-color]]
             [status-im.utils.logging :as log]
             [status-im.utils.types :refer [to-string]])
   (:refer-clojure :exclude [exists?]))
@@ -45,7 +44,7 @@
                      :properties {:chat-id     "string"
                                   :name        "string"
                                   :color       {:type    "string"
-                                                :default default-chat-color}
+                                                :default "#a187d5"}
                                   :group-chat  {:type    "bool"
                                                 :indexed true}
                                   :is-active   "bool"

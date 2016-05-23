@@ -1,31 +1,27 @@
 (ns status-im.chats-list.screen
   (:require [re-frame.core :refer [subscribe dispatch]]
             [status-im.components.react :refer [list-view
-                                              list-item
-                                              view
-                                              text
-                                              image
-                                              touchable-highlight]]
+                                                list-item
+                                                view
+                                                text
+                                                image
+                                                touchable-highlight]]
             [status-im.utils.listview :refer [to-datasource]]
             [reagent.core :as r]
             [status-im.chats-list.views.chat-list-item :refer [chat-list-item]]
             [status-im.components.action-button :refer [action-button
                                                         action-button-item]]
             [status-im.components.drawer.view :refer [drawer-view open-drawer]]
-            [status-im.components.styles :refer [color-blue
-                                                 toolbar-background2]]
+            [status-im.components.styles :refer [color-blue]]
             [status-im.components.toolbar :refer [toolbar]]
             [status-im.components.icons.ionicons :refer [icon]]
             [status-im.chats-list.styles :as st]))
-
 
 (defn chats-list-toolbar []
   [toolbar {:nav-action {:image   {:source {:uri :icon_hamburger}
                                    :style  st/hamburger-icon}
                          :handler open-drawer}
             :title      "Chats"
-            :background-color toolbar-background2
-            ;; TODO implement search
             :action     {:image   {:source {:uri :icon_search}
                                    :style  st/search-icon}
                          :handler (fn [])}}])
@@ -40,7 +36,9 @@
                     :renderRow  (fn [row _ _]
                                   (list-item [chat-list-item row]))
                     :style      st/list-container}]
-        [action-button {:buttonColor color-blue}
+        [action-button {:buttonColor color-blue
+                        :offsetY     16
+                        :offsetX     16}
          [action-button-item
           {:title       "New Chat"
            :buttonColor :#9b59b6

@@ -2,10 +2,10 @@
   (:require-macros [status-im.utils.views :refer [defview]])
   (:require [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [status-im.components.react :refer [view text
-                                              image
-                                              touchable-highlight
-                                              list-view
-                                              list-item]]
+                                                image
+                                                touchable-highlight
+                                                list-view
+                                                list-item]]
             [status-im.contacts.views.contact :refer [contact-view]]
             [status-im.components.styles :refer [toolbar-background2]]
             [status-im.components.toolbar :refer [toolbar]]
