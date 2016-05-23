@@ -6,41 +6,7 @@
                                                online-color
                                                text1-color
                                                text2-color
-                                               new-messages-count-color]]
-            [status-im.components.tabs.styles :refer [tab-height]]))
-
-(def contact-photo-container
-  {:borderRadius 50})
-
-(def contact-photo-image
-  {:borderRadius 50
-   :width        40
-   :height       40})
-
-(def online-container
-  {:position        :absolute
-   :top             24
-   :left            24
-   :width           20
-   :height          20
-   :borderRadius    50
-   :backgroundColor online-color
-   :borderWidth     2
-   :borderColor     color-white})
-
-(def online-dot
-  {:position        :absolute
-   :top             6
-   :width           4
-   :height          4
-   :borderRadius    50
-   :backgroundColor color-white})
-
-(def online-dot-left
-  (assoc online-dot :left 3))
-
-(def online-dot-right
-  (assoc online-dot :left 9))
+                                               new-messages-count-color]]))
 
 (def chat-container
   {:flexDirection     :row
@@ -48,10 +14,11 @@
    :paddingHorizontal 16
    :height            90})
 
-(def photo-container
-  {:marginTop 2
-   :width     44
-   :height    44})
+(def chat-icon-container
+  {:marginTop  -2
+   :marginLeft -4
+   :width      48
+   :height     48})
 
 (def item-container
   {:flexDirection :column
@@ -135,8 +102,7 @@
    :backgroundColor :white})
 
 (def list-container
-  {:backgroundColor :white
-   :marginBottom    tab-height})
+  {:backgroundColor :white})
 
 (def create-icon
   {:fontSize 20
