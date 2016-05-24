@@ -12,8 +12,10 @@
             [status-im.components.action-button :refer [action-button
                                                         action-button-item]]
             [status-im.components.drawer.view :refer [drawer-view open-drawer]]
-            [status-im.components.styles :refer [color-blue]]
+            [status-im.components.styles :refer [color-blue
+                                                 toolbar-background2]]
             [status-im.components.toolbar :refer [toolbar]]
+            [status-im.components.main-tabs :refer [main-tabs]]
             [status-im.components.icons.ionicons :refer [icon]]
             [status-im.chats-list.styles :as st]))
 
@@ -22,6 +24,8 @@
                                    :style  st/hamburger-icon}
                          :handler open-drawer}
             :title      "Chats"
+            :background-color toolbar-background2
+            ;; TODO implement search
             :action     {:image   {:source {:uri :icon_search}
                                    :style  st/search-icon}
                          :handler (fn [])}}])
@@ -37,7 +41,7 @@
                                   (list-item [chat-list-item row]))
                     :style      st/list-container}]
         [action-button {:buttonColor color-blue
-                        :offsetY     16
+                        :offsetY     72
                         :offsetX     16}
          [action-button-item
           {:title       "New Chat"
@@ -50,4 +54,5 @@
            :buttonColor :#1abc9c
            :onPress     #(dispatch [:show-group-new])}
           [icon {:name  :person-stalker
-                 :style st/person-stalker-icon}]]]]])))
+                 :style st/person-stalker-icon}]]]
+        [main-tabs]]])))

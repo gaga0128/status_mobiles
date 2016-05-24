@@ -24,17 +24,17 @@
    :backgroundColor color-white})
 
 (def modal-member-name
-  {:color        text2-color
-   :fontFamily   font
-   :fontSize     14
-   :lineHeight   20})
+  {:color      text2-color
+   :fontFamily font
+   :fontSize   14
+   :lineHeight 20})
 
 (def modal-remove-text
-  {:margin       10
-   :color        text1-color
-   :fontFamily   font
-   :fontSize     14
-   :lineHeight   20})
+  {:margin     10
+   :color      text1-color
+   :fontFamily font
+   :fontSize   14
+   :lineHeight 20})
 
 (def modal-color-picker-inner-container
   {:borderRadius    10
@@ -42,30 +42,21 @@
    :backgroundColor color-white})
 
 (def modal-color-picker-save-btn-text
-  {:margin       10
-   :alignSelf    :center
-   :color        text1-color
-   :fontFamily   font
-   :fontSize     14
-   :lineHeight   20})
+  {:margin     10
+   :alignSelf  :center
+   :color      text1-color
+   :fontFamily font
+   :fontSize   14
+   :lineHeight 20})
 
 (def chat-members-container
   {:marginBottom 10})
 
-(defn chat-icon [color]
-  {:margin          10
-   :width           36
-   :height          36
-   :borderRadius    50
-   :backgroundColor color})
-
-(def chat-icon-text
-  {:marginTop  7
-   :marginLeft 13
-   :color      color-white
-   :fontFamily font
-   :fontSize   16
-   :lineHeight 20})
+(def action
+  {:width          56
+   :height         56
+   :alignItems     :center
+   :justifyContent :center})
 
 (def group-settings
   {:flex            1
@@ -85,14 +76,14 @@
    :fontSize     14
    :lineHeight   20})
 
-(def chat-name-value-container
+(defn chat-name-value-container [focused?]
   {:flexDirection     :row
    :marginLeft        16
    :height            56
    :alignItems        :center
    :justifyContent    :center
-   :borderBottomWidth 1
-   :borderBottomColor separator-color})
+   :borderBottomWidth 2
+   :borderBottomColor (if focused? color-purple separator-color)})
 
 (def chat-name-value
   {:flex       1
@@ -105,11 +96,11 @@
    :justifyContent :center})
 
 (def chat-name-btn-edit-text
-  {:marginTop    -1
-   :color        text2-color
-   :fontFamily   font
-   :fontSize     16
-   :lineHeight   20})
+  {:marginTop  -1
+   :color      text2-color
+   :fontFamily font
+   :fontSize   16
+   :lineHeight 20})
 
 (def members-text
   {:marginTop    24
