@@ -3,59 +3,58 @@
             [clojure.walk :refer [stringify-keys keywordize-keys]]
             [re-frame.core :refer [subscribe dispatch]]
             [status-im.db :as db]
-            [status-im.components.styles :refer [color-blue color-dark-mint]]
-            [status-im.i18n :refer [t]]))
+            [status-im.components.styles :refer [color-blue color-dark-mint]]))
 
 ;; todo delete
 (def commands [{:command      :money
-                :text         (t :commands.money.text)
-                :description  (t :commands.money.description)
+                :text         "!money"
+                :description  "Send money"
                 :color        color-dark-mint
                 :request-icon {:uri "icon_lock_white"}
                 :icon         {:uri "icon_lock_gray"}
                 :suggestion   true}
                {:command     :location
-                :text        (t :commands.location.text)
-                :description (t :commands.location.description)
+                :text        "!location"
+                :description "Send location"
                 :color       "#9a5dcf"
                 :suggestion  true}
                {:command      :phone
-                :text         (t :commands.phone.text)
-                :description  (t :commands.phone.description)
+                :text         "!phone"
+                :description  "Send phone number"
                 :color        color-dark-mint
-                :request-text (t :commands.phone.request-text)
+                :request-text "Phone number request"
                 :suggestion   true
                 :handler      #(dispatch [:sign-up %])}
                {:command      :confirmation-code
-                :text         (t :commands.confirmation-code.text)
-                :description  (t :commands.confirmation-code.description)
-                :request-text (t :commands.confirmation-code.request-text)
+                :text         "!confirmationCode"
+                :description  "Send confirmation code"
+                :request-text "Confirmation code request"
                 :color        color-blue
                 :request-icon {:uri "icon_lock_white"}
                 :icon         {:uri "icon_lock_gray"}
                 :suggestion   true
                 :handler      #(dispatch [:sign-up-confirm %])}
                {:command     :send
-                :text        (t :commands.send.text)
-                :description (t :commands.send.description)
+                :text        "!send"
+                :description "Send location"
                 :color       "#9a5dcf"
                 :suggestion  true}
                {:command     :request
-                :text        (t :commands.request.text)
-                :description (t :commands.request.description)
+                :text        "!request"
+                :description "Send request"
                 :color       "#48ba30"
                 :suggestion  true}
                {:command      :keypair-password
-                :text         (t :commands.keypair-password.text)
-                :description  (t :commands.keypair-password.description)
+                :text         "!keypairPassword"
+                :description  ""
                 :color        color-blue
                 :request-icon {:uri "icon_lock_white"}
                 :icon         {:uri "icon_lock_gray"}
                 :suggestion   false
                 :handler      #(dispatch [:save-password %])}
                {:command     :help
-                :text        (t :commands.help.text)
-                :description (t :commands.help.description)
+                :text        "!help"
+                :description "Help"
                 :color       "#9a5dcf"
                 :suggestion  true}])
 
