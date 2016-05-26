@@ -22,7 +22,8 @@
     (-> driver
         .manage
         .timeouts
-        (.implicitlyWait 25 TimeUnit/SECONDS))
+        (.implicitlyWait 100 TimeUnit/MILLISECONDS))
+    (Thread/sleep 9000)
     driver))
 
 (defn by-xpath [driver xpath]
