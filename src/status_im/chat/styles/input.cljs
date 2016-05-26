@@ -37,8 +37,7 @@
 (def command-input
   {:flex       1
    :marginLeft 8
-   :marginTop  -2
-   :padding    0
+   :marginTop  7
    :fontSize   14
    :fontFamily font
    :color      text1-color})
