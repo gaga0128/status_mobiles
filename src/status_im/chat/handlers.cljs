@@ -42,10 +42,8 @@
         (update-in [:chats current-chat-id :input-text] safe-trim))))
 
 (register-handler :set-chat-command-content
-  (fn [{:keys [current-chat-id] :as db} [_ content]]
-    (-> db
-        (commands/set-chat-command-content content)
-        (assoc-in [:chats current-chat-id :input-text] nil))))
+  (fn [db [_ content]]
+    (commands/set-chat-command-content db content)))
 
 (defn update-input-text
   [{:keys [current-chat-id] :as db} text]
@@ -70,12 +68,8 @@
   (update-input-text db text))
 
 (defn update-command [db [_ text]]
-  (if-not (commands/get-chat-command db)
-    (let [{:keys [command]} (suggestions/check-suggestion db text)]
-      (if command
-        (commands/set-chat-command db command)
-        db))
-    db))
+  (let [{:keys [command]} (suggestions/check-suggestion db text)]
+    (commands/set-chat-command db command)))
 
 (register-handler :set-chat-input-text
   ((enrich update-command) update-text))
