@@ -3,33 +3,32 @@
             [clojure.walk :refer [stringify-keys keywordize-keys]]
             [re-frame.core :refer [subscribe dispatch]]
             [status-im.db :as db]
-            [status-im.components.styles :refer [color-blue color-dark-mint]]
-            [status-im.i18n :refer [label]]))
+            [status-im.components.styles :refer [color-blue color-dark-mint]]))
 
 ;; todo delete
 (def commands [{:command      :money
                 :text         "!money"
-                :description  (label :t/money-command-description)
+                :description  "Send money"
                 :color        color-dark-mint
                 :request-icon {:uri "icon_lock_white"}
                 :icon         {:uri "icon_lock_gray"}
                 :suggestion   true}
                {:command     :location
                 :text        "!location"
-                :description (label :t/location-command-description)
+                :description "Send location"
                 :color       "#9a5dcf"
                 :suggestion  true}
                {:command      :phone
                 :text         "!phone"
-                :description  (label :t/phone-command-description)
+                :description  "Send phone number"
                 :color        color-dark-mint
-                :request-text (label :t/phone-request-text)
+                :request-text "Phone number request"
                 :suggestion   true
                 :handler      #(dispatch [:sign-up %])}
                {:command      :confirmation-code
                 :text         "!confirmationCode"
-                :description  (label :t/confirmation-code-command-description)
-                :request-text (label :t/confirmation-code-request-text)
+                :description  "Send confirmation code"
+                :request-text "Confirmation code request"
                 :color        color-blue
                 :request-icon {:uri "icon_lock_white"}
                 :icon         {:uri "icon_lock_gray"}
@@ -37,17 +36,17 @@
                 :handler      #(dispatch [:sign-up-confirm %])}
                {:command     :send
                 :text        "!send"
-                :description (label :t/send-command-description)
+                :description "Send location"
                 :color       "#9a5dcf"
                 :suggestion  true}
                {:command     :request
                 :text        "!request"
-                :description (label :t/request-command-description)
+                :description "Send request"
                 :color       "#48ba30"
                 :suggestion  true}
                {:command      :keypair-password
-                :text         "!keypair-password"
-                :description  (label :t/keypair-password-command-description)
+                :text         "!keypairPassword"
+                :description  ""
                 :color        color-blue
                 :request-icon {:uri "icon_lock_white"}
                 :icon         {:uri "icon_lock_gray"}
@@ -55,7 +54,7 @@
                 :handler      #(dispatch [:save-password %])}
                {:command     :help
                 :text        "!help"
-                :description (label :t/help-command-description)
+                :description "Help"
                 :color       "#9a5dcf"
                 :suggestion  true}])
 
