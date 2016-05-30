@@ -2,9 +2,10 @@
   (:require [cljs.reader :refer [read-string]]
             [status-im.components.styles :refer [default-chat-color]]
             [status-im.utils.logging :as log]
-            [status-im.utils.types :refer [to-string]]
-            [status-im.utils.utils :as u])
+            [status-im.utils.types :refer [to-string]])
   (:refer-clojure :exclude [exists?]))
+
+(set! js/window.Realm (js/require "realm"))
 
 (def opts {:schema [{:name       :contacts
                      :primaryKey :whisper-identity
@@ -69,10 +70,7 @@
                                                  :objectType "tag"}
                                   :last-updated "date"}}]})
 
-(def realm-class (u/require "realm"))
-
-(def realm (when (cljs.core/exists? js/window)
-             (realm-class. (clj->js opts))))
+(def realm (js/Realm. (clj->js opts)))
 
 (def schema-by-name (->> (:schema opts)
                          (mapv (fn [{:keys [name] :as schema}]

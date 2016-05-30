@@ -1,10 +1,9 @@
 (ns status-im.utils.crypt
   (:require [goog.crypt :refer [byteArrayToHex]]
-            [clojure.string :as s]
-            [status-im.utils.utils :as u])
+            [clojure.string :as s])
   (:import goog.crypt.Sha256))
 
-(def random-bytes (u/require "react-native-randombytes"))
+(set! js/window.RnRandomBytes (js/require "react-native-randombytes"))
 
 (def sha-256 (Sha256.))
 
@@ -20,7 +19,7 @@
   (byteArrayToHex (.digest sha-256)))
 
 (defn gen-random-bytes [length cb]
-  #_(.randomBytes random-bytes length (fn [& [err buf]]
-                                      (if err
-                                        (cb {:error err})
-                                        (cb {:buffer buf})))))
+  (.randomBytes js/window.RnRandomBytes length (fn [& [err buf]]
+                                                 (if err
+                                                   (cb {:error err})
+                                                   (cb {:buffer buf})))))

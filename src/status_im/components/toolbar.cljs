@@ -12,7 +12,9 @@
                                                color-purple
                                                text1-color
                                                text2-color
-                                               toolbar-background1]]))
+                                               toolbar-background1]]
+            [status-im.components.realm :refer [list-view]]
+            [reagent.core :as r]))
 
 (defn toolbar [{:keys [title nav-action hide-nav? action custom-action
                        background-color custom-content style]}]
