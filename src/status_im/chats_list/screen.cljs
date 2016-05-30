@@ -16,14 +16,13 @@
                                                  toolbar-background2]]
             [status-im.components.toolbar :refer [toolbar]]
             [status-im.components.icons.ionicons :refer [icon]]
-            [status-im.i18n :refer [label]]
             [status-im.chats-list.styles :as st]))
 
 (defn chats-list-toolbar []
   [toolbar {:nav-action {:image   {:source {:uri :icon_hamburger}
                                    :style  st/hamburger-icon}
                          :handler open-drawer}
-            :title      (label :t/chats)
+            :title      "Chats"
             :background-color toolbar-background2
             ;; TODO implement search
             :action     {:image   {:source {:uri :icon_search}
@@ -36,7 +35,7 @@
       [drawer-view
        [view st/chats-container
         [chats-list-toolbar]
-        [list-view {:dataSource (to-datasource @chats)
+        [list-view {:dataSource (to-datasource (vals @chats))
                     :renderRow  (fn [row _ _]
                                   (list-item [chat-list-item row]))
                     :style      st/list-container}]
@@ -44,13 +43,13 @@
                         :offsetY     16
                         :offsetX     16}
          [action-button-item
-          {:title       (label :t/new-chat)
+          {:title       "New Chat"
            :buttonColor :#9b59b6
            :onPress     #(dispatch [:navigate-to :contact-list])}
           [icon {:name  :android-create
                  :style st/create-icon}]]
          [action-button-item
-          {:title       (label :t/new-group-chat)
+          {:title       "New Group Chat"
            :buttonColor :#1abc9c
            :onPress     #(dispatch [:show-group-new])}
           [icon {:name  :person-stalker
