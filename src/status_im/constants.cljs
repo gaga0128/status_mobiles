@@ -10,8 +10,3 @@
 (def content-type-command "command")
 (def content-type-command-request "command-request")
 (def content-type-status "status")
-
-(def max-chat-name-length 20)
-
-(def response-input-hiding-duration 200)
-(def response-suggesstion-resize-duration 100)

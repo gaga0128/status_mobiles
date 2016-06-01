@@ -2,16 +2,12 @@
   (:require [re-frame.core :refer [register-handler enrich after debug dispatch]]
             [status-im.models.commands :as commands]
             [clojure.string :as str]
-            [status-im.components.animation :as anim]
             [status-im.components.styles :refer [default-chat-color]]
-            [status-im.chat.styles.response :as response-styles]
-            [status-im.chat.styles.response-suggestions :as response-suggestions-styles]
             [status-im.chat.suggestions :as suggestions]
             [status-im.protocol.api :as api]
             [status-im.models.messages :as messages]
             [status-im.constants :refer [text-content-type
-                                         content-type-command
-                                         response-input-hiding-duration]]
+                                         content-type-command]]
             [status-im.utils.random :as random]
             [status-im.chat.sign-up :as sign-up-service]
             [status-im.models.chats :as chats]
@@ -19,11 +15,8 @@
             [status-im.utils.handlers :as u]
             [status-im.persistence.realm :as r]
             [status-im.handlers.server :as server]
-            [status-im.handlers.content-suggestions :refer [get-content-suggestions]]
             [status-im.utils.phone-number :refer [format-phone-number]]
             [status-im.utils.datetime :as time]))
-
-(def delta 1)
 
 (register-handler :set-show-actions
   (fn [db [_ show-actions]]
@@ -45,55 +38,12 @@
 (register-handler :cancel-command
   (fn [{:keys [current-chat-id] :as db} _]
     (-> db
-        (assoc-in [:animations :response-input-is-hiding?] false)
         (assoc-in [:chats current-chat-id :command-input] {})
         (update-in [:chats current-chat-id :input-text] safe-trim))))
 
-(defn animate-cancel-command! [db]
-  (let [height-anim-value (get-in db [:animations :response-suggestions-height])
-        to-value 1]
-    (anim/add-listener height-anim-value
-                       (fn [val]
-                         (when (<= (- to-value delta) (anim/value val) (+ to-value delta))
-                           (anim/remove-all-listeners height-anim-value)
-                           (dispatch [:cancel-command]))))
-    (anim/start (anim/spring height-anim-value {:toValue    to-value
-                                                :speed      10
-                                                :bounciness 1}))))
-
-(register-handler :start-cancel-command
-  (after animate-cancel-command!)
-  (fn [db _]
-    (let [current-chat-id (:current-chat-id db)
-          hiding? (get-in db [:animations :response-input-is-hiding?])]
-      (if-not hiding?
-        (assoc-in db [:animations :response-input-is-hiding?] true)
-        db))))
-
-(defn update-response-suggestions-height! [db]
-  (when (and (not (get-in db [:animations :response-input-is-hiding?]))
-             (commands/get-chat-command-to-msg-id db))
-    (let [command (commands/get-chat-command db)
-          text (commands/get-chat-command-content db)
-          suggestions (get-content-suggestions command text)
-          suggestions-height (min response-suggestions-styles/max-suggestions-height
-                                  (reduce + 0 (map #(if (:header %)
-                                                     response-suggestions-styles/header-height
-                                                     response-suggestions-styles/suggestion-height)
-                                                   suggestions)))
-          height (+ suggestions-height response-styles/request-info-height)
-          anim-value (get-in db [:animations :response-suggestions-height])]
-      (anim/start
-        (anim/spring anim-value {:toValue    height
-                                 :speed      10
-                                 :bounciness 10})))))
-
 (register-handler :set-chat-command-content
-  (after update-response-suggestions-height!)
-  (fn [{:keys [current-chat-id] :as db} [_ content]]
-    (-> db
-        (commands/set-chat-command-content content)
-        (assoc-in [:chats current-chat-id :input-text] nil))))
+  (fn [db [_ content]]
+    (commands/set-chat-command-content db content)))
 
 (defn update-input-text
   [{:keys [current-chat-id] :as db} text]
@@ -110,7 +60,6 @@
       (commands/stage-command db command-info))))
 
 (register-handler :set-response-chat-command
-  (after update-response-suggestions-height!)
   (fn [db [_ to-msg-id command-key]]
     (commands/set-response-chat-command db to-msg-id command-key)))
 
@@ -119,12 +68,8 @@
   (update-input-text db text))
 
 (defn update-command [db [_ text]]
-  (if-not (commands/get-chat-command db)
-    (let [{:keys [command]} (suggestions/check-suggestion db text)]
-      (if command
-        (commands/set-chat-command db command)
-        db))
-    db))
+  (let [{:keys [command]} (suggestions/check-suggestion db text)]
+    (commands/set-chat-command db command)))
 
 (register-handler :set-chat-input-text
   ((enrich update-command) update-text))
