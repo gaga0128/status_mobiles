@@ -1,19 +1,18 @@
 (ns status-im.components.toolbar
   (:require [re-frame.core :refer [subscribe dispatch]]
             [status-im.components.react :refer [view
-                                                text-input
-                                                icon
-                                                text
-                                                image
-                                                touchable-highlight]]
+                                              text-input
+                                              icon
+                                              text
+                                              image
+                                              touchable-highlight]]
             [status-im.components.styles :refer [font
-                                                 title-font
-                                                 color-white
-                                                 color-purple
-                                                 text1-color
-                                                 text2-color
-                                                 toolbar-background1
-                                                 toolbar-height]]
+                                               title-font
+                                               color-white
+                                               color-purple
+                                               text1-color
+                                               text2-color
+                                               toolbar-background1]]
             [status-im.components.realm :refer [list-view]]
             [reagent.core :as r]))
 
@@ -21,7 +20,7 @@
                        background-color custom-content style]}]
   (let [style (merge {:flexDirection   :row
                       :backgroundColor (or background-color toolbar-background1)
-                      :height          toolbar-height
+                      :height          56
                       :elevation       2} style)]
     [view {:style style}
      (when (not hide-nav?)
