@@ -2,8 +2,7 @@
   (:require [clojure.string :as s]
             [status-im.components.react :refer [view image text]]
             [status-im.resources :as res]
-            [status-im.contacts.styles :as st]
-            [status-im.i18n :refer [label]]))
+            [status-im.contacts.styles :as st]))
 
 (defn contact-photo [{:keys [photo-path]}]
   [view st/contact-photo-container
@@ -28,4 +27,4 @@
      (if (pos? (count name))
        name
        ;; todo is this correct behaviour?
-       (label :t/no-name))]]])
+       "Noname")]]])
