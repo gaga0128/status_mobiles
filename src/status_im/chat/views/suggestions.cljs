@@ -1,11 +1,11 @@
 (ns status-im.chat.views.suggestions
   (:require [re-frame.core :refer [subscribe dispatch]]
             [status-im.components.react :refer [view
-                                                text
-                                                icon
-                                                touchable-highlight
-                                                list-view
-                                                list-item]]
+                                              text
+                                              icon
+                                              touchable-highlight
+                                              list-view
+                                              list-item]]
             [status-im.utils.listview :refer [to-datasource]]
             [status-im.chat.styles.suggestions :as st]))
 
@@ -41,7 +41,6 @@
             [view
              [icon :drag_down st/drag-down-icon]]]
            [view (st/suggestions-container (count suggestions))
-            [list-view {:dataSource                (to-datasource suggestions)
-                        :enableEmptySections       true
-                        :keyboardShouldPersistTaps true
-                        :renderRow                 render-row}]]])))))
+            [list-view {:dataSource (to-datasource suggestions)
+                        :enableEmptySections true
+                        :renderRow  render-row}]]])))))

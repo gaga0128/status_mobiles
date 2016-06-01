@@ -1,7 +1,5 @@
 (ns status-im.db
-  (:require [schema.core :as s :include-macros true]
-            [status-im.components.react :refer [animated]]
-            [status-im.components.animation :as anim]))
+  (:require [schema.core :as s :include-macros true]))
 
 ;; schema of app-db
 (def schema {:greeting s/Str})
@@ -31,15 +29,7 @@
              :email                  "myemail@gmail.com"
              :status                 "Hi, this is my status"
              :current-tag            nil
-             :disable-group-creation false
-             :animations             {;; mutable data
-                                      :response-pan                 nil
-                                      :response-pan-responder       nil
-                                      :message-input-offset         (anim/create-value 0)
-                                      :message-input-buttons-scale  (anim/create-value 1)
-                                      :commands-input-is-switching? false
-                                      :response-suggestions-height  (anim/create-value 0)
-                                      :response-input-is-hiding?    false}})
+             :disable-group-creation false})
 
 (def protocol-initialized-path [:protocol-initialized])
 (defn chat-input-text-path [chat-id]
