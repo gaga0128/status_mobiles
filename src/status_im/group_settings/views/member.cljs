@@ -7,8 +7,7 @@
                                               icon
                                               touchable-highlight]]
             [status-im.resources :as res]
-            [status-im.group-settings.styles.member :as st]
-            [status-im.i18n :refer [label]]))
+            [status-im.group-settings.styles.member :as st]))
 
 (defn contact-photo [{:keys [photo-path]}]
   [view st/contact-photo-container
@@ -33,7 +32,7 @@
      (if (pos? (count name))
        name
        ;; todo is this correct behaviour?
-       (label :t/no-name))]
+       "Noname")]
     ;; TODO implement :role property for group chat contact
     (when role
       [text {:style st/role-text}

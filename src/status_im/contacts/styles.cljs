@@ -1,12 +1,13 @@
 (ns status-im.contacts.styles
   (:require [status-im.components.styles :refer [font
-                                                 title-font
-                                                 text1-color
-                                                 color-white
-                                                 toolbar-background2
-                                                 online-color]]))
+                                               title-font
+                                               text1-color
+                                               color-white
+                                               online-color]]))
 
-
+(def search-icon
+  {:width  17
+   :height 17})
 
 (def contacts-list-container
   {:flex            1
@@ -66,23 +67,3 @@
    :fontSize   16
    :fontFamily font
    :color      text1-color})
-
-(def import-qr-button
-  {:flex            1
-   :height          50
-   :alignItems      :center
-   :backgroundColor "#EFF4F6"})
-
-(def import-qr-button-content
-  {:flex            1
-   :flexDirection   :row
-   :height          50
-   :alignItems      :center
-   :alignSelf       :center})
-
-(def import-qr-text
-  {:flexDirection :column})
-
-(def contact-form-container
-  {:flex            1
-   :backgroundColor :white})
