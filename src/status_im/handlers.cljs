@@ -17,7 +17,6 @@
     status-im.discovery.handlers
     status-im.new-group.handlers
     status-im.participants.handlers
-    status-im.qr-scanner.handlers
     status-im.protocol.handlers))
 
 ;; -- Middleware ------------------------------------------------------------

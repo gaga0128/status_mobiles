@@ -10,10 +10,7 @@
                                               touchable-opacity]]
             [status-im.components.chat-icon.screen :refer [profile-icon
                                                          my-profile-icon]]
-            [status-im.profile.styles :as st]
-            [status-im.components.qr-code :refer [qr-code]]
-            [status-im.utils.types :refer [clj->json]]
-            [status-im.i18n :refer [label]]))
+            [status-im.profile.styles :as st]))
 
 (defn profile-property-view [{:keys [name value]}]
   [view st/profile-property-view-container
@@ -37,38 +34,37 @@
      [profile-icon]]
     [text {:style st/user-name} name]
     ;; TODO stub data
-    [text {:style st/status} (label :t/not-implemented)]
+    [text {:style st/status} "!not implemented"]
     [view st/btns-container
      [touchable-highlight {:onPress #(message-user whisper-identity)}
       [view st/message-btn
-       [text {:style st/message-btn-text} (label :t/message)]]]
+       [text {:style st/message-btn-text} "Message"]]]
      [touchable-highlight {:onPress (fn []
                                       ;; TODO not implemented
                                       )}
       [view st/more-btn
        [icon :more_vertical_blue st/more-btn-image]]]]]
    [view st/profile-properties-container
-    [profile-property-view {:name  (label :t/username)
+    [profile-property-view {:name  "Username"
                             :value name}]
-    [profile-property-view {:name  (label :t/phone-number)
+    [profile-property-view {:name  "Phone number"
                             :value phone-number}]
     ;; TODO stub data
-    [profile-property-view {:name  (label :t/email)
-                            :value (label :t/not-implemented)}]
+    [profile-property-view {:name  "Email"
+                            :value "!not implemented"}]
     [view st/report-user-container
      [touchable-highlight {:on-press (fn []
                                        ;; TODO not implemented
                                        )}
-      [text {:style st/report-user-text} (label :t/report-user)]]]]])
+      [text {:style st/report-user-text} "REPORT USER"]]]]])
 
 (defview my-profile []
   [username     [:get :username]
    photo-path   [:get :photo-path]
    phone-number [:get :phone-number]
    email        [:get :email]
-   status       [:get :status]
-   identity     [:get-in [:user-identity :public]]]
-  [view {:style st/profile}
+   status       [:get :status]]
+  [scroll-view {:style st/profile}
    [touchable-highlight {:style    st/back-btn-touchable
                          :on-press #(dispatch [:navigate-back])}
     [view st/back-btn-container
@@ -84,14 +80,10 @@
      [my-profile-icon]]
     [text {:style st/user-name} username]
     [text {:style st/status} status]]
-   [scroll-view st/profile-properties-container
-    [profile-property-view {:name  (label :t/username)
+   [view st/profile-properties-container
+    [profile-property-view {:name  "Username"
                             :value username}]
-    [profile-property-view {:name  (label :t/phone-number)
+    [profile-property-view {:name  "Phone number"
                             :value phone-number}]
-    [profile-property-view {:name  (label :t/email)
-                            :value email}]
-    [view st/qr-code-container
-     [qr-code {:value (clj->json {:name username
-                                  :whisper-identity identity})
-              :size 200}]]]])
+    [profile-property-view {:name  "Email"
+                            :value email}]]])

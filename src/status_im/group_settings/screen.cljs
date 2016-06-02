@@ -14,8 +14,7 @@
             [status-im.components.toolbar :refer [toolbar]]
             [status-im.components.chat-icon.screen :refer [chat-icon-view-action]]
             [status-im.group-settings.styles.group-settings :as st]
-            [status-im.group-settings.views.member :refer [member-view]]
-            [status-im.i18n :refer [label]]))
+            [status-im.group-settings.views.member :refer [member-view]]))
 
 (defn remove-member []
   (dispatch [:remove-participants]))
@@ -36,7 +35,7 @@
        [text {:style st/modal-member-name} name]
        [touchable-highlight {:on-press remove-member}
         [text {:style st/modal-remove-text}
-         (label :t/remove)]]]]]))
+         "Remove"]]]]]))
 
 (defview chat-members []
   [members [:current-chat-contacts]]
@@ -76,13 +75,13 @@
     [view st/modal-color-picker-inner-container
      [picker {:selectedValue new-color
               :onValueChange #(dispatch [:set :new-chat-color %])}
-      [picker-item {:label (label :t/blue) :value "#7099e6"}]
-      [picker-item {:label (label :t/purple) :value "#a187d5"}]
-      [picker-item {:label (label :t/green) :value "green"}]
-      [picker-item {:label (label :t/red) :value "red"}]]
+      [picker-item {:label "Blue" :value "#7099e6"}]
+      [picker-item {:label "Purple" :value "#a187d5"}]
+      [picker-item {:label "Green" :value "green"}]
+      [picker-item {:label "Red" :value "red"}]]
      [touchable-highlight {:on-press set-chat-color}
       [text {:style st/modal-color-picker-save-btn-text}
-       (label :t/save)]]]]])
+       "Save"]]]]])
 
 (defview chat-color-icon []
   [chat-color [:chat :color]]
@@ -93,11 +92,11 @@
 
 (defn settings-view []
   (let [settings [{:custom-icon [chat-color-icon]
-                   :title       (label :t/change-color)
+                   :title       "Change color"
                    :handler     show-chat-color-picker}
                   ;; TODO not implemented: Notifications
-                  (merge {:title    (label :t/notifications-title)
-                          :subtitle (label :t/not-implemented)
+                  (merge {:title    "Notifications and sounds"
+                          :subtitle "!not implemented"
                           :handler  nil}
                          (if true
                            {:icon       :notifications-on
@@ -109,13 +108,13 @@
                   {:icon       :close-gray
                    :icon-style {:width  12
                                 :height 12}
-                   :title      (label :t/clear-history)
+                   :title      "Clear history"
                    ;; TODO show confirmation dialog?
                    :handler    #(dispatch [:clear-history])}
                   {:icon       :bin
                    :icon-style {:width  12
                                 :height 18}
-                   :title      (label :t/delete-and-leave)
+                   :title      "Delete and leave"
                    ;; TODO show confirmation dialog?
                    :handler    #(dispatch [:leave-group-chat])}]]
     [view st/settings-container
@@ -131,7 +130,7 @@
    [chat-icon-view-action chat-id group-chat name color false]])
 
 (defn new-group-toolbar []
-  [toolbar {:title         (label :t/chat-settings)
+  [toolbar {:title         "Chat settings"
             :custom-action [chat-icon]}])
 
 (defn focus []
@@ -146,9 +145,11 @@
 (defview chat-name []
   [name [:chat :name]
    new-name [:get :new-chat-name]
-   focused? [:get ::name-input-focused]]
+   validation-messages [:new-chat-name-validation-messages]
+   focused? [:get ::name-input-focused]
+   valid? [:new-chat-name-valid?]]
   [view
-   [text {:style st/chat-name-text} (label :t/chat-name)]
+   [text {:style st/chat-name-text} "Chat name"]
    [view (st/chat-name-value-container focused?)
     [text-input {:style          st/chat-name-value
                  :ref            #(when (and % focused?) (.focus %))
@@ -157,12 +158,14 @@
                  :on-blur        blur}
      name]
     (if (or focused? (not= name new-name))
-      [touchable-highlight {:style    st/chat-name-btn-edit-container
+      [touchable-highlight {:style    (st/chat-name-btn-edit-container valid?)
                             :on-press save}
        [view [icon :ok-purple st/add-members-icon]]]
-      [touchable-highlight {:style    st/chat-name-btn-edit-container
+      [touchable-highlight {:style    (st/chat-name-btn-edit-container true)
                             :on-press focus}
-       [text {:style st/chat-name-btn-edit-text} (label :t/edit)]])]])
+       [text {:style st/chat-name-btn-edit-text} "Edit"]])]
+   (when (pos? (count validation-messages))
+     [text {:style st/chat-name-validation-message} (first validation-messages)])])
 
 (defview group-settings []
   [show-color-picker [:group-settings :show-color-picker]]
@@ -170,16 +173,16 @@
    [new-group-toolbar]
    [scroll-view st/body
     [chat-name]
-    [text {:style st/members-text} (label :t/members-title)]
+    [text {:style st/members-text} "Members"]
     [touchable-highlight {:on-press #(dispatch [:navigate-to :add-participants])}
     ;; TODO add participants view is not in design
      [view st/add-members-container
       [icon :add-gray st/add-members-icon]
       [text {:style st/add-members-text}
-       (label :t/add-members)]]]
+       "Add members"]]]
     [chat-members]
     [text {:style st/settings-text}
-     (label :t/settings)]
+     "Settings"]
     [settings-view]]
    (when show-color-picker
      [chat-color-picker])
