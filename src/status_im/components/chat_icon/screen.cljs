@@ -6,8 +6,7 @@
                                                 image
                                                 icon]]
             [status-im.components.chat-icon.styles :as st]
-            [status-im.components.styles :refer [color-purple]]
-            [clojure.string :as s]))
+            [status-im.components.styles :refer [color-purple]]))
 
 (defn default-chat-icon [name styles]
   [view (:default-chat-icon styles)
@@ -27,10 +26,10 @@
 (defview chat-icon-view [chat-id group-chat name online styles]
   [photo-path [:chat-photo chat-id]]
   [view (:container styles)
-   (if-not (s/blank? photo-path)
+   (if (and photo-path (not (empty? photo-path)))
      [chat-icon photo-path styles]
      [default-chat-icon name styles])
-   (when-not group-chat
+   (when (not group-chat)
      [contact-online online styles])])
 
 (defn chat-icon-view-chat-list [chat-id group-chat name color online]
@@ -81,7 +80,7 @@
   [contact [:contact]]
   (let [;; TODO stub data
         online true
-        color  color-purple]
+        color color-purple]
     [profile-icon-view (:photo-path contact) (:name contact) color online]))
 
 (defview my-profile-icon []
@@ -89,5 +88,5 @@
    photo-path [:get :photo-path]]
   (let [;; TODO stub data
         online true
-        color  color-purple]
+        color color-purple]
     [profile-icon-view photo-path name color online]))
