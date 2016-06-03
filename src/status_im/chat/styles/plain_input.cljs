@@ -4,29 +4,19 @@
                                                color-white
                                                color-blue]]))
 
-(def input-height 56)
-
 (def input-container
   {:flexDirection :column})
 
 (def input-view
   {:flexDirection   :row
-   :height          input-height
+   :height          56
    :backgroundColor color-white})
 
-(def message-input-button-touchable
+(def switch-commands-touchable
   {:width          56
    :height         56
    :alignItems     :center
    :justifyContent :center})
-
-(defn message-input-button [scale]
-  {:transform [{:scale scale}]})
-
-(defn message-input-container [offset]
-  {:flex 1
-   :transform [{:translateX offset}]
-   :marginRight offset})
 
 (def list-icon
   {:width  13
@@ -45,7 +35,9 @@
    :color      text2-color})
 
 (def smile-icon
-  {:width       20
+  {:marginTop   18
+   :marginRight 18
+   :width       20
    :height      20})
 
 (def send-icon

@@ -34,14 +34,6 @@
 (def picker (r/adapt-react-class (.-Picker js/React)))
 (def picker-item (r/adapt-react-class (.-Item (.-Picker js/React))))
 
-(def pan-responder (.-PanResponder js/React))
-(def animated (.-Animated js/React))
-(def animated-view (r/adapt-react-class (.-View animated)))
-(def animated-text (r/adapt-react-class (.-Text animated)))
-
-(def dimensions (.-Dimensions js/React))
-(defn get-dimensions [name]
-  (js->clj (.get dimensions name) :keywordize-keys true))
 
 (defn icon
   ([n] (icon n {}))
