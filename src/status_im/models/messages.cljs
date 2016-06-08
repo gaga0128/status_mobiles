@@ -48,10 +48,9 @@
 
 (defn get-messages [chat-id]
   (->> (-> (r/get-by-field :msgs :chat-id chat-id)
-           (r/sorted :timestamp :desc)
+           (r/sorted :timestamp :asc)
            (r/collection->map))
        (into '())
-       reverse
        (map (fn [{:keys [content-type] :as message}]
               (if (command-type? content-type)
                 (update message :content str-to-map)

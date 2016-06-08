@@ -3,7 +3,6 @@
             [status-im.models.commands :as commands]
             [clojure.string :as str]
             [status-im.components.styles :refer [default-chat-color]]
-            [status-im.chat.styles.response :refer [request-info-height response-height-normal]]
             [status-im.chat.suggestions :as suggestions]
             [status-im.protocol.api :as api]
             [status-im.models.messages :as messages]
@@ -16,11 +15,8 @@
             [status-im.utils.handlers :as u]
             [status-im.persistence.realm :as r]
             [status-im.handlers.server :as server]
-            [status-im.handlers.content-suggestions :refer [get-content-suggestions]]
             [status-im.utils.phone-number :refer [format-phone-number]]
-            [status-im.utils.datetime :as time]
-            [status-im.chat.handlers.animation :refer [update-response-height
-                                                       get-response-height]]))
+            [status-im.utils.datetime :as time]))
 
 (register-handler :set-show-actions
   (fn [db [_ show-actions]]
@@ -45,22 +41,9 @@
         (assoc-in [:chats current-chat-id :command-input] {})
         (update-in [:chats current-chat-id :input-text] safe-trim))))
 
-(register-handler :start-cancel-command
-  (u/side-effect!
-    (fn [db _]
-      (if (commands/get-chat-command-to-msg-id db)
-        (dispatch [:animate-cancel-command])
-        (dispatch [:cancel-command])))))
-
 (register-handler :set-chat-command-content
-  (fn [{:keys [current-chat-id] :as db} [_ content]]
-    (as-> db db
-          (commands/set-chat-command-content db content)
-          (assoc-in db [:chats current-chat-id :input-text] nil)
-          (if (commands/get-chat-command-to-msg-id db)
-            (do (dispatch [:animate-response-resize])
-                (update-response-height db))
-            db))))
+  (fn [db [_ content]]
+    (commands/set-chat-command-content db content)))
 
 (defn update-input-text
   [{:keys [current-chat-id] :as db} text]
@@ -68,7 +51,7 @@
 
 (register-handler :stage-command
   (fn [{:keys [current-chat-id] :as db} _]
-    (let [db (update-input-text db nil)
+    (let [db           (update-input-text db nil)
           {:keys [command content]}
           (get-in db [:chats current-chat-id :command-input])
           command-info {:command command
@@ -76,25 +59,7 @@
                         :handler (:handler command)}]
       (commands/stage-command db command-info))))
 
-(register-handler :set-message-input []
-  (fn [db [_ input]]
-    (assoc db :message-input input)))
-
-(register-handler :prepare-message-input
-  (u/side-effect!
-    (fn [db _]
-      (when-let [message-input (:message-input db)]
-        (.clear message-input)
-        (.focus message-input)))))
-
-(register-handler :blur-message-input
-  (u/side-effect!
-    (fn [db _]
-      (when-let [message-input (:message-input db)]
-        (.blur message-input)))))
-
 (register-handler :set-response-chat-command
-  (after #(dispatch [:animate-show-response]))
   (fn [db [_ to-msg-id command-key]]
     (commands/set-response-chat-command db to-msg-id command-key)))
 
@@ -103,12 +68,8 @@
   (update-input-text db text))
 
 (defn update-command [db [_ text]]
-  (if-not (commands/get-chat-command db)
-    (let [{:keys [command]} (suggestions/check-suggestion db text)]
-      (if command
-        (commands/set-chat-command db command)
-        db))
-    db))
+  (let [{:keys [command]} (suggestions/check-suggestion db text)]
+    (commands/set-chat-command db command)))
 
 (register-handler :set-chat-input-text
   ((enrich update-command) update-text))
@@ -289,9 +250,14 @@
   ([{:keys [messages current-chat-id] :as db} _]
    (assoc-in db [:chats current-chat-id :messages] messages)))
 
+(defn load-commands!
+  [{:keys [current-chat-id]}]
+  (dispatch [:load-commands! current-chat-id]))
+
 (register-handler :init-chat
   (-> load-messages!
       ((enrich init-chat))
+      ((after load-commands!))
       debug))
 
 (defn initialize-chats

@@ -59,9 +59,6 @@
    :backgroundColor  color-white
    :borderRadius     5})
 
-(def container
-  {:backgroundColor color-white})
-
 (def drag-down-touchable
   {:height         22
    :alignItems     :center
