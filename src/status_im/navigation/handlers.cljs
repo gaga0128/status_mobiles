@@ -48,8 +48,7 @@
     (fn [db _]
       (-> db
           (push-view :new-group)
-          (assoc :new-group #{})
-          (assoc :new-chat-name nil)))))
+          (assoc :new-group #{})))))
 
 (register-handler :show-contacts
   (fn [db _]
