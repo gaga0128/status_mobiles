@@ -92,14 +92,10 @@
 (defn add-new-contacts
   [{:keys [contacts] :as db} [_ new-contacts]]
   (let [identities    (set (map :whisper-identity contacts))
-        new-contacts' (->> new-contacts
-                           (remove #(identities (:whisper-identity %)))
-                           (map #(vector (:whisper-identity %) %))
-                           (into {}))]
-    (println new-contacts')
+        new-contacts' (remove #(identities (:whisper-identity %)) new-contacts)]
     (-> db
-        (update :contacts merge new-contacts')
-        (assoc :new-contacts (vals new-contacts')))))
+        (update :contacts concat new-contacts')
+        (assoc :new-contacts new-contacts'))))
 
 (register-handler :add-contacts
   (after save-contacts!)
