@@ -3,7 +3,6 @@
             [clojure.walk :refer [stringify-keys keywordize-keys]]
             [re-frame.core :refer [subscribe dispatch]]
             [status-im.db :as db]
-            [status-im.components.animation :as anim]
             [status-im.components.styles :refer [color-blue color-dark-mint]]
             [status-im.i18n :refer [label]]))
 
@@ -36,16 +35,6 @@
                 :icon         {:uri "icon_lock_gray"}
                 :suggestion   true
                 :handler      #(dispatch [:sign-up-confirm %])}
-               {:command     :send
-                :text        "!send"
-                :description (label :t/send-command-description)
-                :color       "#9a5dcf"
-                :suggestion  true}
-               {:command     :request
-                :text        "!request"
-                :description (label :t/request-command-description)
-                :color       "#48ba30"
-                :suggestion  true}
                {:command      :keypair-password
                 :text         "!keypair-password"
                 :description  (label :t/keypair-password-command-description)
@@ -60,19 +49,11 @@
                 :color       "#9a5dcf"
                 :suggestion  true}])
 
-(defn get-commands [db]
-  ;; todo: temp. must be '(get db :commands)'
-  ;; (get db :commands)
-  commands)
-
-(defn set-commands [db commands]
-  (assoc db :commands commands))
-
-;; todo delete
-(def suggestions (filterv :suggestion commands))
+(defn get-commands [{:keys [current-chat-id] :as db}]
+  (or (get-in db [:chats current-chat-id :commands]) {}))
 
 (defn get-command [db command-key]
-  (first (filter #(= command-key (:command %)) (get-commands db))))
+  ((get-commands db) command-key))
 
 (defn find-command [commands command-key]
   (first (filter #(= command-key (:command %)) commands)))
@@ -133,4 +114,4 @@
   (update content :command #(find-command commands (keyword %))))
 
 (defn parse-command-request [commands content]
-  (update content :command #(find-command commands (keyword %))))
+  (update content :command #((keyword %) commands)))
