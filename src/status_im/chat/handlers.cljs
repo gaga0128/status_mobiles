@@ -68,7 +68,7 @@
   (update-input-text db text))
 
 (defn update-command [db [_ text]]
-  (let [[command] (suggestions/check-suggestion db text)]
+  (let [{:keys [command]} (suggestions/check-suggestion db text)]
     (commands/set-chat-command db command)))
 
 (register-handler :set-chat-input-text
@@ -99,7 +99,7 @@
 (defn prepare-message
   [{:keys [identity current-chat-id] :as db} _]
   (let [text    (get-in db [:chats current-chat-id :input-text])
-        [command] (suggestions/check-suggestion db (str text " "))
+        {:keys [command]} (suggestions/check-suggestion db (str text " "))
         message (check-author-direction
                   db current-chat-id
                   {:msg-id          (random/id)
@@ -230,9 +230,9 @@
     (sign-up-service/stop-listening-confirmation-code-sms db)))
 
 (register-handler :sign-up-confirm
-  (u/side-effect!
-    (fn [_ [_ confirmation-code]]
-      (server/sign-up-confirm confirmation-code sign-up-service/on-send-code-response))))
+  (fn [db [_ confirmation-code]]
+    (server/sign-up-confirm confirmation-code sign-up-service/on-send-code-response)
+    db))
 
 (register-handler :set-signed-up
   (fn [db [_ signed-up]]
@@ -250,14 +250,9 @@
   ([{:keys [messages current-chat-id] :as db} _]
    (assoc-in db [:chats current-chat-id :messages] messages)))
 
-(defn load-commands!
-  [{:keys [current-chat-id]}]
-  (dispatch [:load-commands! current-chat-id]))
-
 (register-handler :init-chat
   (-> load-messages!
       ((enrich init-chat))
-      ((after load-commands!))
       debug))
 
 (defn initialize-chats

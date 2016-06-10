@@ -5,12 +5,11 @@
                                               touchable-without-feedback
                                               text]]
             [status-im.components.carousel.styles :as st]
-            [status-im.utils.logging :as log]
-            [status-im.components.react :as r]))
+            [status-im.utils.logging :as log]))
 
 
 (defn window-page-width []
-  (.-width (.get (.. r/react -Dimensions) "window")))
+  (.-width (.get (.. js/React -Dimensions) "window")))
 
 (def defaults {:gap 10
                :sneak 10

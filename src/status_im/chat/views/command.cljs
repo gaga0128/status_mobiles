@@ -32,19 +32,17 @@
          [content-suggestions-view]
          [view st/command-input-container
           [view (st/command-text-container command)
-           [text {:style st/command-text} (str "!" (:name command))]]
+           [text {:style st/command-text} (:text command)]]
           [text-input (merge {:style           st/command-input
                               :autoFocus       true
                               :onChangeText    set-input-message
                               :onSubmitEditing (fn []
                                                  (when (valid? message validator)
-                                                   (send-command)))
-                              :accessibility-label :command-input}
+                                                   (send-command)))}
                              input-options)
            message]
           (if (valid? message validator)
-            [touchable-highlight {:on-press send-command
-                                  :accessibility-label :stage-command}
+            [touchable-highlight {:on-press send-command}
              [view st/send-container [icon :send st/send-icon]]]
             [touchable-highlight {:on-press cancel-command-input}
              [view st/cancel-container

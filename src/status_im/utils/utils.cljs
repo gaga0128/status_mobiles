@@ -5,11 +5,6 @@
    [natal-shell.toast-android :as toast])
   (:require [status-im.constants :as const]))
 
-(defn require [module]
-  (if (exists? js/window)
-    (js/require module)
-    #js {}))
-
 (defn log [obj]
   (.log js/console obj))
 
@@ -41,8 +36,10 @@
                      (toast (str error))))))))
 
 (defn http-get
-  ([url on-success on-error]
-   (-> (.fetch js/window url (clj->js {:method "GET"}))
+  ([action on-success on-error]
+   (-> (.fetch js/window
+               (str const/server-address action)
+               (clj->js {:method "GET"}))
        (.then (fn [response]
                 (log response)
                 (.text response)))

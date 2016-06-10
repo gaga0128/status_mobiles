@@ -17,10 +17,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.io.File;
-import com.statusim.Jail.JailPackage;
 
+import com.lwansbrough.RCTCamera.*;
 import com.i18n.reactnativei18n.ReactNativeI18n;
 import io.realm.react.RealmReactPackage;
+
 
 public class MainActivity extends ReactActivity {
 
@@ -77,13 +78,13 @@ public class MainActivity extends ReactActivity {
     protected List<ReactPackage> getPackages() {
         return Arrays.<ReactPackage>asList(
                 new MainReactPackage(),
-                new JailPackage(),
                 new RealmReactPackage(),
                 new VectorIconsPackage(),
                 new ReactNativeContacts(),
                 new ReactNativeI18n(),
                 new RandomBytesPackage(),
                 new LinearGradientPackage(),
+                new RCTCameraPackage(),
                 new SmsListener(this)
         );
     }
