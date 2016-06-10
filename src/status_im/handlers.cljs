@@ -17,7 +17,6 @@
     status-im.discovery.handlers
     status-im.new-group.handlers
     status-im.participants.handlers
-    status-im.qr-scanner.handlers
     status-im.protocol.handlers))
 
 ;; -- Middleware ------------------------------------------------------------
@@ -36,15 +35,23 @@
 
 ;; -- Common --------------------------------------------------------------
 
+(defn set-el [db [_ k v]]
+  (assoc db k v))
+
 (register-handler :set
-  (debug
-    (fn [db [_ k v]]
-      (assoc db k v))))
+  debug
+  set-el)
+
+(defn set-in [db [_ path v]]
+  (assoc-in db path v))
 
 (register-handler :set-in
-  (debug
-    (fn [db [_ path v]]
-      (assoc-in db path v))))
+  debug
+  set-in)
+
+(register-handler :set-animation
+  (fn [db [_ k v]]
+    (assoc-in db [:animations k] v)))
 
 (register-handler :initialize-db
   (fn [_ _]

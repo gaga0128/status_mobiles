@@ -16,9 +16,7 @@
     "react-native-randombytes",
     "dismissKeyboard",
     "react-native-linear-gradient",
-    "react-native-android-sms-listener",
-    "react-native-camera",
-    "react-native-qrcode"
+    "react-native-android-sms-listener"
   ],
   "imageDirs": [
     "images"
