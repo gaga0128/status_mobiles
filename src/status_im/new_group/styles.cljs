@@ -7,10 +7,9 @@
                                                text2-color
                                                toolbar-background1]]))
 
-(defn toolbar-icon [enabled?]
-  {:width   20
-   :height  18
-   :opacity (if enabled? 1 0.3)})
+(def toolbar-icon
+  {:width  20
+   :height 18})
 
 (def new-group-container
   {:flex            1
@@ -33,9 +32,6 @@
    :fontSize   14
    :fontFamily font
    :color      text1-color})
-
-(def group-name-validation-message
-  {:color :red})
 
 (def members-text
   {:marginTop    24
