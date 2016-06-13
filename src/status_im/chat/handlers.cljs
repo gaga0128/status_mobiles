@@ -68,7 +68,7 @@
   (update-input-text db text))
 
 (defn update-command [db [_ text]]
-  (let [[command] (suggestions/check-suggestion db text)]
+  (let [{:keys [command]} (suggestions/check-suggestion db text)]
     (commands/set-chat-command db command)))
 
 (register-handler :set-chat-input-text
@@ -99,25 +99,25 @@
 (defn prepare-message
   [{:keys [identity current-chat-id] :as db} _]
   (let [text    (get-in db [:chats current-chat-id :input-text])
-        [command] (suggestions/check-suggestion db (str text " "))
+        {:keys [command]} (suggestions/check-suggestion db (str text " "))
         message (check-author-direction
                   db current-chat-id
-                  {:msg-id       (random/id)
-                   :chat-id      current-chat-id
-                   :content      text
-                   :to           current-chat-id
-                   :from         identity
-                   :content-type text-content-type
-                   :outgoing     true
-                   :timestamp    (time/now-ms)})]
+                  {:msg-id          (random/id)
+                   :chat-id         current-chat-id
+                   :content         text
+                   :to              current-chat-id
+                   :from            identity
+                   :content-type    text-content-type
+                   :outgoing        true
+                   :timestamp       (time/now-ms)})]
     (if command
       (commands/set-chat-command db command)
       (assoc db :new-message (when-not (str/blank? text) message)))))
 
 (defn prepare-command [identity chat-id staged-command]
-  (let [command-name (get-in staged-command [:command :name])
-        content      {:command command-name
-                      :content (:content staged-command)}]
+  (let [command-key (get-in staged-command [:command :command])
+        content     {:command (name command-key)
+                     :content (:content staged-command)}]
     {:msg-id       (random/id)
      :from         identity
      :to           chat-id
@@ -250,14 +250,9 @@
   ([{:keys [messages current-chat-id] :as db} _]
    (assoc-in db [:chats current-chat-id :messages] messages)))
 
-(defn load-commands!
-  [{:keys [current-chat-id]}]
-  (dispatch [:load-commands! current-chat-id]))
-
 (register-handler :init-chat
   (-> load-messages!
       ((enrich init-chat))
-      ((after load-commands!))
       debug))
 
 (defn initialize-chats
@@ -301,9 +296,9 @@
 
 (defmethod nav/preload-data! :chat
   [{:keys [current-chat-id] :as db} [_ _ id]]
-  (let [chat-id  (or id current-chat-id)
+  (let [chat-id (or id current-chat-id)
         messages (get-in db [:chats chat-id :messages])
-        db'      (assoc db :current-chat-id chat-id)]
+        db' (assoc db :current-chat-id chat-id)]
     (if (seq messages)
       db'
       (-> db'

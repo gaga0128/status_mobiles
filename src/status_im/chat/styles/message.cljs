@@ -146,17 +146,6 @@
    :borderRadius    50
    :backgroundColor (:color command)})
 
-(defn command-image-view
-  [command]
-  {:position        :absolute
-   :top             0
-   :right           0
-   :width           24
-   :height          24
-   :borderRadius    50
-   :backgroundColor (:color command)
-   :alignItems    :center})
-
 (def command-request-image
   {:position :absolute
    :top      9
@@ -189,9 +178,12 @@
    :color      color-white})
 
 (def command-image
-  {:margin-top 5
+  {:position :absolute
+   :top      4
+   :right    0
    :width    12
    :height   13})
+
 (def command-text
   (merge style-message-text
          {:marginTop        8

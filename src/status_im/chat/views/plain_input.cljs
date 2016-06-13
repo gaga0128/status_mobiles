@@ -10,18 +10,22 @@
 (defn set-input-message [message]
   (dispatch [:set-chat-input-text message]))
 
-(defn send [] (dispatch [:send-chat-msg]))
+(defn send [chat input-message]
+  (let [{:keys [group-chat chat-id]} chat]
+    (dispatch [:send-chat-msg])))
 
 (defn message-valid? [staged-commands message]
   (or (and (pos? (count message))
            (not= "!" message))
       (pos? (count staged-commands))))
 
-(defn try-send [staged-commands message]
-  (when (message-valid? staged-commands message) (send)))
+(defn try-send [chat staged-commands message]
+  (when (message-valid? staged-commands message)
+    (send chat message)))
 
 (defn plain-message-input-view []
-  (let [input-message-atom   (subscribe [:get-chat-input-text])
+  (let [chat                 (subscribe [:get-current-chat])
+        input-message-atom   (subscribe [:get-chat-input-text])
         staged-commands-atom (subscribe [:get-chat-staged-commands])
         typing-command?      (subscribe [:typing-command?])]
     (fn []
@@ -38,13 +42,13 @@
           [text-input {:style              st/message-input
                        :autoFocus          (pos? (count @staged-commands-atom))
                        :onChangeText       set-input-message
-                       :onSubmitEditing    #(try-send @staged-commands-atom
+                       :onSubmitEditing    #(try-send @chat @staged-commands-atom
                                                       input-message)}
            input-message]
           ;; TODO emoticons: not implemented
           [icon :smile st/smile-icon]
           (when (message-valid? @staged-commands-atom input-message)
-            [touchable-highlight {:on-press #(send)
+            [touchable-highlight {:on-press #(send @chat input-message)
                                   :accessibility-label :send-message}
              [view st/send-container
               [icon :send st/send-icon]]])]]))))

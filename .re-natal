@@ -17,7 +17,8 @@
     "dismissKeyboard",
     "react-native-linear-gradient",
     "react-native-android-sms-listener",
-    "react-native-status"
+    "react-native-camera",
+    "react-native-qrcode"
   ],
   "imageDirs": [
     "images"
