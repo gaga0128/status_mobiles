@@ -135,8 +135,3 @@
    :color         text2-color
    ;; IOS:
    :letterSpacing 0.5})
-
-(def qr-code-container
-  {:flex 1
-   :alignItems :center
-   :margin 15})
