@@ -6,8 +6,7 @@
                                                online-color
                                                text1-color
                                                text2-color
-                                               new-messages-count-color]]
-            [status-im.components.tabs.styles :refer [tabs-height]]))
+                                               new-messages-count-color]]))
 
 (def chat-container
   {:flexDirection     :row
@@ -114,11 +113,3 @@
   {:fontSize 20
    :height   22
    :color    :white})
-
-(defn action-buttons-container [animation? offset-y]
-  {:position     :absolute
-   :left         0
-   :right        0
-   :top          0
-   :bottom       0
-   :transform    [{:translateY (if animation? offset-y 1)}]})
