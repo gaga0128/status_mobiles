@@ -10,7 +10,6 @@
                                                 image
                                                 touchable-highlight
                                                 get-dimensions]]
-            [status-im.components.drawer.view :refer [drawer-view]]
             [status-im.components.animation :as anim]
             [status-im.chats-list.screen :refer [chats-list]]
             [status-im.discovery.screen :refer [discovery]]
@@ -102,10 +101,9 @@
 (defview main-tabs []
   [view-id [:get :view-id]
    tab-animation? [:get :prev-tab-view-id]]
-  [drawer-view
-   [view {:style common-st/flex}
-    [view {:style common-st/flex
-           :pointerEvents (if tab-animation? :none :auto)}
-     (doall (map #(tab-view %) tab-list))]
-    [tabs {:selected-view-id view-id
-           :tab-list         tab-list}]]])
+  [view {:style common-st/flex}
+   [view {:style common-st/flex
+          :pointerEvents (if tab-animation? :none :auto)}
+    (doall (map #(tab-view %) tab-list))]
+   [tabs {:selected-view-id view-id
+          :tab-list         tab-list}]])
