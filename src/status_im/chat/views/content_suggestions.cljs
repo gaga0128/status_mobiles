@@ -2,11 +2,11 @@
   (:require-macros [status-im.utils.views :refer [defview]])
   (:require [re-frame.core :refer [subscribe dispatch]]
             [status-im.components.react :refer [view
-                                              icon
-                                              text
-                                              touchable-highlight
-                                              list-view
-                                              list-item]]
+                                                icon
+                                                text
+                                                touchable-highlight
+                                                list-view
+                                                list-item]]
             [status-im.chat.styles.content-suggestions :as st]
             [status-im.utils.listview :refer [to-datasource]]))
 
@@ -24,9 +24,9 @@
   (list-item [suggestion-list-item row]))
 
 (defview content-suggestions-view []
-  [suggestions [:get :current-suggestion]]
+  [suggestions [:get-content-suggestions]]
   (when (seq suggestions)
-    [view
+    [view st/container
      [touchable-highlight {:style   st/drag-down-touchable
                            ;; TODO hide suggestions?
                            :onPress (fn [])}
