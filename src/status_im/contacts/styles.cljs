@@ -1,12 +1,14 @@
 (ns status-im.contacts.styles
   (:require [status-im.components.styles :refer [font
+                                                 font-medium
                                                  title-font
                                                  text1-color
+                                                 text2-color
+                                                 text3-color
+                                                 text5-color
                                                  color-white
                                                  toolbar-background2
                                                  online-color]]))
-
-
 
 (def contacts-list-container
   {:flex            1
@@ -15,57 +17,75 @@
 (def contacts-list
   {:backgroundColor :white})
 
+(def contact-group
+  {:flexDirection   :row
+   :alignItems      :center
+   :height          52
+   :backgroundColor toolbar-background2})
+
+(def contact-group-text
+  {:flex       1
+   :marginLeft 16
+   :fontSize   14
+   :fontFamily font-medium
+   :color      text5-color})
+
+(def contact-group-size-text
+  {:marginRight 14
+   :fontSize    12
+   :fontFamily  font
+   :color       text2-color})
+
+(def show-all
+  {:flexDirection :row
+   :alignItems    :center
+   :height        56})
+
+(def show-all-text
+  {:marginLeft    72
+   :fontSize      14
+   :fontFamily    font-medium
+   :color         text3-color
+   ;; ios only:
+   :letterSpacing 0.5})
+
+(def letter-container
+  {:paddingTop  11
+   :paddingLeft 20
+   :width       56})
+
+(def letter-text
+  {:fontSize   24
+   :fontFamily font
+   :color      text3-color})
+
 (def contact-photo-container
-  {:borderRadius 50})
-
-(def photo-image
-  {:borderRadius 50
-   :width        40
-   :height       40})
-
-(def online-container
-  {:position        :absolute
-   :top             24
-   :left            24
-   :width           20
-   :height          20
-   :borderRadius    50
-   :backgroundColor online-color
-   :borderWidth     2
-   :borderColor     color-white})
-
-(def online-dot
-  {:position        :absolute
-   :top             6
-   :width           4
-   :height          4
-   :borderRadius    50
-   :backgroundColor color-white})
-
-(def online-dot-left
-  (assoc online-dot :left 3))
-
-(def online-dot-right
-  (assoc online-dot :left 9))
+  {:marginTop  4
+   :marginLeft 12})
 
 (def contact-container
   {:flexDirection :row
    :height        56})
 
-(def photo-container
-  {:marginTop  8
-   :marginLeft 16
-   :width      44
-   :height     44})
-
 (def name-container
-  {:justifyContent :center})
+  {:flex           1
+   :marginLeft     12
+   :justifyContent :center})
 
 (def name-text
-  {:marginLeft 16
-   :fontSize   16
+  {:fontSize   16
    :fontFamily font
    :color      text1-color})
+
+(def more-btn
+  {:width          56
+   :height         56
+   :alignItems     :center
+   :justifyContent :center})
+
+(def more-btn-icon
+  {:width  4
+   :height 16})
 
 ; new contact
 

@@ -6,7 +6,8 @@
                                                 animated-view
                                                 icon
                                                 touchable-highlight
-                                                text-input]]
+                                                text-input
+                                                dismiss-keyboard!]]
             [status-im.components.animation :as anim]
             [status-im.chat.views.plain-message :as plain-message]
             [status-im.chat.views.command :as command]
@@ -60,7 +61,8 @@
     staged-commands [:get-chat-staged-commands]
     typing-command? [:typing-command?]
     commands-input-is-switching? [:animations :commands-input-is-switching?]]
-   (let [response? (and command to-msg-id)
+   (let [dismiss-keyboard (not (or command typing-command?))
+         response? (and command to-msg-id)
          message-input? (or (not command) commands-input-is-switching?)
          animation? commands-input-is-switching?]
      [text-input (merge {:style           (cond
@@ -70,7 +72,7 @@
                          :ref             (fn [input]
                                             (dispatch [:set-message-input input]))
                          :autoFocus       false
-                         :blurOnSubmit    false
+                         :blurOnSubmit    dismiss-keyboard
                          :onChangeText    (fn [text]
                                             (when-not animation?
                                               ((if message-input?
@@ -80,7 +82,8 @@
                          :onSubmitEditing #(when-not animation?
                                             (if message-input?
                                               (plain-message/try-send staged-commands
-                                                                      input-message)
+                                                                      input-message
+                                                                      dismiss-keyboard)
                                               (command/try-send input-command validator)))}
                         (when command
                           {:accessibility-label :command-input})
@@ -97,7 +100,8 @@
    staged-commands [:get-chat-staged-commands]
    typing-command? [:typing-command?]
    commands-input-is-switching? [:animations :commands-input-is-switching?]]
-  (let [response? (and command to-msg-id)
+  (let [dismiss-keyboard (not (or command typing-command?))
+        response? (and command to-msg-id)
         message-input? (or (not command) commands-input-is-switching?)]
     [view st/input-container
      [view st/input-view
@@ -113,7 +117,8 @@
       (if message-input?
         (when (plain-message/message-valid? staged-commands input-message)
           [send-button {:on-press            #(plain-message/try-send staged-commands
-                                                                      input-message)
+                                                                      input-message
+                                                                      dismiss-keyboard)
                         :accessibility-label :send-message}])
         (if (command/valid? input-command validator)
           [send-button {:on-press            command/send-command

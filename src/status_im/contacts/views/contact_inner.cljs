@@ -1,31 +1,42 @@
 (ns status-im.contacts.views.contact-inner
   (:require [clojure.string :as s]
-            [status-im.components.react :refer [view image text]]
-            [status-im.resources :as res]
+            [status-im.components.react :refer [view image text touchable-highlight icon]]
+            [status-im.components.chat-icon.screen :refer [contact-icon-contacts-tab]]
             [status-im.contacts.styles :as st]
             [status-im.i18n :refer [label]]))
 
-(defn contact-photo [{:keys [photo-path]}]
+(defn letter-view [letter]
+  [view st/letter-container
+   (when letter
+     [text {:style st/letter-text}
+      letter])])
+
+(defn contact-photo [{:keys [whisper-identity]}]
   [view st/contact-photo-container
-   [image {:source (if (s/blank? photo-path)
-                     res/user-no-photo
-                     {:uri photo-path})
-           :style  st/photo-image}]])
+   [contact-icon-contacts-tab whisper-identity]])
 
-(defn contact-online [{:keys [online]}]
-  (when online
-    [view st/online-container
-     [view st/online-dot-left]
-     [view st/online-dot-right]]))
-
-(defn contact-inner-view [{:keys [name photo-path online]}]
+(defn contact-inner-view [{:keys [name letter] :as contact}]
   [view st/contact-container
-   [view st/photo-container
-    [contact-photo {:photo-path photo-path}]
-    [contact-online {:online online}]]
+   [letter-view letter]
+   [contact-photo contact]
    [view st/name-container
     [text {:style st/name-text}
      (if (pos? (count name))
        name
        ;; todo is this correct behaviour?
        (label :t/no-name))]]])
+
+(defn contact-inner-view-2 [{:keys [name] :as contact}]
+  [view st/contact-container
+   [contact-photo contact]
+   [view st/name-container
+    [text {:style st/name-text}
+     (if (pos? (count name))
+       name
+       ;; todo is this correct behaviour?
+       (label :t/no-name))]]
+   [touchable-highlight
+    ;; TODO not imlemented: contact more button
+    {:on-press nil}
+    [view st/more-btn
+     [icon :more-vertical st/more-btn-icon]]]])
