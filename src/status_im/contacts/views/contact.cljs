@@ -2,8 +2,7 @@
   (:require-macros [status-im.utils.views :refer [defview]])
   (:require [status-im.components.react :refer [view touchable-highlight]]
             [re-frame.core :refer [dispatch subscribe]]
-            [status-im.contacts.views.contact-inner :refer [contact-inner-view
-                                                            contact-inner-view-2]]))
+            [status-im.contacts.views.contact-inner :refer [contact-inner-view]]))
 
 (defn on-press [chat whisper-identity]
   (if chat
@@ -15,9 +14,3 @@
   [touchable-highlight
    {:onPress (on-press chat whisper-identity)}
    [view {} [contact-inner-view contact]]])
-
-(defview contact-view-2 [{:keys [whisper-identity] :as contact}]
-  [chat [:get-chat whisper-identity]]
-  [touchable-highlight
-   {:onPress (on-press chat whisper-identity)}
-   [view [contact-inner-view-2 contact]]])
