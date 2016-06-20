@@ -1,19 +1,10 @@
-(ns status-im.contacts.styles
+(ns status-im.group-settings.styles.member
   (:require [status-im.components.styles :refer [font
-                                                 title-font
-                                                 text1-color
-                                                 color-white
-                                                 toolbar-background2
-                                                 online-color]]))
-
-
-
-(def contacts-list-container
-  {:flex            1
-   :backgroundColor :white})
-
-(def contacts-list
-  {:backgroundColor :white})
+                                               title-font
+                                               text1-color
+                                               text2-color
+                                               color-white
+                                               online-color]]))
 
 (def contact-photo-container
   {:borderRadius 50})
@@ -58,28 +49,30 @@
    :width      44
    :height     44})
 
-(def name-container
-  {:justifyContent :center})
+(def info-container
+  {:flex           1
+   :flexDirection  :column
+   :marginLeft     16
+   :justifyContent :center})
 
 (def name-text
-  {:marginLeft 16
+  {:marginTop  -2
    :fontSize   16
    :fontFamily font
    :color      text1-color})
 
-; new contact
+(def role-text
+  {:marginTop  1
+   :fontSize   12
+   :fontFamily font
+   :color      text2-color})
 
-(def contact-form-container
-  {:flex  1
-   :color :white})
+(def more-btn
+  {:width          56
+   :height         56
+   :alignItems     :center
+   :justifyContent :center })
 
-(def gradient-background
-  {:position :absolute
-   :top      0
-   :right    0
-   :bottom   0
-   :left     0})
-
-(def form-container
-  {:marginLeft 16
-   :margin-top 50})
+(def more-btn-icon
+  {:width  4
+   :height 16})

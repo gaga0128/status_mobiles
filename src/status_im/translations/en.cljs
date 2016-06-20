@@ -72,9 +72,6 @@
    :contacts                              "Contacts"
    :no-name                               "Noname"
    :new-contact                           "New Contact"
-   :show-all                              "SHOW ALL"
-   :contacs-group-dapps                   "DApps"
-   :contacs-group-people                  "People"
 
    ;group-settings
    :remove                                "Remove"

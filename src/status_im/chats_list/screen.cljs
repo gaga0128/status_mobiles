@@ -46,7 +46,7 @@
          [action-button-item
           {:title       (label :t/new-chat)
            :buttonColor :#9b59b6
-           :onPress     #(dispatch [:show-group-contacts :people])}
+           :onPress     #(dispatch [:navigate-to :contact-list])}
           [icon {:name  :android-create
                  :style st/create-icon}]]
          [action-button-item
