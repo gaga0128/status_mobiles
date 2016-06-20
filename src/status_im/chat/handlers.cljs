@@ -48,7 +48,9 @@
 (register-handler :start-cancel-command
   (u/side-effect!
     (fn [db _]
-      (dispatch [:animate-cancel-command]))))
+      (if (commands/get-chat-command-to-msg-id db)
+        (dispatch [:animate-cancel-command])
+        (dispatch [:cancel-command])))))
 
 (defn animate-set-chat-command-content [db _]
   (when (commands/get-chat-command-to-msg-id db)
@@ -76,9 +78,7 @@
           command-info {:command command
                         :content content
                         :handler (:handler command)}]
-      (-> db
-          (assoc-in [:chats current-chat-id :command-input :command] nil)
-          (commands/stage-command command-info)))))
+      (commands/stage-command db command-info))))
 
 (register-handler :set-message-input []
   (fn [db [_ input]]

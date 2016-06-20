@@ -2,8 +2,8 @@
   (:require [status-im.components.styles :refer [font
                                                  text2-color]]))
 
-(defn message-input-button-touchable [w]
-  {:width          w
+(def message-input-button-touchable
+  {:width          56
    :height         56
    :alignItems     :center
    :justifyContent :center})

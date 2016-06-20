@@ -37,10 +37,13 @@
                                       :whisper-identity ""
                                       :phone-number     ""}
              :disable-group-creation false
-             :animations             {:to-response-height           nil
+             :animations             {;; mutable data
+                                      :to-response-height           nil
                                       :response-height-current      nil
-                                      :command?                     false
+                                      :message-input-offset         0
+                                      :message-input-buttons-scale  1
                                       :messages-offset              0
+                                      :commands-input-is-switching? false
                                       :response-resize?             false}})
 
 (def protocol-initialized-path [:protocol-initialized])
