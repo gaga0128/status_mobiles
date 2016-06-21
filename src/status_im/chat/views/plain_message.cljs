@@ -5,7 +5,8 @@
             [status-im.components.react :refer [view
                                                 animated-view
                                                 icon
-                                                touchable-highlight]]
+                                                touchable-highlight
+                                                dismiss-keyboard!]]
             [status-im.components.animation :as anim]
             [status-im.chat.styles.plain-message :as st]
             [status-im.constants :refer [response-input-hiding-duration]]))
@@ -13,14 +14,19 @@
 (defn set-input-message [message]
   (dispatch [:set-chat-input-text message]))
 
+(defn send [dismiss-keyboard]
+  (when dismiss-keyboard
+    (dismiss-keyboard!))
+  (dispatch [:send-chat-msg]))
+
 (defn message-valid? [staged-commands message]
   (or (and (pos? (count message))
            (not= "!" message))
       (pos? (count staged-commands))))
 
-(defn try-send [staged-commands message]
+(defn try-send [staged-commands message dismiss-keyboard]
   (when (message-valid? staged-commands message)
-    (dispatch [:send-chat-msg])))
+    (send dismiss-keyboard)))
 
 (defn prepare-message-input [message-input]
   (when message-input
