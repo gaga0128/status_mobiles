@@ -1,6 +1,5 @@
 (ns status-im.navigation.handlers
-  (:require [re-frame.core :refer [register-handler dispatch debug enrich
-                                   after]]))
+  (:require [re-frame.core :refer [register-handler dispatch debug enrich after]]))
 
 (defn push-view [db view-id]
   (-> db
@@ -66,6 +65,12 @@
 (register-handler :show-contacts
   (fn [db _]
     (push-view db :contact-list)))
+
+(register-handler :show-group-contacts
+  (fn [db [_ group]]
+    (-> db
+        (assoc :contacts-group group)
+        (push-view :group-contacts))))
 
 (defn show-profile
   [db [_ identity]]
