@@ -37,10 +37,14 @@
                                       :whisper-identity ""
                                       :phone-number     ""}
              :disable-group-creation false
-             :animations             {:to-response-height           0.1
+             :animations             {;; mutable data
+                                      :to-response-height           nil
+                                      :response-height-current      nil
+                                      :message-input-offset         0
+                                      :message-input-buttons-scale  1
                                       :messages-offset              0
-                                      ;; todo clear this
-                                      :tabs-bar-value               (anim/create-value 0)}})
+                                      :commands-input-is-switching? false
+                                      :response-resize?             false}})
 
 (def protocol-initialized-path [:protocol-initialized])
 (defn chat-input-text-path [chat-id]

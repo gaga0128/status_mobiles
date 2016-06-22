@@ -2,7 +2,6 @@
   (:require [status-im.components.styles :refer [font
                                                  title-font
                                                  color-white
-                                                 color-gray2
                                                  chat-background
                                                  online-color
                                                  selected-message-color
@@ -50,7 +49,7 @@
    :elevation       0})
 
 (def discovery-subtitle
-  {:color      color-gray2
+  {:color      "#8f838c93"
    :fontFamily "sans-serif-medium"
    :fontSize   14})
 
