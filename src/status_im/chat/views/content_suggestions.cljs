@@ -25,10 +25,13 @@
 
 (defview content-suggestions-view []
   [suggestions [:get-content-suggestions]]
-  (when (seq suggestions)
+  (when-let [values (not-empty (filter :value suggestions))]
     [view st/container
      [touchable-highlight {:style   st/drag-down-touchable
                            ;; TODO hide suggestions?
                            :onPress (fn [])}
       [view [icon :drag_down st/drag-down-icon]]]
-     suggestions]))
+     [view (st/suggestions-container (count values))
+      [list-view {:dataSource                (to-datasource values)
+                  :keyboardShouldPersistTaps true
+                  :renderRow                 render-row}]]]))
