@@ -1,11 +1,12 @@
 (ns status-im.chat.views.message
+  (:require-macros [status-im.utils.views :refer [defview]])
   (:require [clojure.string :as s]
             [re-frame.core :refer [subscribe dispatch]]
             [reagent.core :as r]
             [status-im.components.react :refer [view
-                                                animated-view
                                                 text
                                                 image
+                                                animated-view
                                                 touchable-highlight]]
             [status-im.components.animation :as anim]
             [status-im.chat.views.request-message :refer [message-content-command-request]]
@@ -55,9 +56,9 @@
     [view st/track-mark]
     [text {:style st/track-duration-text} "03:39"]]])
 
-(defn message-content-command [content]
-  (let [commands-atom (subscribe [:get-commands])]
-    (fn [content]
+(defn message-content-command [content preview]
+  (let [commands-atom (subscribe [:get-commands-and-responses])]
+    (fn [content preview]
       (let [commands @commands-atom
             {:keys [command content]}
             (parse-command-msg-content commands content)]
@@ -65,14 +66,42 @@
          [view st/command-container
           [view (st/command-view command)
            [text {:style st/command-name}
-            (:text command)]]]
-         [image {:source (:icon command)
-                 :style  st/command-image}]
-         [text {:style st/command-text}
-          ;; TODO isn't smart
-          (if (= (:command command) :keypair-password)
-            "******"
-            content)]]))))
+            (str "!" (:name command))]]]
+         ;; todo doesn't reflect design
+         (when-let [icon (:icon command)]
+           [view (st/command-image-view command)
+            [image {:source {:uri icon}
+                    :style  st/command-image}]])
+         (if preview
+           preview
+           [text {:style st/command-text}
+            content])]))))
+
+(defn set-chat-command [msg-id command]
+  (dispatch [:set-response-chat-command msg-id (keyword (:name command))]))
+
+(defn label [{:keys [command]}]
+  (->> (when command (name command))
+       (str "request-")))
+
+;; todo remove (merging leftover)
+#_(defview message-content-command-request
+  [{:keys [msg-id content from incoming-group]}]
+  [commands [:get-responses]]
+  (let [{:keys [command content]} (parse-command-request commands content)]
+    [touchable-highlight {:onPress             #(set-chat-command msg-id command)
+                          :accessibility-label (label command)}
+     [view st/comand-request-view
+      [view st/command-request-message-view
+       (when incoming-group
+         [text {:style st/command-request-from-text} from])
+       [text {:style st/style-message-text} content]]
+      [view (st/command-request-image-view command)
+       [image {:source {:uri (:icon command)}
+               :style  st/command-request-image}]]
+      (when-let [request-text (:request-text command)]
+        [view st/command-request-text-view
+         [text {:style st/style-sub-text} request-text]])]]))
 
 (defn message-view
   [message content]
@@ -103,9 +132,9 @@
   [message-content-status message])
 
 (defmethod message-content content-type-command
-  [wrapper {:keys [content] :as message}]
+  [wrapper {:keys [content rendered-preview] :as message}]
   [wrapper message
-   [message-view message [message-content-command content]]])
+   [message-view message [message-content-command content rendered-preview]]])
 
 (defmethod message-content :default
   [wrapper {:keys [content-type content] :as message}]
