@@ -41,8 +41,10 @@
                      (toast (str error))))))))
 
 (defn http-get
-  ([url on-success on-error]
-   (-> (.fetch js/window url (clj->js {:method "GET"}))
+  ([action on-success on-error]
+   (-> (.fetch js/window
+               (str const/server-address action)
+               (clj->js {:method "GET"}))
        (.then (fn [response]
                 (log response)
                 (.text response)))
