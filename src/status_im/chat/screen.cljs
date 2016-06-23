@@ -18,7 +18,6 @@
             [status-im.components.invertible-scroll-view :refer [invertible-scroll-view]]
             [status-im.components.toolbar :refer [toolbar]]
             [status-im.chat.views.message :refer [chat-message]]
-            [status-im.chat.views.content-suggestions :refer [content-suggestions-view]]
             [status-im.chat.views.suggestions :refer [suggestions-view]]
             [status-im.chat.views.response :refer [response-view]]
             [status-im.chat.views.new-message :refer [chat-message-new]]
@@ -259,6 +258,7 @@
   [group-chat [:chat :group-chat]
    show-actions-atom [:show-actions]
    command [:get-chat-command]
+   command? [:command?]
    to-msg-id [:get-chat-command-to-msg-id]]
   [view {:style st/chat-view
          :onLayout (fn [event]
@@ -268,9 +268,7 @@
    [messages-container
     [messages-view group-chat]]
    (when group-chat [typing-all])
-   (cond
-     (and command to-msg-id) [response-view]
-     command [content-suggestions-view]
-     :else [suggestions-view])
+   [response-view]
+   (when-not command? [suggestions-view])
    [chat-message-new]
    (when show-actions-atom [actions-view])])

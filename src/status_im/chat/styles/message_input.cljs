@@ -1,13 +1,11 @@
 (ns status-im.chat.styles.message-input
   (:require [status-im.components.styles :refer [color-white
-                                                 color-blue]]))
+                                                 color-blue]]
+            [status-im.chat.constants :refer [input-height]]))
 
-(def input-height 56)
-
-(defn message-input-container [offset]
+(def message-input-container
   {:flex 1
-   :transform [{:translateX offset}]
-   :marginRight offset})
+   :marginRight 0})
 
 (def input-container
   {:flexDirection :column})

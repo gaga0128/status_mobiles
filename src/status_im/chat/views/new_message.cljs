@@ -16,22 +16,24 @@
    (for [command staged-commands]
      ^{:key command} [staged-command-view command])])
 
-(defn show-input [command]
+(defview show-input []
+  [command  [:get-chat-command]
+   command? [:command?]]
   [plain-message-input-view
-   (when command
+   (when command?
      (case (:command command)
        :phone {:input-options {:keyboardType :phone-pad}
                :validator     valid-mobile-number?}
-       :keypair-password {:input-options {:secureTextEntry true}}
+       :keypair {:input-options {:secureTextEntry true}}
        :confirmation-code {:input-options {:keyboardType :numeric}}
        :money {:input-options {:keyboardType :numeric}}
        :request {:input-options {:keyboardType :numeric}}
-       (throw (js/Error. "Uknown command type"))))])
+       ;; todo maybe nil is finr for now :)
+       nil #_(throw (js/Error. "Uknown command type"))))])
 
 (defview chat-message-new []
-  [command [:get-chat-command]
-   staged-commands [:get-chat-staged-commands]]
+  [staged-commands [:get-chat-staged-commands]]
   [view st/new-message-container
    (when (and staged-commands (pos? (count staged-commands)))
      [staged-commands-view staged-commands])
-   [show-input command]])
+   [show-input]])
