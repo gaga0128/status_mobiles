@@ -35,4 +35,3 @@
   [touchable-highlight {:on-press cancel-command-input}
    [view st/cancel-container
     [icon :close-gray st/cancel-icon]]])
-

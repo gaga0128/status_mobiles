@@ -1,6 +1,7 @@
 (ns status-im.persistence.realm
   (:require [cljs.reader :refer [read-string]]
             [status-im.components.styles :refer [default-chat-color]]
+            [status-im.utils.logging :as log]
             [status-im.utils.types :refer [to-string]]
             [status-im.utils.utils :as u])
   (:refer-clojure :exclude [exists?]))
@@ -33,9 +34,7 @@
                                   :delivery-status {:type     "string"
                                                     :optional true}
                                   :same-author     "bool"
-                                  :same-direction  "bool"
-                                  :preview         {:type     :string
-                                                    :optional true}}}
+                                  :same-direction  "bool"}}
                     {:name       :chat-contact
                      :properties {:identity   "string"
                                   :is-in-chat {:type    "bool"
@@ -52,15 +51,7 @@
                                   :timestamp   "int"
                                   :contacts    {:type       "list"
                                                 :objectType "chat-contact"}
-                                  :dapp-url    {:type     :string
-                                                :optional true}
-                                  :dapp-hash   {:type     :int
-                                                :optional true}
                                   :last-msg-id "string"}}
-                    {:name       :commands
-                     :primaryKey :chat-id
-                     :properties {:chat-id "string"
-                                  :file    "string"}}
                     {:name       :tag
                      :primaryKey :name
                      :properties {:name  "string"
@@ -102,10 +93,6 @@
    (create schema-name obj false))
   ([schema-name obj update?]
    (.create realm (to-string schema-name) (clj->js obj) update?)))
-
-(defn create-object
-  [schema-name obj]
-  (write (fn [] (create schema-name obj true))))
 
 (defmulti to-query (fn [schema-name operator field value]
                      operator))
@@ -171,6 +158,3 @@
 (defn collection->map [collection]
   (-> (.map collection (fn [object _ _] object))
       (js->clj :keywordize-keys true)))
-
-(defn get-one-by-field [schema-name field value]
-  (single-cljs (get-by-field schema-name field value)))
