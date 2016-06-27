@@ -23,7 +23,7 @@
         </intent-filter>
       </activity>
       <service
-        android:name=".geth.service.GethService"
+        android:name=".GethService"
         android:enabled="true"
         android:exported="true"
         android:process=":geth_process"/>
