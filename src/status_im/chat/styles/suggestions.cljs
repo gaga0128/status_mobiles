@@ -1,16 +1,16 @@
 (ns status-im.chat.styles.suggestions
   (:require [status-im.components.styles :refer [font
-                                                 color-light-blue-transparent
-                                                 color-white
-                                                 color-black
-                                                 color-blue
-                                                 color-blue-transparent
-                                                 selected-message-color
-                                                 online-color
-                                                 separator-color
-                                                 text1-color
-                                                 text2-color
-                                                 text3-color]]))
+                                               color-light-blue-transparent
+                                               color-white
+                                               color-black
+                                               color-blue
+                                               color-blue-transparent
+                                               selected-message-color
+                                               online-color
+                                               separator-color
+                                               text1-color
+                                               text2-color
+                                               text3-color]]))
 
 (def suggestion-height 88)
 
@@ -59,19 +59,11 @@
    :backgroundColor  color-white
    :borderRadius     5})
 
-(defn container [height]
-  {:flexDirection   :column
-   :position        :absolute
-   :left            0
-   :right           0
-   :bottom          0
-   :height          height
-   :backgroundColor color-white
-   :elevation       2})
+(def container
+  {:backgroundColor color-white})
 
 (def drag-down-touchable
   {:height         22
-   :background-color color-white
    :alignItems     :center
    :justifyContent :center})
 

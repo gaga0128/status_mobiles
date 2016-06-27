@@ -1,5 +1,4 @@
-(ns status-im.utils.handlers
-  (:require [re-frame.core :refer [after dispatch debug] :as re-core]))
+(ns status-im.utils.handlers)
 
 (defn side-effect!
   "Middleware for handlers that will not affect db."
@@ -7,8 +6,3 @@
   (fn [db params]
     (handler db params)
     db))
-
-(defn register-handler
-  ([name handler] (register-handler name nil handler))
-  ([name middleware handler]
-   (re-core/register-handler name [#_debug middleware] handler)))
