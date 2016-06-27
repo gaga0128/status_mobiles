@@ -173,7 +173,7 @@
     (dispatch [:received-msg
                {:msg-id       msg-id
                 :content      (command-content
-                                :keypair
+                                :keypair-password
                                 (label :t/keypair-generated))
                 :content-type content-type-command-request
                 :outgoing     false
@@ -184,9 +184,6 @@
 (def console-chat
   {:chat-id    "console"
    :name       "console"
-   ; todo remove/change dapp config fot console
-   :dapp-url   "http://localhost:8185/resources"
-   :dapp-hash  858845357
    :color      default-chat-color
    :group-chat false
    :is-active  true

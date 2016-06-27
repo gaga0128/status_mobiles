@@ -24,12 +24,11 @@
      (case (:command command)
        :phone {:input-options {:keyboardType :phone-pad}
                :validator     valid-mobile-number?}
-       :keypair {:input-options {:secureTextEntry true}}
+       :keypair-password {:input-options {:secureTextEntry true}}
        :confirmation-code {:input-options {:keyboardType :numeric}}
        :money {:input-options {:keyboardType :numeric}}
        :request {:input-options {:keyboardType :numeric}}
-       ;; todo maybe nil is finr for now :)
-       nil #_(throw (js/Error. "Uknown command type"))))])
+       (throw (js/Error. "Uknown command type"))))])
 
 (defview chat-message-new []
   [staged-commands [:get-chat-staged-commands]]

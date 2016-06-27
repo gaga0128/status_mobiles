@@ -3,11 +3,11 @@
             [re-frame.core :refer [dispatch]]
             [cljs.reader :refer [read-string]]
             [status-im.utils.random :refer [timestamp]]
+            [status-im.db :as db]
             [status-im.utils.logging :as log]
             [clojure.string :refer [join split]]
             [clojure.walk :refer [stringify-keys keywordize-keys]]
-            [status-im.constants :as c]
-            [status-im.commands.utils :refer [generate-hiccup]]))
+            [status-im.constants :as c]))
 
 (defn- map-to-str
   [m]
@@ -21,8 +21,7 @@
   {:outgoing       false
    :to             nil
    :same-author    false
-   :same-direction false
-   :preview        nil})
+   :same-direction false})
 
 (defn save-message
   ;; todo remove chat-id parameter
@@ -52,16 +51,10 @@
            (r/sorted :timestamp :desc)
            (r/collection->map))
        (into '())
-       ;; todo why reverse?
        reverse
-       (map (fn [{:keys [content-type preview] :as message}]
+       (map (fn [{:keys [content-type] :as message}]
               (if (command-type? content-type)
-                (-> message
-                    (update :content str-to-map)
-                    (assoc :rendered-preview (when preview
-                                               (generate-hiccup
-                                                 (read-string preview))))
-                    (dissoc :preview))
+                (update message :content str-to-map)
                 message)))))
 
 (defn update-message! [{:keys [msg-id] :as msg}]

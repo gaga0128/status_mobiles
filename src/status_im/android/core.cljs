@@ -48,6 +48,7 @@
          (.addOrientationListener
            orientation
            #(dispatch [:set :orientation (orientation->keyword %)]))
+         (.lockToPortrait orientation)
          (.addListener device-event-emitter
                        "keyboardDidShow"
                        (fn [e]
@@ -82,6 +83,7 @@
   (dispatch [:load-user-phone-number])
   (dispatch [:load-contacts])
   ;; load commands from remote server (todo: uncomment)
+  ;; (dispatch [:load-commands])
   (dispatch [:init-console-chat])
   (dispatch [:init-chat])
   (init-back-button-handler!)
