@@ -1,5 +1,5 @@
 (ns status-im.chat.handlers
-  (:require [re-frame.core :refer [register-handler enrich after debug dispatch]]
+  (:require [re-frame.core :refer [enrich after debug dispatch]]
             [status-im.models.commands :as commands]
             [clojure.string :as str]
             [status-im.components.styles :refer [default-chat-color]]
@@ -12,13 +12,14 @@
             [status-im.chat.sign-up :as sign-up-service]
             [status-im.models.chats :as chats]
             [status-im.navigation.handlers :as nav]
-            [status-im.utils.handlers :as u]
+            [status-im.utils.handlers :refer [register-handler] :as u]
             [status-im.persistence.realm :as r]
             [status-im.handlers.server :as server]
             [status-im.handlers.content-suggestions :refer [get-content-suggestions]]
             [status-im.utils.phone-number :refer [format-phone-number]]
             [status-im.utils.datetime :as time]
             [status-im.components.jail :as j]
+            [status-im.utils.types :refer [json->clj]]
             [status-im.commands.utils :refer [generate-hiccup]]))
 
 (register-handler :set-show-actions
@@ -93,7 +94,7 @@
 (register-handler :stage-command
   (after invoke-command-preview!)
   (fn [{:keys [current-chat-id] :as db} _]
-    (let [db (update-input-text db nil)
+    (let [db           (update-input-text db nil)
           {:keys [command content]}
           (get-in db [:chats current-chat-id :command-input])
           command-info {:command command
@@ -115,9 +116,7 @@
 
 (register-handler :set-response-chat-command
   [(after invoke-suggestions-handler!)
-   (after #(dispatch [:command-edit-mode]))
-   ;(after #(dispatch [:animate-show-response]))
-   ]
+   (after #(dispatch [:command-edit-mode]))]
   (fn [db [_ to-msg-id command-key]]
     (commands/set-response-chat-command db to-msg-id command-key)))
 
@@ -133,8 +132,23 @@
         db))
     db))
 
+(defn check-suggestions
+  [{:keys [current-chat-id] :as db} [_ text]]
+  (let [suggestions (suggestions/get-suggestions db text)]
+    (assoc-in db [:command-suggestions current-chat-id] suggestions)))
+
+(defn select-suggestion!
+  [{:keys [current-chat-id] :as db} [_ text]]
+  (let [suggestions (get-in db [:command-suggestions current-chat-id])]
+    (when (= 1 (count suggestions))
+      (dispatch [:set-chat-command (ffirst suggestions)]))))
+
 (register-handler :set-chat-input-text
-  ((enrich update-command) update-text))
+  [(enrich update-command)
+   (after select-suggestion!)
+   (enrich check-suggestions)
+   (after #(dispatch [:animate-command-suggestions]))]
+  update-text)
 
 (defn console? [s]
   (= "console" s))
@@ -297,9 +311,8 @@
     (commands/unstage-command db staged-command)))
 
 (register-handler :set-chat-command
-  [(after #(dispatch [:command-edit-mode]))
-   ;(after #(dispatch [:animate-show-response]))
-   ]
+  [(after invoke-suggestions-handler!)
+   (after #(dispatch [:command-edit-mode]))]
   (fn [db [_ command-key]]
     (commands/set-chat-command db command-key)))
 
@@ -353,8 +366,7 @@
 (register-handler :init-chat
   (-> load-messages!
       ((enrich init-chat))
-      ((after load-commands!))
-      debug))
+      ((after load-commands!))))
 
 (defn initialize-chats
   [{:keys [loaded-chats] :as db} _]
@@ -437,9 +449,11 @@
       ((after save-chat!))
       ((after open-chat!))))
 
-(register-handler :switch-command-suggestions
-  (fn [db [_]]
-    (suggestions/switch-command-suggestions db)))
+(register-handler :switch-command-suggestions!
+  (u/side-effect!
+    (fn [db]
+      (let [text (if (suggestions/typing-command? db) "" "!")]
+        (dispatch [:set-chat-input-text text])))))
 
 (defn remove-chat
   [{:keys [current-chat-id] :as db} _]
@@ -488,6 +502,7 @@
     (assoc-in db [:edit-mode current-chat-id] mode)))
 
 (register-handler :command-edit-mode
+  [(after #(dispatch [:set-chat-input-text ""]))]
   (edit-mode-handler :command))
 
 (register-handler :text-edit-mode
