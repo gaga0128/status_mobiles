@@ -13,50 +13,61 @@
 (def request-message-icon-scale-delay 600)
 
 (defn set-chat-command [msg-id command]
-  (dispatch [:set-response-chat-command msg-id (keyword (:name command))]))
+  (dispatch [:set-response-chat-command msg-id (:command command)]))
 
 (defn label [{:keys [command]}]
   (->> (name command)
        (str "request-")))
 
-(def min-scale 1)
-(def max-scale 1.3)
-
-(defn request-button-animation-logic
-  [{:keys [to-value val loop?] :as context}]
-  (anim/start
-    (anim/anim-sequence
-      [(anim/anim-delay (if @loop? request-message-icon-scale-delay 0))
-       (anim/spring val {:toValue to-value})])
-    #(when @loop?
-      (let [new-value (if (= to-value min-scale) max-scale min-scale)
-            context' (assoc context :to-value new-value)]
-        (request-button-animation-logic context')))))
+(defn request-button-animation-logic [{:keys [to-value val loop?]}]
+  (fn [_]
+    (let [loop? @loop?
+          minimum 1
+          maximum 1.3
+          to-scale (if loop?
+                     (or @to-value maximum)
+                     minimum)]
+      (anim/start
+        (anim/anim-sequence
+          [(anim/anim-delay (if loop? request-message-icon-scale-delay 0))
+           (anim/spring val {:toValue to-scale})])
+        (fn [arg]
+          (when (.-finished arg)
+            (dispatch [:set-animation ::request-button-scale-current to-scale])
+            (when loop?
+              (dispatch [:set-animation ::request-button-scale (if (= to-scale minimum)
+                                                                 maximum
+                                                                 minimum)]))))))))
 
 (defn request-button [msg-id command]
-  (let [scale-anim-val (anim/create-value min-scale)
+  (let [to-scale (subscribe [:animations ::request-button-scale])
+        cur-scale (subscribe [:animations ::request-button-scale-current])
+        scale-anim-val (anim/create-value (or @cur-scale 1))
         loop? (r/atom true)
-        context {:to-value max-scale
+        context {:to-value to-scale
                  :val      scale-anim-val
-                 :loop?    loop?}]
+                 :loop?    loop?}
+        on-update (request-button-animation-logic context)]
     (r/create-class
       {:component-did-mount
-       #(request-button-animation-logic context)
-       :component-will-unmount
-       #(reset! loop? false)
+       on-update
+       :component-did-update
+       on-update
        :reagent-render
        (fn [msg-id command]
-         [touchable-highlight {:on-press (fn []
-                                           (reset! loop? false)
-                                           (set-chat-command msg-id command))
-                               :style    st/command-request-image-touchable}
+         @to-scale
+         [touchable-highlight {:on-press            (fn []
+                                                      (reset! loop? false)
+                                                      (set-chat-command msg-id command))
+                               :style               st/command-request-image-touchable
+                               :accessibility-label (label command)}
           [animated-view {:style (st/command-request-image-view command scale-anim-val)}
-           [image {:source {:uri (:icon command)}
+           [image {:source (:request-icon command)
                    :style  st/command-request-image}]]])})))
 
 (defn message-content-command-request
   [{:keys [msg-id content from incoming-group]}]
-  (let [commands-atom (subscribe [:get-responses])]
+  (let [commands-atom (subscribe [:get-commands])]
     (fn [{:keys [msg-id content from incoming-group]}]
       (let [commands @commands-atom
             {:keys [command content]} (parse-command-request commands content)]

@@ -1,9 +1,12 @@
 (ns status-im.chat.subs
   (:require-macros [reagent.ratom :refer [reaction]])
-  (:require [re-frame.core :refer [register-sub dispatch subscribe path]]
+  (:require [re-frame.core :refer [register-sub dispatch subscribe]]
+            [status-im.db :as db]
+    ;todo handlers in subs?...
+            [status-im.chat.suggestions :refer
+             [get-suggestions typing-command?]]
             [status-im.models.commands :as commands]
             [status-im.constants :refer [response-suggesstion-resize-duration]]
-            [status-im.chat.constants :as c]
             [status-im.handlers.content-suggestions :refer [get-content-suggestions]]
             [status-im.chat.views.plain-message :as plain-message]
             [status-im.chat.views.command :as command]))
@@ -40,24 +43,15 @@
 
 (register-sub :get-suggestions
   (fn [db _]
-    (let [chat-id (subscribe [:get-current-chat-id])]
-      (reaction (get-in @db [:command-suggestions @chat-id])))))
+    (let [input-text (->> (:current-chat-id @db)
+                          db/chat-input-text-path
+                          (get-in @db)
+                          (reaction))]
+      (reaction (get-suggestions @db @input-text)))))
 
 (register-sub :get-commands
   (fn [db _]
     (reaction (commands/get-commands @db))))
-
-(register-sub :get-responses
-  (fn [db _]
-    (let [current-chat (@db :current-chat-id)]
-      (reaction (or (get-in @db [:chats current-chat :responses]) {})))))
-
-(register-sub :get-commands-and-responses
-  (fn [db _]
-    (let [current-chat (@db :current-chat-id)]
-      (reaction _ (or (->> (get-in @db [:chats current-chat])
-                           ((juxt :commands :responses))
-                           (apply merge)) {})))))
 
 (register-sub :get-chat-input-text
   (fn [db _]
@@ -73,7 +67,7 @@
 
 (register-sub :valid-plain-message?
   (fn [_ _]
-    (let [input-message (subscribe [:get-chat-input-text])
+    (let [input-message   (subscribe [:get-chat-input-text])
           staged-commands (subscribe [:get-chat-staged-commands])]
       (reaction
         (plain-message/message-valid? @staged-commands @input-message)))))
@@ -108,21 +102,18 @@
   (fn [db [_ chat-id]]
     (reaction (get-in @db [:chats chat-id]))))
 
+(register-sub :typing-command?
+  (fn [db _]
+    (reaction (typing-command? @db))))
+
 (register-sub :get-content-suggestions
   (fn [db _]
-    (reaction (get-in @db [:suggestions (:current-chat-id @db)]))))
+    (let [command (reaction (commands/get-chat-command @db))
+          text (reaction (commands/get-chat-command-content @db))]
+      (reaction (get-content-suggestions @command @text)))))
 
 (register-sub :command?
-  (fn [db]
+  (fn [db ]
     (->> (get-in @db [:edit-mode (:current-chat-id @db)])
          (= :command)
          (reaction))))
-
-(register-sub :messages-offset
-  (fn []
-    (let [command? (subscribe [:command?])
-          suggestions (subscribe [:get-suggestions])]
-      ;; todo fix magic values
-      (reaction (cond @command? c/request-info-height
-                      (seq @suggestions) c/suggestions-header-height
-                      :else 0)))))

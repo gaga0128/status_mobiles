@@ -24,16 +24,15 @@
 (defn button-animation-logic [{:keys [command? val]}]
   (fn [_]
     (let [to-scale (if @command? 0 1)]
-      (anim/start (anim/spring val {:toValue to-scale
-                                    :tension 30})))))
+      (anim/start (anim/spring val {:toValue  to-scale})))))
 
 (defn list-container [min]
   (fn [{:keys [command? width]}]
     (let [n-width (if @command? min 56)
-          delay   (if @command? 100 0)]
+          delay (if @command? 100 0)]
       (anim/start (anim/timing width {:toValue  n-width
                                       :duration response-input-hiding-duration
-                                      :delay    delay})))))
+                                      :delay delay})))))
 
 (defn commands-button []
   (let [command?        (subscribe [:command?])
@@ -52,7 +51,7 @@
        on-update
        :reagent-render
        (fn []
-         [touchable-highlight {:on-press #(dispatch [:switch-command-suggestions!])
+         [touchable-highlight {:on-press #(dispatch [:switch-command-suggestions])
                                :disabled @command?}
           [animated-view {:style (st/message-input-button-touchable
                                    container-width)}
@@ -63,20 +62,19 @@
   (fn [_]
     (let [to-scale (if @command? 0 1)]
       (when-not @command? (anim/set-value width 56))
-      (anim/start (anim/spring val {:toValue to-scale
-                                    :tension 30})
+      (anim/start (anim/spring val {:toValue  to-scale})
                   (fn [e]
                     (when (and @command? (.-finished e))
                       (anim/set-value width 0.1)))))))
 
 (defn smile-button []
-  (let [command?        (subscribe [:command?])
-        buttons-scale   (anim/create-value (if @command? 1 0))
+  (let [command?      (subscribe [:command?])
+        buttons-scale (anim/create-value (if @command? 1 0))
         container-width (anim/create-value (if @command? 0.1 56))
-        context         {:command? command?
-                         :val      buttons-scale
-                         :width    container-width}
-        on-update       (smile-animation-logic context)]
+        context       {:command? command?
+                       :val      buttons-scale
+                       :width    container-width}
+        on-update (smile-animation-logic context)]
     (r/create-class
       {:component-did-mount
        on-update
