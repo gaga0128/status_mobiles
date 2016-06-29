@@ -92,9 +92,8 @@ var status = {
         return response.create(n, d, h);
     },
     types: {
-        TEXT: 'text',
-        NUMBER: 'number',
-        PHONE: 'phone',
+        STRING: 'string',
+        PHONE_NUMBER: 'phone-number',
         PASSWORD: 'password'
     },
     events: {

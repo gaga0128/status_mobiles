@@ -87,15 +87,6 @@
   (fn [db _]
     (reaction (commands/get-chat-command @db))))
 
-(register-sub :get-command-parameter
-  (fn [db]
-    (let [command (subscribe [:get-chat-command])
-          chat-id (subscribe [:get-current-chat-id])]
-      (reaction
-        (let [path [:chats @chat-id :command-input :parameter-idx]
-              n (get-in @db path)]
-          (when n (nth (:params @command) n)))))))
-
 (register-sub :get-chat-command-content
   (fn [db _]
     (reaction (commands/get-chat-command-content @db))))
@@ -130,8 +121,12 @@
 (register-sub :messages-offset
   (fn []
     (let [command? (subscribe [:command?])
+          command (subscribe [:get-chat-command])
           suggestions (subscribe [:get-suggestions])]
       ;; todo fix magic values
-      (reaction (cond @command? c/request-info-height
-                      (seq @suggestions) c/suggestions-header-height
-                      :else 0)))))
+      (reaction
+        (let [type (:type @command)]
+          (cond (and @command? (= type :response)) c/request-info-height
+                (and @command? (= type :command)) c/suggestions-header-height
+                (seq @suggestions) c/suggestions-header-height
+                :else 0))))))
