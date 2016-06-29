@@ -1,95 +1,111 @@
 (ns status-im.chat.handlers.animation
-  (:require [re-frame.core :refer [after dispatch debug path]]
-            [status-im.utils.handlers :refer [register-handler]]
+  (:require [re-frame.core :refer [register-handler after dispatch]]
+            [re-frame.middleware :refer [path]]
+            [status-im.models.commands :as commands]
             [status-im.handlers.content-suggestions :refer [get-content-suggestions]]
-            [status-im.chat.constants :refer [input-height request-info-height
-                                              minimum-command-suggestions-height
-                                              response-height-normal minimum-suggestion-height]]
+            [status-im.chat.styles.message-input :refer [input-height]]
+            [status-im.chat.styles.response :refer [request-info-height response-height-normal]]
+            [status-im.chat.styles.response-suggestions :as response-suggestions-styles]
             [status-im.constants :refer [response-input-hiding-duration]]))
 
-;; todo magic value
-(def middle-height 270)
+(def zero-height input-height)
 
 (defn animation-handler
   ([name handler] (animation-handler name nil handler))
   ([name middleware handler]
    (register-handler name [(path :animations) middleware] handler)))
 
-(animation-handler :animate-cancel-command
-  (after #(dispatch [:text-edit-mode]))
+(animation-handler :finish-animate-cancel-command
   (fn [db _]
-    (assoc db :to-response-height input-height)))
+    (assoc db :commands-input-is-switching? false)))
 
-(def response-height (+ input-height response-height-normal))
+(animation-handler :animate-cancel-command
+  (fn [db _]
+    (if-not (:commands-input-is-switching? db)
+      (assoc db
+        :commands-input-is-switching? true
+        :message-input-buttons-scale 1
+        :message-input-offset 0
+        :to-response-height zero-height
+        :messages-offset 0)
+      db)))
+
+(animation-handler :finish-animate-response-resize
+  (fn [db _]
+    (let [fixed (:to-response-height db)]
+      (assoc db :response-height-current fixed
+                :response-resize? false))))
+
+(animation-handler :set-response-height
+  (fn [db [_ value]]
+    (assoc db :response-height-current value)))
+
+(animation-handler :animate-response-resize
+  (fn [db _]
+    (assoc db :response-resize? true)))
+
+(defn get-response-height [db]
+  (let [command (commands/get-chat-command db)
+        text (commands/get-chat-command-content db)
+        suggestions (get-content-suggestions command text)
+        suggestions-height (reduce + 0 (map #(if (:header %)
+                                              response-suggestions-styles/header-height
+                                              response-suggestions-styles/suggestion-height)
+                                            suggestions))]
+    (+ zero-height
+       (min response-height-normal (+ suggestions-height request-info-height)))))
 
 (defn update-response-height [db]
-  (assoc-in db [:animations :to-response-height] response-height))
+  (assoc-in db [:animations :to-response-height] (get-response-height db)))
 
-(register-handler :animate-command-suggestions
-  (fn [{:keys [current-chat-id] :as db} _]
-    (let [suggestions? (seq (get-in db [:command-suggestions current-chat-id]))
-          current (get-in db [:animations :command-suggestions-height])
-          height (if suggestions? middle-height 10)
-          changed? (if (and suggestions?
-                            (not (nil? current))
-                            (not= 10 current))
-                     identity inc)]
-      (-> db
-          (update :animations assoc :command-suggestions-height height)
-          (update-in [:animations :commands-height-changed] changed?)))))
-
-(defn get-minimum-height
-  [{:keys [current-chat-id] :as db}]
-  (let [path [:chats current-chat-id :command-input :command :type]
-        type (get-in db path)]
-    (if (= :response type)
-      minimum-suggestion-height
-      10)))
+(animation-handler :finish-show-response
+  (fn [db _]
+    (assoc db :commands-input-is-switching? false)))
 
 (register-handler :animate-show-response
-  [(after #(dispatch [:command-edit-mode]))]
-  (fn [{:keys [current-chat-id] :as db}]
-    (let [suggestions? (seq (get-in db [:suggestions current-chat-id]))
-          height (if suggestions?
-                   middle-height
-                   (get-minimum-height db))]
-      (assoc-in db [:animations :to-response-height] height))))
+  (after #(dispatch [:animate-response-resize]))
+  (fn [db _]
+    (-> db
+        (assoc-in [:animations :commands-input-is-switching?] true)
+        (assoc-in [:animations :response-height-current] zero-height)
+        (assoc-in [:animations :message-input-buttons-scale] 0.1)
+        (assoc-in [:animations :message-input-offset] -40)
+        (assoc-in [:animations :messages-offset] request-info-height)
+        (update-response-height))))
 
-(defn fix-height
-  [height-key height-signal-key suggestions-key minimum]
-  (fn [{:keys [current-chat-id] :as db} [_ vy current]]
-    (let [max-height (get-in db [:layout-height])
-          moving-down? (pos? vy)
-          moving-up? (not moving-down?)
-          under-middle-position? (<= current middle-height)
-          over-middle-position? (not under-middle-position?)
-          suggestions (get-in db [suggestions-key current-chat-id])
-          new-fixed (cond (not suggestions)
-                          (minimum db)
+(animation-handler :set-response-max-height
+  (fn [db [_ height]]
+    (let [prev-height (:response-height-max db)]
+      (if (not= height prev-height)
+        (let [db (assoc db :response-height-max height)]
+          (if (= prev-height (:to-response-height db))
+            (assoc db :to-response-height height
+                      :response-height-current height)
+            db))
+        db))))
 
-                          (and under-middle-position? moving-up?)
-                          middle-height
-
-                          (and over-middle-position? moving-down?)
-                          middle-height
-
-                          (and over-middle-position? moving-up?)
-                          max-height
-
-                          (and under-middle-position? moving-down?)
-                          (minimum db))]
-      (-> db
-          (assoc-in [:animations height-key] new-fixed)
-          (update-in [:animations height-signal-key] inc)))))
-
-(register-handler :fix-commands-suggestions-height
-  (fix-height :command-suggestions-height
-              :commands-height-changed
-              :command-suggestions
-              (constantly minimum-command-suggestions-height)))
+(animation-handler :on-drag-response
+  (fn [db [_ dy]]
+    (let [fixed (:to-response-height db)]
+      (assoc db :response-height-current (- fixed dy)
+                :response-resize? false))))
 
 (register-handler :fix-response-height
-  (fix-height :to-response-height
-              :response-height-changed
-              :suggestions
-              get-minimum-height))
+  (fn [db _]
+    (if (and (commands/get-chat-command-to-msg-id db)
+             (not (get-in db [:animations :commands-input-is-switching?])))
+      (let [current (get-in db [:animations :response-height-current])
+            normal-height response-height-normal
+            command (commands/get-chat-command db)
+            text (commands/get-chat-command-content db)
+            suggestions (get-content-suggestions command text)
+            max-height (get-in db [:animations :response-height-max])
+            delta (/ normal-height 2)
+            new-fixed (cond
+                        (or (<= current (+ zero-height delta))
+                            (empty? suggestions)) (+ zero-height request-info-height)
+                        (<= current (+ zero-height normal-height delta)) (get-response-height db)
+                        :else max-height)]
+        (dispatch [:animate-response-resize])
+        (assoc-in db [:animations :to-response-height] new-fixed))
+      db)))

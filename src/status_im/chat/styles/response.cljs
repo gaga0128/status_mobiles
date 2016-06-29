@@ -6,8 +6,10 @@
                                                  text2-color
                                                  chat-background
                                                  color-black]]
-            [status-im.chat.constants :refer [input-height request-info-height
-                                              response-height-normal]]))
+            [status-im.chat.styles.message-input :refer [input-height]]))
+
+(def response-height-normal 211)
+(def request-info-height 61)
 
 (def drag-container
   {:height         16
@@ -83,12 +85,12 @@
    :width      12
    :height     12})
 
-(defn command-input [ml disbale?]
+(def command-input
   {:flex        1
+   :marginLeft  56
    :marginRight 16
-   :margin-left (- ml 5)
    :marginTop   -2
    :padding     0
    :fontSize    14
    :fontFamily  font
-   :color       (if disbale? color-white text1-color)})
+   :color       text1-color})
