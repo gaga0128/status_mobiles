@@ -23,6 +23,7 @@ import android.content.Context;
 import com.bitgo.randombytes.RandomBytesPackage;
 import com.BV.LinearGradient.LinearGradientPackage;
 import com.centaurwarchief.smslistener.SmsListener;
+import com.github.yamill.orientation.OrientationPackage;
 
 
 import android.util.Log;
@@ -31,11 +32,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.io.File;
+import com.statusim.Jail.JailPackage;
 
 import com.lwansbrough.RCTCamera.*;
 import com.i18n.reactnativei18n.ReactNativeI18n;
 import io.realm.react.RealmReactPackage;
-
+import android.content.Intent;
+import android.content.res.Configuration;
 
 public class MainActivity extends ReactActivity {
 
@@ -174,6 +177,7 @@ public class MainActivity extends ReactActivity {
     protected List<ReactPackage> getPackages() {
         return Arrays.<ReactPackage>asList(
                 new MainReactPackage(),
+                new JailPackage(),
                 new RealmReactPackage(),
                 new VectorIconsPackage(),
                 new ReactNativeContacts(),
@@ -181,7 +185,16 @@ public class MainActivity extends ReactActivity {
                 new RandomBytesPackage(),
                 new LinearGradientPackage(),
                 new RCTCameraPackage(),
-                new SmsListener(this)
+                new SmsListener(this),
+                new OrientationPackage(this)
         );
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Intent intent = new Intent("onConfigurationChanged");
+        intent.putExtra("newConfig", newConfig);
+        this.sendBroadcast(intent);
     }
 }
