@@ -5,7 +5,8 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [status-im.handlers]
             [status-im.subs]
-            [status-im.components.react :refer [navigator app-registry]]
+            [status-im.components.react :refer [navigator app-registry device-event-emitter
+                                                orientation]]
             [status-im.components.main-tabs :refer [main-tabs]]
             [status-im.contacts.views.contact-list :refer [contact-list] ]
             [status-im.contacts.views.new-contact :refer [new-contact]]
@@ -13,6 +14,7 @@
             [status-im.discovery.screen :refer [discovery]]
             [status-im.discovery.tag :refer [discovery-tag]]
             [status-im.chat.screen :refer [chat]]
+            [status-im.users.screen :refer [users]]
             [status-im.chats-list.screen :refer [chats-list]]
             [status-im.new-group.screen :refer [new-group]]
             [status-im.participants.views.add :refer [new-participants]]
@@ -33,25 +35,51 @@
                            true)))]
     (add-event-listener "hardwareBackPress" new-listener)))
 
+(defn orientation->keyword [o]
+  (keyword (.toLowerCase o)))
+
 (defn app-root []
   (let [signed-up (subscribe [:get :signed-up])
-        view-id   (subscribe [:get :view-id])]
-    (fn []
-      (case (if @signed-up @view-id :chat)
-        :discovery [main-tabs]
-        :discovery-tag [discovery-tag]
-        :add-participants [new-participants]
-        :remove-participants [remove-participants]
-        :chat-list [main-tabs]
-        :new-group [new-group]
-        :group-settings [group-settings]
-        :contact-list [main-tabs]
-        :group-contacts [contact-list]
-        :new-contact [new-contact]
-        :qr-scanner [qr-scanner]
-        :chat [chat]
-        :profile [profile]
-        :my-profile [my-profile]))))
+        view-id   (subscribe [:get :view-id])
+        keyboard-height (subscribe [:get :keyboard-height])]
+    (r/create-class
+      {:component-will-mount
+       (fn []
+         (let [o (orientation->keyword (.getInitialOrientation orientation))]
+           (dispatch [:set :orientation o]))
+         (.addOrientationListener
+           orientation
+           #(dispatch [:set :orientation (orientation->keyword %)]))
+         (.lockToPortrait orientation)
+         (.addListener device-event-emitter
+                       "keyboardDidShow"
+                       (fn [e]
+                         (let [h (.. e -endCoordinates -height)]
+                           (when-not (= h keyboard-height)
+                             (dispatch [:set :keyboard-height h])))))
+         (.addListener device-event-emitter
+                       "keyboardDidHide"
+                       (when-not (= 0 keyboard-height)
+                         #(dispatch [:set :keyboard-height 0]))))
+       :render
+       (fn []
+         (case (if @signed-up @view-id :chat)
+           :discovery [main-tabs]
+           :discovery-tag [discovery-tag]
+           :add-participants [new-participants]
+           :remove-participants [remove-participants]
+           :chat-list [main-tabs]
+           :new-group [new-group]
+           :group-settings [group-settings]
+           :contact-list [main-tabs]
+           :group-contacts [contact-list]
+           :new-contact [new-contact]
+           :qr-scanner [qr-scanner]
+           :chat [chat]
+           :profile [profile]
+           :users [users]
+           :login [login]
+           :my-profile [my-profile]))})))
 
 (defn init []
   (dispatch-sync [:initialize-db])
@@ -60,8 +88,6 @@
   (dispatch [:initialize-protocol])
   (dispatch [:load-user-phone-number])
   (dispatch [:load-contacts])
-  ;; load commands from remote server (todo: uncomment)
-  ;; (dispatch [:load-commands])
   (dispatch [:init-console-chat])
   (dispatch [:init-chat])
   (init-back-button-handler!)

@@ -119,12 +119,9 @@
    :You                                   "You"
 
    ;new-contact
-   :add-new-contact                       "Add new contact"
    :import-qr                             "Import"
-   :scan-qr                               "Scan QR"
-   :name                                  "Name"
+   :contact-name                          "Contact Name"
    :whisper-identity                      "Whisper Identity"
-   :address-explication                   "Maybe here should be some text explaining what an address is and where to look for it"
 
    ;login
    :recover-from-passphrase               "Recover from passphrase"
