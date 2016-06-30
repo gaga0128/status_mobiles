@@ -81,10 +81,8 @@
 (defn init []
   (dispatch-sync [:initialize-db])
   (dispatch [:initialize-crypt])
-  (dispatch [:initialize-geth])
   (dispatch [:initialize-chats])
-  ;protocol must be initialized after user enters password and we create account
-      ;(dispatch [:initialize-protocol])
+  (dispatch [:initialize-protocol])
   (dispatch [:load-user-phone-number])
   (dispatch [:load-contacts])
   (dispatch [:init-console-chat])
