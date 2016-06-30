@@ -78,14 +78,10 @@
 (defn init []
   (dispatch-sync [:initialize-db])
   (dispatch [:initialize-crypt])
-  (dispatch [:initialize-geth])
   (dispatch [:initialize-chats])
-  ;protocol must be initialized after user enters password and we create account
-      ;(dispatch [:initialize-protocol])
+  (dispatch [:initialize-protocol])
   (dispatch [:load-user-phone-number])
   (dispatch [:load-contacts])
-  ;; load commands from remote server (todo: uncomment)
-  ;; (dispatch [:load-commands])
   (dispatch [:init-console-chat])
   (dispatch [:init-chat])
   (init-back-button-handler!)
