@@ -39,8 +39,7 @@
 
 (defn app-root []
   (let [signed-up (subscribe [:get :signed-up])
-        view-id   (subscribe [:get :view-id])
-        keyboard-height (subscribe [:get :keyboard-height])]
+        view-id   (subscribe [:get :view-id])]
     (r/create-class
       {:component-will-mount
        (fn []
@@ -54,12 +53,10 @@
                        "keyboardDidShow"
                        (fn [e]
                          (let [h (.. e -endCoordinates -height)]
-                           (when-not (= h keyboard-height)
-                             (dispatch [:set :keyboard-height h])))))
+                           (dispatch [:set :keyboard-height h]))))
          (.addListener device-event-emitter
                        "keyboardDidHide"
-                       (when-not (= 0 keyboard-height)
-                         #(dispatch [:set :keyboard-height 0]))))
+                       #(dispatch [:set :keyboard-height 0])))
        :render
        (fn []
          (case (if @signed-up @view-id :chat)
@@ -81,10 +78,14 @@
 (defn init []
   (dispatch-sync [:initialize-db])
   (dispatch [:initialize-crypt])
+  (dispatch [:initialize-geth])
   (dispatch [:initialize-chats])
-  (dispatch [:initialize-protocol])
+  ;protocol must be initialized after user enters password and we create account
+      ;(dispatch [:initialize-protocol])
   (dispatch [:load-user-phone-number])
   (dispatch [:load-contacts])
+  ;; load commands from remote server (todo: uncomment)
+  ;; (dispatch [:load-commands])
   (dispatch [:init-console-chat])
   (dispatch [:init-chat])
   (init-back-button-handler!)
