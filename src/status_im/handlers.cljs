@@ -7,6 +7,7 @@
     [status-im.protocol.state.storage :as storage]
     [status-im.utils.logging :as log]
     [status-im.utils.crypt :refer [gen-random-bytes]]
+    [status-im.components.react :refer [geth]]
     [status-im.utils.handlers :refer [register-handler] :as u]
     status-im.chat.handlers
     status-im.chat.handlers.animation
@@ -19,6 +20,7 @@
     status-im.commands.handlers.loading
     status-im.commands.handlers.jail
     status-im.qr-scanner.handlers
+    status-im.accounts.handlers
     status-im.protocol.handlers
     status-im.chat.handlers.requests))
 
@@ -72,6 +74,11 @@
                                         (.toBits (.. js/ecc -sjcl -codec -hex))
                                         (.addEntropy (.. js/ecc -sjcl -random)))
                                    (dispatch [:crypt-initialized]))))))))
+(register-handler :initialize-geth
+                  (u/side-effect!
+                   (fn [_ _]
+                       (log/debug "Starting node")
+                       (.startNode geth (fn [result] (log/debug "Started Node: " result))))))
 
 (register-handler :crypt-initialized
   (u/side-effect!
