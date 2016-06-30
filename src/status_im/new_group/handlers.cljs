@@ -1,7 +1,6 @@
 (ns status-im.new-group.handlers
   (:require [status-im.protocol.api :as api]
-            [re-frame.core :refer [after dispatch debug enrich]]
-            [status-im.utils.handlers :refer [register-handler]]
+            [re-frame.core :refer [register-handler after dispatch debug enrich]]
             [status-im.components.styles :refer [default-chat-color]]
             [status-im.models.chats :as chats]
             [clojure.string :as s]))

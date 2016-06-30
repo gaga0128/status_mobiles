@@ -4,8 +4,7 @@
   (:require [status-im.utils.handlers :as u]
             [status-im.utils.logging :as log]
             [status-im.protocol.api :as api]
-            [re-frame.core :refer [dispatch debug]]
-            [status-im.utils.handlers :refer [register-handler]]
+            [re-frame.core :refer [register-handler dispatch debug]]
             [status-im.models.contacts :as contacts]
             [status-im.protocol.api :refer [init-protocol]]
             [status-im.protocol.protocol-handler :refer [make-handler]]
@@ -18,8 +17,8 @@
 
 (register-handler :initialize-protocol
   (u/side-effect!
-    (fn [db [_ account]]
-      (init-protocol account (make-handler db)))))
+    (fn [db [_]]
+      (init-protocol (make-handler db)))))
 
 (register-handler :protocol-initialized
   (fn [db [_ identity]]

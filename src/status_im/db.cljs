@@ -11,7 +11,6 @@
 ;; initial state of app-db
 (def app-db {:identity-password      "replace-me-with-user-entered-password"
              :identity               "me"
-             :accounts               {}
              :contacts               []
              :contacts-ids           #{}
              :selected-contacts      #{}
@@ -38,8 +37,14 @@
                                       :whisper-identity ""
                                       :phone-number     ""}
              :disable-group-creation false
-             :animations             {:to-response-height           0.1
-                                      ;; todo clear this
+             :animations             {;; mutable data
+                                      :to-response-height           nil
+                                      :response-height-current      nil
+                                      :message-input-offset         0
+                                      :message-input-buttons-scale  1
+                                      :messages-offset              0
+                                      :commands-input-is-switching? false
+                                      :response-resize?             false
                                       :tabs-bar-value               (anim/create-value 0)}})
 
 (def protocol-initialized-path [:protocol-initialized])

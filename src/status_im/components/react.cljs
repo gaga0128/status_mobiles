@@ -4,7 +4,6 @@
             [status-im.utils.utils :as u]))
 
 (def react (u/require "react-native"))
-(def native-modules (.-NativeModules react))
 
 (defn get-react-property [name]
   (aget react name))
@@ -77,7 +76,3 @@
   (r/as-element component))
 
 (def dismiss-keyboard! (u/require "dismissKeyboard"))
-(def device-event-emitter (.-DeviceEventEmitter react))
-(def orientation (u/require "react-native-orientation"))
-
-(def geth (.-Geth native-modules))

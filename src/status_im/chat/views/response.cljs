@@ -11,10 +11,10 @@
                                                 text-input
                                                 touchable-highlight]]
             [status-im.components.drag-drop :as drag]
+            [status-im.chat.views.response-suggestions :refer [response-suggestions-view]]
             [status-im.chat.styles.response :as st]
-            [status-im.chat.styles.dragdown :as ddst]
-            [status-im.components.animation :as anim]
-            [status-im.chat.suggestions-responder :as resp]))
+            [status-im.chat.styles.message-input :refer [input-height]]
+            [status-im.components.animation :as anim]))
 
 (defn drag-icon []
   [view st/drag-container
@@ -33,64 +33,67 @@
     ;; TODO stub data: request message info
     "By ???, MMM 1st at HH:mm"]])
 
-(defn request-info [response-height]
-  (let [orientation (subscribe [:get :orientation])
-        kb-height (subscribe [:get :keyboard-height])
-        pan-responder (resp/pan-responder response-height
-                                          kb-height
-                                          orientation
-                                          :fix-response-height)
+(defn create-response-pan-responder []
+  (drag/create-pan-responder
+    {:on-move    (fn [e gesture]
+                   (dispatch [:on-drag-response (.-dy gesture)]))
+     :on-release (fn [e gesture]
+                   (dispatch [:fix-response-height]))}))
+
+(defn request-info []
+  (let [pan-responder (create-response-pan-responder)
         command (subscribe [:get-chat-command])]
-    (fn [response-height]
-      (if (= :response (:type @command))
-        [view (merge (drag/pan-handlers pan-responder)
-                     {:style (st/request-info (:color @command))})
-         [drag-icon]
-         [view st/inner-container
-          [command-icon nil]
-          [info-container @command]
-          [touchable-highlight {:on-press #(dispatch [:start-cancel-command])}
-           [view st/cancel-container
-            [icon :close-white st/cancel-icon]]]]]
-        [view (merge (drag/pan-handlers pan-responder)
-                     {:style ddst/drag-down-touchable})
-         [icon :drag_down ddst/drag-down-icon]]))))
+    (fn []
+      [view (merge (drag/pan-handlers pan-responder)
+                   {:style (st/request-info (:color @command))})
+       [drag-icon]
+       [view st/inner-container
+        [command-icon nil]
+        [info-container @command]
+        [touchable-highlight {:on-press #(dispatch [:start-cancel-command])}
+         [view st/cancel-container
+          [icon :close-white st/cancel-icon]]]]])))
 
-(defn container-animation-logic [{:keys [to-value val]}]
-  (let [to-value @to-value]
-    (anim/start (anim/spring val {:toValue to-value}))))
+(defn container-animation-logic [{:keys [animation? to-value current-value val]}]
+  (fn [_]
+    (if @animation?
+      (let [to-value @to-value]
+        (anim/start (anim/spring val {:toValue to-value})
+                    (fn [arg]
+                      (when (.-finished arg)
+                        (dispatch [:set-animation :response-height-current to-value])
+                        (dispatch [:finish-animate-response-resize])
+                        (when (= to-value input-height)
+                          (dispatch [:finish-animate-cancel-command])
+                          (dispatch [:cancel-command]))))))
+      (anim/set-value val @current-value))))
 
-(defn container [response-height & children]
-  (let [;; todo to-response-height, cur-response-height must be specific
-        ;; for each chat
+(defn container [& children]
+  (let [commands-input-is-switching? (subscribe [:animations :commands-input-is-switching?])
+        response-resize? (subscribe [:animations :response-resize?])
         to-response-height (subscribe [:animations :to-response-height])
-        changed (subscribe [:animations :response-height-changed])
-        context {:to-value to-response-height
-                 :val      response-height}
-        on-update #(container-animation-logic context)]
+        cur-response-height (subscribe [:animations :response-height-current])
+        response-height (anim/create-value (or @cur-response-height 0))
+        context {:animation?    (reaction (or @commands-input-is-switching? @response-resize?))
+                 :to-value      to-response-height
+                 :current-value cur-response-height
+                 :val           response-height}
+        on-update (container-animation-logic context)]
     (r/create-class
       {:component-did-mount
        on-update
        :component-did-update
        on-update
        :reagent-render
-       (fn [response-height & children]
-         @to-response-height @changed
-         (into [animated-view {:style (st/response-view response-height)}]
+       (fn [& children]
+         @to-response-height
+         (into [animated-view {:style (st/response-view (if (or @commands-input-is-switching? @response-resize?)
+                                                          response-height
+                                                          (or @cur-response-height 0)))}]
                children))})))
 
-(defview placeholder []
-  [suggestions [:get-content-suggestions]]
-  (when (seq suggestions)
-    [view st/input-placeholder]))
-
-(defview response-suggestions-view []
-  [suggestions [:get-content-suggestions]]
-  (when (seq suggestions) suggestions))
-
 (defn response-view []
-  (let [response-height (anim/create-value 0)]
-    [container response-height
-     [request-info response-height]
-     [response-suggestions-view]
-     [placeholder]]))
+  [container
+   [request-info]
+   [response-suggestions-view]
+   [view st/input-placeholder]])
