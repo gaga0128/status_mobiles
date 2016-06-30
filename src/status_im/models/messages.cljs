@@ -6,8 +6,7 @@
             [status-im.utils.logging :as log]
             [clojure.string :refer [join split]]
             [clojure.walk :refer [stringify-keys keywordize-keys]]
-            [status-im.constants :as c]
-            [status-im.commands.utils :refer [generate-hiccup]]))
+            [status-im.constants :as c]))
 
 (defn- map-to-str
   [m]
@@ -21,8 +20,7 @@
   {:outgoing       false
    :to             nil
    :same-author    false
-   :same-direction false
-   :preview        nil})
+   :same-direction false})
 
 (defn save-message
   ;; todo remove chat-id parameter

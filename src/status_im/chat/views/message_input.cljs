@@ -6,6 +6,7 @@
                                                 icon
                                                 touchable-highlight
                                                 text-input]]
+            [status-im.components.animation :as anim]
             [status-im.chat.views.plain-message :as plain-message]
             [status-im.chat.views.command :as command]
             [status-im.chat.styles.message-input :as st]
@@ -21,27 +22,24 @@
 (defn message-input-container [input]
   [view st/message-input-container input])
 
-(defn plain-input-options [disbale?]
+(def plain-input-options
   {:style           st-message/message-input
-   :onChangeText    (when-not disbale? plain-message/set-input-message)
-   :editable        (not disbale?)
+   :onChangeText    plain-message/set-input-message
    :onSubmitEditing plain-message/send})
 
-(defn command-input-options [icon-width disbale?]
-  {:style           (st-response/command-input icon-width disbale?)
-   :onChangeText    (when-not disbale? command/set-input-message)
+(def command-input-options
+  {:style           st-response/command-input
+   :onChangeText    command/set-input-message
    :onSubmitEditing command/send-command})
 
 (defview message-input [input-options]
   [command? [:command?]
    input-message [:get-chat-input-text]
-   input-command [:get-chat-command-content]
-   icon-width [:command-icon-width]
-   disbale? [:get :disable-input]]
+   input-command [:get-chat-command-content]]
   [text-input (merge
                 (if command?
-                  (command-input-options icon-width disbale?)
-                  (plain-input-options disbale?))
+                  command-input-options
+                  plain-input-options)
                 {:autoFocus           false
                  :blurOnSubmit        false
                  :accessibility-label :input}
@@ -50,7 +48,6 @@
 
 (defview plain-message-input-view [{:keys [input-options validator]}]
   [command? [:command?]
-   {:keys [type] :as command} [:get-chat-command]
    input-command [:get-chat-command-content]
    valid-plain-message? [:valid-plain-message?]
    valid-command? [:valid-command? validator]]
@@ -66,6 +63,4 @@
                        command/send-command
                        plain-message/send)]
         [send-button {:on-press            on-press
-                      :accessibility-label :send-message}]))
-    (when (and command? (= :command type))
-      [command/command-icon command])]])
+                      :accessibility-label :send-message}]))]])
