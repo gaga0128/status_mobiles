@@ -20,8 +20,6 @@
             [status-im.handlers.content-suggestions :refer [get-content-suggestions]]
             [status-im.utils.phone-number :refer [format-phone-number]]
             [status-im.utils.datetime :as time]
-            [status-im.components.react :refer [geth]]
-            [status-im.utils.logging :as log]
             [status-im.components.jail :as j]
             [status-im.utils.types :refer [json->clj]]
             [status-im.commands.utils :refer [generate-hiccup]]))
@@ -363,7 +361,6 @@
 
 (register-handler :save-password
   (fn [db [_ password]]
-    (dispatch [:create-account password])
     (sign-up-service/save-password password)
     (assoc db :password-saved true)))
 
@@ -475,9 +472,7 @@
               :group-chat false
               :is-active  true
               :timestamp  (.getTime (js/Date.))
-              :contacts   [{:identity contcat-id}]
-              :dapp-url   nil
-              :dapp-hash  nil}]
+              :contacts   [{:identity contcat-id}]}]
     (assoc db :new-chat chat)))
 
 (defn add-chat [{:keys [new-chat] :as db} [_ chat-id]]

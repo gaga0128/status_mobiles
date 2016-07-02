@@ -11,7 +11,6 @@
 ;; initial state of app-db
 (def app-db {:identity-password      "replace-me-with-user-entered-password"
              :identity               "me"
-             :accounts               {}
              :contacts               []
              :contacts-ids           #{}
              :selected-contacts      #{}
