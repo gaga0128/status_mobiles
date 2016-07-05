@@ -120,23 +120,20 @@
     [message-content-audio {:content      content
                             :content-type content-type}]]])
 
-(defview message-delivery-status
-  [{:keys [delivery-status msg-id to] :as m}]
-  [status [:get-in [:message-status to msg-id]]]
+(defn message-delivery-status [{:keys [delivery-status]}]
   [view st/delivery-view
    [image {:source (case delivery-status
+                     :delivered {:uri :icon_ok_small}
                      :seen {:uri :icon_ok_small}
                      :seen-by-everyone {:uri :icon_ok_small}
-                     :failed res/delivery-failed-icon
-                     nil)
+                     :failed res/delivery-failed-icon)
            :style  st/delivery-image}]
    [text {:style st/delivery-text}
-    (case (or status delivery-status)
-      :delivered "Sent"
+    (case delivery-status
+      :delivered "Delivered"
       :seen "Seen"
       :seen-by-everyone "Seen by everyone"
-      :failed "Failed"
-      "Pending")]])
+      :failed "Failed")]])
 
 (defn member-photo [{:keys [photo-path]}]
   [view st/photo-view
@@ -162,11 +159,12 @@
          [message-delivery-status {:delivery-status delivery-status}])]]]))
 
 (defn message-body
-  [{:keys [outgoing delivery-status] :as message} content]
-  [view (st/message-body message)
-   content
-   (when outgoing
-     [message-delivery-status message])])
+  [{:keys [outgoing] :as message} content]
+  (let [delivery-status :seen]
+    [view (st/message-body message)
+     content
+     (when (and outgoing delivery-status)
+       [message-delivery-status {:delivery-status delivery-status}])]))
 
 (defn message-container-animation-logic [{:keys [to-value val callback]}]
   (fn [_]

@@ -14,6 +14,8 @@
             [status-im.discovery.screen :refer [discovery]]
             [status-im.discovery.tag :refer [discovery-tag]]
             [status-im.chat.screen :refer [chat]]
+            [status-im.login.screen :refer [login]]
+            [status-im.accounts.screen :refer [accounts]]
             [status-im.chats-list.screen :refer [chats-list]]
             [status-im.new-group.screen :refer [new-group]]
             [status-im.participants.views.add :refer [new-participants]]
@@ -76,6 +78,8 @@
            :qr-scanner [qr-scanner]
            :chat [chat]
            :profile [profile]
+           :users [accounts]
+           :login [login]
            :my-profile [my-profile]))})))
 
 (defn init []

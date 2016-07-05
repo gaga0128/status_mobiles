@@ -283,10 +283,12 @@
   [{:keys [new-message current-chat-id] :as db} _]
   (when (and new-message (not-console? current-chat-id))
     (let [{:keys [group-chat]} (get-in db [:chats current-chat-id])
-          message (select-keys new-message [:content :msg-id])]
+          content (:content new-message)]
       (if group-chat
-        (api/send-group-user-msg (assoc message :group-id current-chat-id))
-        (api/send-user-msg (assoc message :to current-chat-id))))))
+        (api/send-group-user-msg {:group-id current-chat-id
+                                  :content  content})
+        (api/send-user-msg {:to      current-chat-id
+                            :content content})))))
 
 (defn save-message-to-realm!
   [{:keys [new-message current-chat-id]} _]
