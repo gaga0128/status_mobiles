@@ -6,7 +6,6 @@
             [status-im.utils.types :refer [json->clj]]
             [status-im.persistence.simple-kv-store :as kv]
             [status-im.protocol.state.storage :as storage]
-            [status-im.utils.identicon :refer [identicon]]
             [clojure.string :as str]))
 
 
@@ -26,9 +25,7 @@
         public-key (:pubkey data)
         address (:address data)
         account {:public-key public-key
-                 :address address
-                 :name address
-                 :photo-path (identicon address)}]
+                 :address address}]
     (log/debug "Created account: " result)
     (when (not (str/blank? public-key))
       (do

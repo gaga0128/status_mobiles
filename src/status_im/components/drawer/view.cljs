@@ -65,7 +65,6 @@
        [view st/switch-users-container
         [touchable-opacity {:onPress (fn []
                                        (close-drawer)
-                                       (dispatch [:navigate-to :users])
                                        ;; TODO not implemented
                                        )}
          [text {:style st/switch-users-text}
