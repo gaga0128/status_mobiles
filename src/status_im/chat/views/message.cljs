@@ -120,23 +120,20 @@
     [message-content-audio {:content      content
                             :content-type content-type}]]])
 
-(defview message-delivery-status
-  [{:keys [delivery-status msg-id to] :as m}]
-  [status [:get-in [:message-status to msg-id]]]
+(defn message-delivery-status [{:keys [delivery-status]}]
   [view st/delivery-view
-   [image {:source (case (or status delivery-status)
+   [image {:source (case delivery-status
+                     :delivered {:uri :icon_ok_small}
                      :seen {:uri :icon_ok_small}
                      :seen-by-everyone {:uri :icon_ok_small}
-                     :failed res/delivery-failed-icon
-                     nil)
+                     :failed res/delivery-failed-icon)
            :style  st/delivery-image}]
    [text {:style st/delivery-text}
-    (case (or status delivery-status)
-      :delivered "Sent"
+    (case delivery-status
+      :delivered "Delivered"
       :seen "Seen"
       :seen-by-everyone "Seen by everyone"
-      :failed "Failed"
-      "Pending")]])
+      :failed "Failed")]])
 
 (defn member-photo [{:keys [photo-path]}]
   [view st/photo-view
@@ -162,11 +159,12 @@
          [message-delivery-status {:delivery-status delivery-status}])]]]))
 
 (defn message-body
-  [{:keys [outgoing delivery-status] :as message} content]
-  [view (st/message-body message)
-   content
-   (when outgoing
-     [message-delivery-status message])])
+  [{:keys [outgoing] :as message} content]
+  (let [delivery-status :seen]
+    [view (st/message-body message)
+     content
+     (when (and outgoing delivery-status)
+       [message-delivery-status {:delivery-status delivery-status}])]))
 
 (defn message-container-animation-logic [{:keys [to-value val callback]}]
   (fn [_]
@@ -205,28 +203,17 @@
     (into [view] children)))
 
 (defn chat-message
-  [{:keys [outgoing delivery-status timestamp new-day group-chat msg-id chat-id]
+  [{:keys [outgoing delivery-status timestamp new-day group-chat]
     :as   message}]
-  (let [status (subscribe [:get-in [:message-status chat-id msg-id]])]
-    (r/create-class
-      {:component-did-mount
-       (fn []
-         (when (and outgoing
-                    (not= :seen delivery-status)
-                    (not= :seen @status))
-           (dispatch [:send-seen! chat-id msg-id])))
-       :reagent-render
-       (fn [{:keys [outgoing delivery-status timestamp new-day group-chat]
-             :as   message}]
-         [message-container message
-          ;; TODO there is no new-day info in message
-          (when new-day
-            [message-date timestamp])
-          [view
-           (let [incoming-group (and group-chat (not outgoing))]
-             [message-content
-              (if incoming-group
-                incoming-group-message-body
-                message-body)
-              (merge message {:delivery-status (keyword delivery-status)
-                              :incoming-group  incoming-group})])]])})))
+  [message-container message
+   ;; TODO there is no new-day info in message
+   (when new-day
+     [message-date timestamp])
+   [view
+    (let [incoming-group (and group-chat (not outgoing))]
+      [message-content
+       (if incoming-group
+         incoming-group-message-body
+         message-body)
+       (merge message {:delivery-status (keyword delivery-status)
+                       :incoming-group  incoming-group})])]])
