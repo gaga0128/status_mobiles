@@ -17,10 +17,8 @@
                                                      :optinal true}}}
                     {:name       :accounts
                      :primaryKey :address
-                     :properties {:address    "string"
-                                  :public-key "string"
-                                  :name       "string"
-                                  :photo-path "string"}}
+                     :properties {:address "string"
+                                  :public-key "string"}}
                     {:name       :requests
                      :properties {:message-id :string
                                   :chat-id    :string
