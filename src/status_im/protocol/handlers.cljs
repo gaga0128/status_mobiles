@@ -4,13 +4,13 @@
   (:require [status-im.utils.handlers :as u]
             [status-im.utils.logging :as log]
             [status-im.protocol.api :as api]
-            [re-frame.core :refer [dispatch after]]
+            [re-frame.core :refer [dispatch debug]]
             [status-im.utils.handlers :refer [register-handler]]
             [status-im.models.contacts :as contacts]
             [status-im.protocol.api :refer [init-protocol]]
             [status-im.protocol.protocol-handler :refer [make-handler]]
             [status-im.models.protocol :refer [update-identity
-                                               set-initialized]]
+                                             set-initialized]]
             [status-im.constants :refer [text-content-type]]
             [status-im.models.messages :as messages]
             [status-im.models.chats :as chats]
@@ -18,8 +18,8 @@
 
 (register-handler :initialize-protocol
   (u/side-effect!
-    (fn [{:keys [user-identity] :as db} [_ account]]
-      (init-protocol (or account user-identity) (make-handler db)))))
+    (fn [db [_ account]]
+      (init-protocol account (make-handler db)))))
 
 (register-handler :protocol-initialized
   (fn [db [_ identity]]
@@ -102,28 +102,16 @@
       (log/debug action msg-id from group-id identity)
       (participant-invited-to-group-msg group-id identity from msg-id))))
 
-(defn update-message! [status]
-  (fn [_ [_ _ msg-id]]
-    (messages/update-message! {:msg-id          msg-id
-                               :delivery-status status})))
-
-(defn update-message-status [status]
-  (fn [db [_ from msg-id]]
-    (let [current-status (get-in db [:message-status from msg-id])]
-      (if-not (= :seen current-status)
-        (assoc-in db [:message-status from msg-id] status)
-        db))))
-
 (register-handler :acked-msg
-  (after (update-message! :delivered))
-  (update-message-status :delivered))
+  (u/side-effect!
+    (fn [_ [action from msg-id]]
+      (log/debug action from msg-id)
+      (messages/update-message! {:msg-id          msg-id
+                                 :delivery-status :delivered}))))
 
 (register-handler :msg-delivery-failed
-  (after (update-message! :failed))
-  (update-message-status :failed))
-
-(register-handler :msg-seen
-  [(after (update-message! :seen))
-   (after (fn [_ [_ chat-id]]
-            (dispatch [:remove-unviewed-messages chat-id])))]
-  (update-message-status :seen))
+  (u/side-effect!
+    (fn [_ [action msg-id]]
+      (log/debug action msg-id)
+      (messages/update-message! {:msg-id          msg-id
+                                 :delivery-status :failed}))))

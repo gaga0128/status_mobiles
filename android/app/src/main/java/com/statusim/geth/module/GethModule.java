@@ -128,12 +128,7 @@ public class GethModule extends ReactContextBaseJavaModule implements LifecycleE
     }
 
     @ReactMethod
-    public void startNode(Callback callback, Callback onAlreadyRunning) {
-
-        if(GethService.isRunning()){
-            onAlreadyRunning.invoke();
-            return;
-        }
+    public void startNode(Callback callback) {
 
         Activity currentActivity = getCurrentActivity();
 

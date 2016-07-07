@@ -11,6 +11,7 @@
     [status-im.utils.handlers :refer [register-handler] :as u]
     [status-im.models.protocol :as protocol]
     status-im.chat.handlers
+    status-im.chat.handlers.animation
     status-im.group-settings.handlers
     status-im.navigation.handlers
     status-im.contacts.handlers
@@ -21,7 +22,8 @@
     status-im.commands.handlers.jail
     status-im.qr-scanner.handlers
     status-im.accounts.handlers
-    status-im.protocol.handlers))
+    status-im.protocol.handlers
+    status-im.chat.handlers.requests))
 
 ;; -- Middleware ------------------------------------------------------------
 ;;
@@ -88,9 +90,7 @@
   (u/side-effect!
    (fn [db _]
      (log/debug "Starting node")
-     (.startNode geth
-                 (fn [result] (node-started db result))
-                 #(dispatch [:initialize-protocol])))))
+     (.startNode geth (fn [result] (node-started db result))))))
 
 (register-handler :crypt-initialized
   (u/side-effect!

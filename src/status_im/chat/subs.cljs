@@ -173,6 +173,12 @@
     (let [requests (subscribe [:get-requests])]
       (reaction (not (some #(= message-id (:message-id %)) @requests))))))
 
-(register-sub :unviewed-messages-count
-  (fn [db [_ chat-id]]
-    (reaction (get-in @db [:unviewed-messages chat-id :count]))))
+(register-sub :validation-errors
+  (fn [db]
+    (let [current-chat-id (subscribe [:get-current-chat-id])]
+      (reaction (get-in @db [:validation-errors @current-chat-id])))))
+
+(register-sub :custom-validation-errors
+  (fn [db]
+    (let [current-chat-id (subscribe [:get-current-chat-id])]
+      (reaction (get-in @db [:custom-validation-errors @current-chat-id])))))
