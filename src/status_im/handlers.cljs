@@ -11,7 +11,6 @@
     [status-im.utils.handlers :refer [register-handler] :as u]
     [status-im.models.protocol :as protocol]
     status-im.chat.handlers
-    status-im.chat.handlers.animation
     status-im.group-settings.handlers
     status-im.navigation.handlers
     status-im.contacts.handlers
@@ -22,8 +21,7 @@
     status-im.commands.handlers.jail
     status-im.qr-scanner.handlers
     status-im.accounts.handlers
-    status-im.protocol.handlers
-    status-im.chat.handlers.requests))
+    status-im.protocol.handlers))
 
 ;; -- Middleware ------------------------------------------------------------
 ;;
@@ -79,13 +77,20 @@
                                    (dispatch [:crypt-initialized]))))))))
 
 (defn node-started [db result]
-  (log/debug "Started Node: " result))
+  (let [identity (:user-identity db)
+        password (:password db)]
+  (log/debug "Started Node: " result)
+  (when identity (do
+                   (dispatch [:login-account (:address identity) password])
+                   (dispatch [:initialize-protocol identity])))))
 
 (register-handler :initialize-geth
   (u/side-effect!
    (fn [db _]
      (log/debug "Starting node")
-     (.startNode geth (fn [result] (node-started db result))))))
+     (.startNode geth
+                 (fn [result] (node-started db result))
+                 #(dispatch [:initialize-protocol])))))
 
 (register-handler :crypt-initialized
   (u/side-effect!
