@@ -182,3 +182,19 @@
   (fn [db]
     (let [current-chat-id (subscribe [:get-current-chat-id])]
       (reaction (get-in @db [:custom-validation-errors @current-chat-id])))))
+
+(register-sub :unviewed-messages-count
+  (fn [db [_ chat-id]]
+    (reaction (get-in @db [:unviewed-messages chat-id :count]))))
+
+(register-sub :command-suggestions-height
+  (fn [db]
+    (let [chat-id (subscribe [:get-current-chat-id])]
+      (reaction
+        (get-in @db [:animations :command-suggestions-height @chat-id])))))
+
+(register-sub :response-height
+  (fn [db]
+    (let [chat-id (subscribe [:get-current-chat-id])]
+      (reaction
+        (get-in @db [:animations :to-response-height @chat-id])))))
