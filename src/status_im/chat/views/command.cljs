@@ -15,7 +15,8 @@
   (dispatch [:set-chat-command-content message]))
 
 (defn send-command []
-  (dispatch [:stage-command]))
+  (dispatch [:stage-command])
+  (cancel-command-input))
 
 (defn valid? [message validator]
   (if validator

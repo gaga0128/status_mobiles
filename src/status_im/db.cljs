@@ -12,6 +12,7 @@
 (def app-db {:identity-password      "replace-me-with-user-entered-password"
              :identity               "me"
              :accounts               {}
+             :current-account        false
              :contacts               []
              :contacts-ids           #{}
              :selected-contacts      #{}
@@ -38,7 +39,8 @@
                                       :whisper-identity ""
                                       :phone-number     ""}
              :disable-group-creation false
-             :animations             {;; todo clear this
+             :animations             {:to-response-height           0.1
+                                      ;; todo clear this
                                       :tabs-bar-value               (anim/create-value 0)}})
 
 (def protocol-initialized-path [:protocol-initialized])

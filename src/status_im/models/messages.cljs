@@ -26,8 +26,7 @@
 
 (defn save-message
   ;; todo remove chat-id parameter
-  [chat-id {:keys [delivery-status msg-id content]
-            :or   {delivery-status :pending}
+  [chat-id {:keys [msg-id content]
             :as   message}]
   (when-not (r/exists? :msgs :msg-id msg-id)
     (r/write
@@ -39,8 +38,8 @@
                               message
                               {:chat-id         chat-id
                                :content         content'
-                               :delivery-status delivery-status
-                               :timestamp       (timestamp)})]
+                               :timestamp       (timestamp)
+                               :delivery-status nil})]
           (r/create :msgs message' true))))))
 
 (defn command-type? [type]
@@ -51,13 +50,13 @@
 (defn get-messages
   ([chat-id] (get-messages chat-id 0))
   ([chat-id from]
-   (->> (-> (r/get-by-field :msgs :chat-id chat-id)
-            (r/sorted :timestamp :desc)
-            (r/page from (+ from c/default-number-of-messages))
-            (r/collection->map))
-        (into '())
-        reverse
-        (keep (fn [{:keys [content-type] :as message}]
+    (->> (-> (r/get-by-field :msgs :chat-id chat-id)
+             (r/sorted :timestamp :desc)
+             (r/page from (+ from c/default-number-of-messages))
+             (r/collection->map))
+         (into '())
+         reverse
+         (keep (fn [{:keys [content-type] :as message}]
                 (if (command-type? content-type)
                   (update message :content str-to-map)
                   message))))))

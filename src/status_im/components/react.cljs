@@ -17,11 +17,7 @@
 
 (def app-registry (get-react-property "AppRegistry"))
 (def navigator (get-class "Navigator"))
-(def text-class (get-class "Text"))
-(defn text
-  ([s] [text-class s])
-  ([{:keys [style] :as opts} s]
-   [text-class (if style opts {:style opts}) s]))
+(def text (get-class "Text"))
 (def view (get-class "View"))
 (def image (get-class "Image"))
 (def touchable-highlight-class (get-class "TouchableHighlight"))
