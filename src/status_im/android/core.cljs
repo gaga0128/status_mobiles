@@ -24,6 +24,7 @@
             [status-im.profile.screen :refer [profile my-profile]]
             [status-im.utils.utils :refer [toast]]
             [status-im.utils.encryption]
+            status-im.persistence.realm.core
             [status-im.utils.logging :as log]))
 
 (defn init-back-button-handler! []
@@ -42,6 +43,7 @@
 
 (defn app-root []
   (let [signed-up (subscribe [:get :signed-up])
+        _ (log/debug "signed up: " @signed-up)
         view-id   (subscribe [:get :view-id])
         account   (subscribe [:get :user-identity])
         keyboard-height (subscribe [:get :keyboard-height])]
@@ -59,15 +61,21 @@
                        "keyboardDidShow"
                        (fn [e]
                          (let [h (.. e -endCoordinates -height)]
-                           (when-not (= h keyboard-height)
+                           (when-not (= h @keyboard-height)
                              (dispatch [:set :keyboard-height h])))))
          (.addListener device-event-emitter
                        "keyboardDidHide"
-                       (when-not (= 0 keyboard-height)
+                       (when-not (= 0 @keyboard-height)
                          #(dispatch [:set :keyboard-height 0]))))
        :render
        (fn []
-         (let [startup-view (if @account @view-id (if (contains? #{:login :chat} @view-id) @view-id :accounts))]
+         (let [startup-view (if @account 
+                              (if @signed-up
+                                @view-id
+                                :chat)
+                              (if (contains? #{:login :chat} @view-id) 
+                                @view-id 
+                                :accounts))]
            (log/debug startup-view)
          (case (if true startup-view :chat)
            :discovery [main-tabs]

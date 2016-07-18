@@ -12,7 +12,6 @@
     [status-im.utils.handlers :refer [register-handler] :as u]
     [status-im.models.protocol :as protocol]
     status-im.chat.handlers
-    status-im.chat.handlers.animation
     status-im.group-settings.handlers
     status-im.navigation.handlers
     status-im.contacts.handlers
@@ -23,8 +22,7 @@
     status-im.commands.handlers.jail
     status-im.qr-scanner.handlers
     status-im.accounts.handlers
-    status-im.protocol.handlers
-    status-im.chat.handlers.requests))
+    status-im.protocol.handlers))
 
 ;; -- Middleware ------------------------------------------------------------
 ;;
@@ -63,8 +61,8 @@
       :user-identity nil)))
 
 (register-handler :initialize-account-db
-  (fn [_ _]
-    (assoc app-db
+  (fn [db _]
+    (assoc db
       :signed-up (storage/get kv/kv-store :signed-up)
       :password (storage/get kv/kv-store :password))))
 
@@ -108,7 +106,9 @@
   (u/side-effect!
    (fn [db _]
      (log/debug "Starting node")
-     (.startNode geth (fn [result] (node-started db result))))))
+     (.startNode geth
+                 (fn [result] (node-started db result))
+                 #(log/debug "Geth already initialized")))))
 
 (register-handler :crypt-initialized
   (u/side-effect!
