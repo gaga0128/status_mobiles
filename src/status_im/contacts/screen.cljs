@@ -20,7 +20,6 @@
                                                  icon-search
                                                  create-icon
                                                  toolbar-background2]]
-            [status-im.components.tabs.bottom-gradient :refer [bottom-gradient]]
             [status-im.contacts.styles :as st]
             [status-im.i18n :refer [label]]))
 
@@ -98,5 +97,4 @@
            :buttonColor :#9b59b6
            :onPress     #(dispatch [:navigate-to :new-contact])}
           [icon {:name  :android-create
-                 :style create-icon}]]]]
-       [bottom-gradient]])))
+                 :style create-icon}]]]]])))

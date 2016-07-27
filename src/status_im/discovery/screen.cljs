@@ -10,7 +10,6 @@
     [status-im.discovery.views.popular :refer [popular]]
     [status-im.discovery.views.recent :refer [discovery-recent]]
     [status-im.discovery.styles :as st]
-    [status-im.components.tabs.bottom-gradient :refer [bottom-gradient]]
     [status-im.i18n :refer [label]]))
 
 (defn get-hashtags [status]
@@ -51,5 +50,4 @@
     [popular]
     [view st/section-spacing
      [text {:style st/discovery-subtitle} (label :t/recent)]]
-    [discovery-recent]]
-   [bottom-gradient]])
+    [discovery-recent]]])

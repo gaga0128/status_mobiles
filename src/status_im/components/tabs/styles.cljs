@@ -24,12 +24,9 @@
                       (- tabs-height) 0)
    :transform       [{:translateY (if animation? offset-y 1)}]})
 
-(def bottom-gradient
-  {:position :absolute
-   :bottom 0
-   :left 0
-   :right 0
-   :height 4})
+(def top-gradient
+  {:flexDirection :row
+   :height        3})
 
 (def tabs-inner-container
   {:flexDirection   :row
