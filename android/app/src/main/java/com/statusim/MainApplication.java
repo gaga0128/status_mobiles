@@ -22,7 +22,6 @@ import com.statusim.geth.module.GethPackage;
 import com.aakashns.reactnativedialogs.ReactNativeDialogsPackage;
 import fr.bamlab.rnimageresizer.ImageResizerPackage;
 import com.reactnative.picker.PickerPackage;
-import com.github.alinz.reactnativewebviewbridge.WebViewBridgePackage;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,9 +52,7 @@ public class MainApplication extends Application implements ReactApplication {
               new GethPackage(),
               new ReactNativeDialogsPackage(),
               new ImageResizerPackage(),
-              new PickerPackage(),
-              new WebViewBridgePackage()
-
+              new PickerPackage()
       );
     }
   };

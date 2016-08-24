@@ -66,14 +66,8 @@
           (assoc :new-chat-name nil)))))
 
 (register-handler :show-contacts
-  (fn [db [_ click-handler]]
-    (-> db
-        (assoc :contacts-click-handler click-handler)
-        (push-view :contact-list))))
-
-(register-handler :remove-contacts-click-handler
-                  (fn [db]
-                    (dissoc db :contacts-click-handler)))
+  (fn [db _]
+    (push-view db :contact-list)))
 
 (register-handler :show-group-contacts
   (fn [db [_ group]]

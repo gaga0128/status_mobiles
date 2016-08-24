@@ -23,18 +23,12 @@
 (defn fetch-commands!
   [db [identity]]
   (when true
-    ;-let [url (get-in db [:chats identity :dapp-url])]
-    (cond
-      (= "console" identity)
-      (dispatch [::validate-hash identity (slurp "resources/commands.js")])
-
-      (= "wallet" identity)
-      (dispatch [::validate-hash identity (slurp "resources/wallet.js")])
-
-      :else
+    ;;when-let [url (:dapp-url (get-in db [:chats identity]))]
+    ;; todo fix this after demo
+    (if true
+      ;(= "console" identity)
       (dispatch [::validate-hash identity (slurp "resources/commands.js")])
       #_(http-get (s/join "/" [url commands-js])
-
                 #(dispatch [::validate-hash identity %])
                 #(dispatch [::loading-failed! identity ::file-was-not-found])))))
 
@@ -75,12 +69,11 @@
        (into {})))
 
 (defn add-commands
-  [db [id _ {:keys [commands responses autorun] :as data}]]
+  [db [id _ {:keys [commands responses]}]]
   (-> db
       (update-in [id :commands] merge (mark-as :command commands))
       (update-in [id :responses] merge (mark-as :response responses))
-      (assoc-in [id :commands-loaded] true)
-      (assoc-in [id :autorun] autorun)))
+      (assoc-in [id :commands-loaded] true)))
 
 (defn save-commands-js!
   [_ [id file]]
@@ -108,26 +101,7 @@
 
 (reg-handler ::add-commands
   [(path :chats)
-   (after save-commands-js!)
-   (after #(dispatch [:check-autorun]))
-   (after (fn [_ [id]]
-            (dispatch [:invoke-commands-loading-callbacks id])))]
+   (after save-commands-js!)]
   add-commands)
 
 (reg-handler ::loading-failed! (u/side-effect! loading-failed!))
-
-(reg-handler :add-commands-loading-callback
-  (fn [db [chat-id callback]]
-    (update-in db [::commands-callbacks chat-id] conj callback)))
-
-(reg-handler :invoke-commands-loading-callbacks
-  (u/side-effect!
-    (fn [db [chat-id]]
-      (let [callbacks (get-in db [::commands-callbacks chat-id])]
-        (doseq [callback callbacks]
-          (callback))
-        (dispatch [::clear-commands-callbacks chat-id])))))
-
-(reg-handler ::clear-commands-callbacks
-  (fn [db [chat-id]]
-    (assoc-in db [::commands-callbacks chat-id] nil)))

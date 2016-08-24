@@ -1,7 +1,6 @@
 (ns status-im.chat.handlers
   (:require-macros [cljs.core.async.macros :as am])
-  (:require [re-frame.core :refer [enrich after debug dispatch]]
-
+  (:require [re-frame.core :refer [enrich after debug dispatch path]]
             [status-im.models.commands :as commands]
             [clojure.string :as str]
             [status-im.components.styles :refer [default-chat-color]]
@@ -31,9 +30,7 @@
             status-im.chat.handlers.unviewed-messages
             status-im.chat.handlers.send-message
             status-im.chat.handlers.receive-message
-            [cljs.core.async :as a]
-            status-im.chat.handlers.webview-bridge
-            status-im.chat.handlers.wallet-chat))
+            [cljs.core.async :as a]))
 
 (register-handler :set-show-actions
   (fn [db [_ show-actions]]
@@ -166,9 +163,8 @@
     (sign-up-service/init db)))
 
 (register-handler :save-password
-  (fn [db [_ password]]
-    (sign-up-service/save-password password)
-    (dispatch [:create-account password])
+  (fn [db [_ password mnemonic]]
+    (sign-up-service/save-password password mnemonic)
     (assoc db :password-saved true)))
 
 (register-handler :sign-up
@@ -253,18 +249,17 @@
           init-chat))))
 
 (defn prepare-chat
-  [{:keys [contacts] :as db} [_ contcat-id options]]
-  (let [name (get-in contacts [contcat-id :name])
-        chat (merge {:chat-id    contcat-id
-                     :name       (or name contcat-id)
-                     :color      default-chat-color
-                     :group-chat false
-                     :is-active  true
-                     :timestamp  (.getTime (js/Date.))
-                     :contacts   [{:identity contcat-id}]
-                     :dapp-url   nil
-                     :dapp-hash  nil}
-                    options)]
+  [{:keys [contacts] :as db} [_ contact-id]]
+  (let [name (get-in contacts [contact-id :name])
+        chat {:chat-id    contact-id
+              :name       (or name contact-id)
+              :color      default-chat-color
+              :group-chat false
+              :is-active  true
+              :timestamp  (.getTime (js/Date.))
+              :contacts   [{:identity contact-id}]
+              :dapp-url   nil
+              :dapp-hash  nil}]
     (assoc db :new-chat chat)))
 
 (defn add-chat [{:keys [new-chat] :as db} [_ chat-id]]
@@ -277,21 +272,14 @@
   (chats/create-chat new-chat))
 
 (defn open-chat!
-  [_ [_ chat-id _ navigation-type]]
-  (dispatch [(or navigation-type :navigate-to) :chat chat-id]))
+  [_ [_ chat-id]]
+  (dispatch [:navigate-to :chat chat-id]))
 
-(register-handler ::start-chat!
+(register-handler :start-chat
   (-> prepare-chat
       ((enrich add-chat))
       ((after save-chat!))
       ((after open-chat!))))
-
-(register-handler :start-chat
-  (u/side-effect!
-    (fn [{:keys [chats]} [_ contcat-id options navigation-type]]
-      (if (chats contcat-id)
-        (dispatch [(or navigation-type :navigate-to) :chat contcat-id])
-        (dispatch [::start-chat! contcat-id options navigation-type])))))
 
 (register-handler :add-chat
   (-> prepare-chat
@@ -403,14 +391,3 @@
     (if (get-in db [:chats chat-id])
       (update-in db [:chats chat-id] merge new-chat-data)
       db)))
-
-(register-handler :check-autorun
-  (u/side-effect!
-    (fn [{:keys [current-chat-id] :as db}]
-      (let [autorun (get-in db [:chats current-chat-id :autorun])]
-        (when autorun
-          (am/go
-            ;;todo: find another way to make it work...
-            (a/<! (a/timeout 100))
-            (dispatch [:set-chat-command (keyword autorun)])
-            (dispatch [:animate-command-suggestions])))))))

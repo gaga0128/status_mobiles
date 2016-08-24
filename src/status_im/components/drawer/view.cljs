@@ -7,6 +7,7 @@
                                                 view
                                                 text
                                                 image
+                                                navigator
                                                 drawer-layout-android
                                                 touchable-opacity]]
             [status-im.resources :as res]
@@ -63,7 +64,7 @@
                 :handler           #(dispatch [:navigate-to :discovery])
                 :platform-specific platform-specific}]
     [menu-item {:name              (label :t/contacts)
-                :handler           #(dispatch [:show-contacts])
+                :handler           #(dispatch [:show-contacts navigator])
                 :platform-specific platform-specific}]
     [menu-item {:name              (label :t/invite-friends)
                 :handler           (fn []
