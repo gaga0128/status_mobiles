@@ -16,8 +16,8 @@
                                          content-type-status]]
             [status-im.i18n :refer [label]]))
 
-(defn send-console-msg [text]
-  {:msg-id       (random/id)
+(defn send-console-message [text]
+  {:message-id   (random/id)
    :from         "me"
    :to           "console"
    :content      text
@@ -36,9 +36,9 @@
 
 ;; -- Send phone number ----------------------------------------
 (defn on-sign-up-response [& [message]]
-  (let [msg-id (random/id)]
+  (let [message-id (random/id)]
     (dispatch [:received-message
-               {:msg-id       msg-id
+               {:message-id   message-id
                 :content      (command-content
                                 :confirmation-code
                                 (or message (label :t/confirmation-code)))
@@ -64,7 +64,7 @@
 ;; -- Send confirmation code and synchronize contacts---------------------------
 (defn on-sync-contacts []
   (dispatch [:received-message
-             {:msg-id       (random/id)
+             {:message-id   (random/id)
               :content      (label :t/contacts-syncronized)
               :content-type text-content-type
               :outgoing     false
@@ -78,7 +78,7 @@
 
 (defn on-send-code-response [body]
   (dispatch [:received-message
-             {:msg-id       (random/id)
+             {:message-id   (random/id)
               :content      (:message body)
               :content-type text-content-type
               :outgoing     false
@@ -95,9 +95,9 @@
       (on-sign-up-response (label :t/incorrect-code)))))
 
 (defn start-signup []
-  (let [msg-id (random/id)]
+  (let [message-id (random/id)]
     (dispatch [:received-message
-               {:msg-id       msg-id
+               {:message-id   message-id
                 :content      (command-content
                                 :phone
                                 (label :t/phone-number-required))
@@ -107,10 +107,10 @@
                 :to           "me"}])))
 
 ;; -- Saving password ----------------------------------------
-(defn save-password [password]
+(defn save-password [password mnemonic]
   ;; TODO validate and save password
   (dispatch [:received-message
-             {:msg-id       (random/id)
+             {:message-id   (random/id)
               :content      (label :t/password-saved)
               :content-type text-content-type
               :outgoing     false
@@ -118,7 +118,7 @@
               :to           "me"
               :new?         false}])
   (dispatch [:received-message
-             {:msg-id       (random/id)
+             {:message-id   (random/id)
               :content      (label :t/generate-passphrase)
               :content-type text-content-type
               :outgoing     false
@@ -126,26 +126,23 @@
               :to           "me"
               :new?         false}])
   (dispatch [:received-message
-             {:msg-id       (random/id)
+             {:message-id   (random/id)
               :content      (label :t/here-is-your-passphrase)
               :content-type text-content-type
               :outgoing     false
               :from         "console"
               :to           "me"
               :new?         false}])
-  ;; TODO generate passphrase
-  (let [passphrase (str "The brash businessman's braggadocio and public squabbing with "
-                        "candidates in the US presidential election")]
-    (dispatch [:received-message
-               {:msg-id       (random/id)
-                :content      passphrase
-                :content-type text-content-type
-                :outgoing     false
-                :from         "console"
-                :to           "me"
-                :new?         false}]))
   (dispatch [:received-message
-             {:msg-id       "8"
+             {:message-id   (random/id)
+              :content      mnemonic
+              :content-type text-content-type
+              :outgoing     false
+              :from         "console"
+              :to           "me"
+              :new?         false}])
+  (dispatch [:received-message
+             {:message-id   "8"
               :content      (label :t/written-down)
               :content-type text-content-type
               :outgoing     false
@@ -158,7 +155,7 @@
 
 
 (def intro-status
-  {:msg-id          "intro-status"
+  {:message-id      "intro-status"
    :content         (label :t/intro-status)
    :delivery-status "seen"
    :from            "console"
@@ -170,7 +167,7 @@
 (defn intro [logged-in?]
   (dispatch [:received-message intro-status])
   (dispatch [:received-message
-             {:msg-id       "intro-message1"
+             {:message-id   "intro-message1"
               :content      (label :t/intro-message1)
               :content-type text-content-type
               :outgoing     false
@@ -178,7 +175,7 @@
               :to           "me"}])
   (when-not logged-in?
     (dispatch [:received-message
-               {:msg-id       "intro-message2"
+               {:message-id   "intro-message2"
                 :content      (label :t/intro-message2)
                 :content-type text-content-type
                 :outgoing     false
@@ -186,7 +183,7 @@
                 :to           "me"}])
 
     (dispatch [:received-message
-               {:msg-id       "intro-message3"
+               {:message-id   "intro-message3"
                 :content      (command-content
                                 :keypair
                                 (label :t/keypair-generated))

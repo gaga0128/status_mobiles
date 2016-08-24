@@ -36,6 +36,7 @@
   (let [data       (json->clj result)
         public-key (:pubkey data)
         address    (:address data)
+        mnemonic   (:mnemonic data)
         account    {:public-key public-key
                     :address    address
                     :name       address
@@ -44,7 +45,8 @@
     (when (not (str/blank? public-key))
       (do
         (dispatch-sync [:add-account account])
-        (dispatch [:login-account address password])))))
+        (dispatch-sync [:save-password password mnemonic])
+        (dispatch-sync [:login-account address password])))))
 
 (register-handler :create-account
   (after #(dispatch [:init-wallet-chat]))
@@ -102,9 +104,9 @@
 (register-handler :load-accounts load-accounts!)
 
 (defn console-create-account [db _]
-  (let [msg-id (random/id)]
+  (let [message-id (random/id)]
     (dispatch [:received-message
-               {:msg-id       msg-id
+               {:message-id   message-id
                 :content      {:command (name :keypair)
                                :content (label :t/keypair-generated)}
                 :content-type content-type-command-request
