@@ -7,7 +7,7 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 
-import com.statusim.module.StatusPackage;
+import com.statusim.Jail.JailPackage;
 import io.realm.react.RealmReactPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.rt2zz.reactnativecontacts.ReactNativeContacts;
@@ -18,6 +18,7 @@ import com.lwansbrough.RCTCamera.*;
 import com.centaurwarchief.smslistener.SmsListenerPackage;
 import com.github.yamill.orientation.OrientationPackage;
 import com.rnfs.RNFSPackage;
+import com.statusim.geth.module.GethPackage;
 import com.aakashns.reactnativedialogs.ReactNativeDialogsPackage;
 import fr.bamlab.rnimageresizer.ImageResizerPackage;
 import com.reactnative.picker.PickerPackage;
@@ -38,7 +39,7 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.asList(
               new MainReactPackage(),
-              new StatusPackage(),
+              new JailPackage(),
               new RealmReactPackage(),
               new VectorIconsPackage(),
               new ReactNativeContacts(),
@@ -49,6 +50,7 @@ public class MainApplication extends Application implements ReactApplication {
               new SmsListenerPackage(),
               new OrientationPackage(),
               new RNFSPackage(),
+              new GethPackage(),
               new ReactNativeDialogsPackage(),
               new ImageResizerPackage(),
               new PickerPackage(),

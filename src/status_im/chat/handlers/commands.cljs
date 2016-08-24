@@ -1,7 +1,7 @@
 (ns status-im.chat.handlers.commands
   (:require [re-frame.core :refer [enrich after dispatch]]
             [status-im.utils.handlers :refer [register-handler] :as u]
-            [status-im.components.status :as status]
+            [status-im.components.jail :as j]
             [status-im.components.react :as r]
             [status-im.models.commands :as commands]
             [clojure.string :as str]
@@ -30,12 +30,12 @@
                 0
                 :suggestions]
           params {:value (content-by-command command content)}]
-      (status/call-jail current-chat-id
-                        path
-                        params
-                        #(dispatch [:suggestions-handler {:command command
-                                                          :content content
-                                                          :chat-id current-chat-id} %])))))
+      (j/call current-chat-id
+              path
+              params
+              #(dispatch [:suggestions-handler {:command command
+                                                :content content
+                                                :chat-id current-chat-id} %])))))
 
 (defn cancel-command!
   [{:keys [canceled-command]}]
@@ -69,10 +69,10 @@
               name
               :preview]
         params {:value content}]
-    (status/call-jail chat-id
-                      path
-                      params
-                      #(dispatch [:command-preview chat-id id %]))))
+    (j/call chat-id
+            path
+            params
+            #(dispatch [:command-preview chat-id id %]))))
 
 (defn command-input
   ([{:keys [current-chat-id] :as db}]
@@ -106,10 +106,10 @@
               :validator]
         params {:value   content
                 :command data}]
-    (status/call-jail chat-id
-                      path
-                      params
-                      #(dispatch [::validate! data %]))))
+    (j/call chat-id
+            path
+            params
+            #(dispatch [::validate! data %]))))
 
 (register-handler :stage-command
   (after start-validate!)

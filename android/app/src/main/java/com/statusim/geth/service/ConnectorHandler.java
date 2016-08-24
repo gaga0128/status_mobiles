@@ -1,4 +1,4 @@
-package com.statusim.module;
+package com.statusim.geth.service;
 
 
 import android.os.Message;

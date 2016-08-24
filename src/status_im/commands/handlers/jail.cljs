@@ -2,7 +2,7 @@
   (:require [re-frame.core :refer [after dispatch subscribe trim-v debug]]
             [status-im.utils.handlers :as u]
             [status-im.utils.utils :refer [http-get toast]]
-            [status-im.components.status :as status]
+            [status-im.components.jail :as j]
             [status-im.utils.types :refer [json->clj]]
             [status-im.commands.utils :refer [generate-hiccup reg-handler]]
             [clojure.string :as s]
@@ -10,8 +10,8 @@
 
 (defn init-render-command!
   [_ [chat-id command message-id data]]
-  (status/call-jail chat-id [command :render] data
-                    #(dispatch [::render-command chat-id message-id %])))
+  (j/call chat-id [command :render] data
+          #(dispatch [::render-command chat-id message-id %])))
 
 (defn render-command
   [db [chat-id message-id markup]]

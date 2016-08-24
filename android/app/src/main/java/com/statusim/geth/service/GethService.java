@@ -1,4 +1,4 @@
-package com.statusim.module;
+package com.statusim.geth.service;
 
 import android.app.Service;
 import android.content.Intent;
@@ -12,11 +12,11 @@ import com.github.status_im.status_go.Statusgo;
 
 import java.io.File;
 
-public class StatusService extends Service {
+public class GethService extends Service {
 
-    private static final String TAG = "StatusService";
+    private static final String TAG = "GethService";
 
-    private static boolean isStatusInitialized = false;
+    private static boolean isGethInitialized = false;
     private final Handler handler = new Handler();
 
     private static String dataFolder;
@@ -25,9 +25,9 @@ public class StatusService extends Service {
 
     private static class IncomingHandler extends Handler {
 
-        private final WeakReference<StatusService> service;
+        private final WeakReference<GethService> service;
 
-        IncomingHandler(StatusService service) {
+        IncomingHandler(GethService service) {
 
             this.service = new WeakReference<>(service);
         }
@@ -35,7 +35,7 @@ public class StatusService extends Service {
         @Override
         public void handleMessage(Message message) {
 
-            StatusService service = this.service.get();
+            GethService service = this.service.get();
             if (service != null) {
                 if (!service.handleMessage(message)) {
                     super.handleMessage(message);
@@ -48,19 +48,13 @@ public class StatusService extends Service {
 
 
     public static void signalEvent(String jsonEvent) {
-        
         Log.d(TAG, "Signal event: " + jsonEvent);
         Bundle replyData = new Bundle();
         replyData.putString("event", jsonEvent);
 
-        Message replyMessage = Message.obtain(null, StatusMessages.MSG_GETH_EVENT, 0, 0, null);
+        Message replyMessage = Message.obtain(null, GethMessages.MSG_GETH_EVENT, 0, 0, null);
         replyMessage.setData(replyData);
         sendReply(applicationMessenger, replyMessage);
-    }
-
-    static {
-        System.loadLibrary("statusgoraw");
-        System.loadLibrary("statusgo");
     }
 
     @Nullable
@@ -71,66 +65,51 @@ public class StatusService extends Service {
 
     @Override
     public void onCreate() {
-        
         super.onCreate();
-
+        System.loadLibrary("statusgoraw");
+        System.loadLibrary("statusgo");
     }
 
     @Override
     public void onDestroy() {
-        
         super.onDestroy();
         //TODO: stop geth
         stopNode(null);
-        isStatusInitialized = false;
-        Log.d(TAG, "Status Service stopped !");
+        isGethInitialized = false;
+        Log.d(TAG, "Geth Service stopped !");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
         return Service.START_STICKY;
     }
 
     private boolean handleMessage(Message message) {
-        
         switch (message.what) {
 
-            case StatusMessages.MSG_START_NODE:
+            case GethMessages.MSG_START_NODE:
                 Log.d(TAG, "Received start node message." + message.toString());
                 startNode(message);
                 break;
 
-            case StatusMessages.MSG_STOP_NODE:
+            case GethMessages.MSG_STOP_NODE:
                 stopNode(message);
                 break;
 
-            case StatusMessages.MSG_CREATE_ACCOUNT:
+            case GethMessages.MSG_CREATE_ACCOUNT:
                 createAccount(message);
                 break;
 
-            case StatusMessages.MSG_RECOVER_ACCOUNT:
+            case GethMessages.MSG_RECOVER_ACCOUNT:
                 recoverAccount(message);
                 break;
 
-            case StatusMessages.MSG_LOGIN:
+            case GethMessages.MSG_LOGIN:
                 login(message);
                 break;
 
-            case StatusMessages.MSG_COMPLETE_TRANSACTION:
+            case GethMessages.MSG_COMPLETE_TRANSACTION:
                 completeTransaction(message);
-                break;
-
-            case StatusMessages.MSG_JAIL_INIT:
-                initJail(message);
-                break;
-
-            case StatusMessages.MSG_JAIL_PARSE:
-                parseJail(message);
-                break;
-
-            case StatusMessages.MSG_JAIL_CALL:
-                callJail(message);
                 break;
 
             default:
@@ -141,12 +120,11 @@ public class StatusService extends Service {
     }
 
     private void startNode(Message message) {
-        
-        if (!isStatusInitialized) {
-            isStatusInitialized = true;
+        if (!isGethInitialized) {
+            isGethInitialized = true;
             Log.d(TAG, "Client messenger1: " + message.replyTo.toString());
             Bundle data = message.getData();
-            String callbackIdentifier = data.getString(StatusConnector.CALLBACK_IDENTIFIER);
+            String callbackIdentifier = data.getString(GethConnector.CALLBACK_IDENTIFIER);
             Log.d(TAG, "Callback identifier: " + callbackIdentifier);
             new StartTask(message.replyTo, callbackIdentifier).execute();
         }
@@ -158,13 +136,11 @@ public class StatusService extends Service {
         Messenger messenger;
 
         StartTask(Messenger messenger, String callbackIdentifier) {
-            
             this.messenger = messenger;
             this.callbackIdentifier = callbackIdentifier;
         }
 
         protected Void doInBackground(Void... args) {
-            
             startGeth();
             return null;
         }
@@ -175,19 +151,20 @@ public class StatusService extends Service {
     }
 
     private void onGethStarted(Messenger messenger, String callbackIdentifier) {
-        
-        Log.d(TAG, "Geth Node started");
-        Message replyMessage = Message.obtain(null, StatusMessages.MSG_START_NODE, 0, 0, null);
+        Log.d(TAG, "Geth Service started");
+        Message replyMessage = Message.obtain(null, GethMessages.MSG_NODE_STARTED, 0, 0, null);
         Bundle replyData = new Bundle();
         Log.d(TAG, "Callback identifier: " + callbackIdentifier);
-        replyData.putString(StatusConnector.CALLBACK_IDENTIFIER, callbackIdentifier);
+        replyData.putString(GethConnector.CALLBACK_IDENTIFIER, callbackIdentifier);
         replyMessage.setData(replyData);
         sendReply(messenger, replyMessage);
     }
 
     private void startGeth() {
-        
+
+
         File extStore = Environment.getExternalStorageDirectory();
+
         dataFolder = extStore.exists() ?
                 extStore.getAbsolutePath() + "/ethereum" :
                 getApplicationInfo().dataDir + "/ethereum";
@@ -220,11 +197,10 @@ public class StatusService extends Service {
     private void stopNode(Message message) {
         // TODO: stop node
 
-        createAndSendReply(message, StatusMessages.MSG_STOP_NODE, null);
+        createAndSendReply(message, GethMessages.MSG_NODE_STOPPED, null);
     }
 
     private void createAccount(Message message) {
-        
         Bundle data = message.getData();
         String password = data.getString("password");
         Log.d(TAG, "Creating account: " + password);
@@ -233,11 +209,10 @@ public class StatusService extends Service {
 
         Bundle replyData = new Bundle();
         replyData.putString("data", jsonData);
-        createAndSendReply(message, StatusMessages.MSG_CREATE_ACCOUNT, replyData);
+        createAndSendReply(message, GethMessages.MSG_ACCOUNT_CREATED, replyData);
     }
 
     private void recoverAccount(Message message) {
-        
         Bundle data = message.getData();
         String passphrase = data.getString("passphrase");
         String password = data.getString("password");
@@ -247,11 +222,10 @@ public class StatusService extends Service {
 
         Bundle replyData = new Bundle();
         replyData.putString("data", jsonData);
-        createAndSendReply(message, StatusMessages.MSG_RECOVER_ACCOUNT, replyData);
+        createAndSendReply(message, GethMessages.MSG_ACCOUNT_RECOVERED, replyData);
     }
 
     private void login(Message message) {
-        
         applicationMessenger = message.replyTo;
         Bundle data = message.getData();
         String address = data.getString("address");
@@ -260,15 +234,14 @@ public class StatusService extends Service {
         Log.d(TAG, "Loggedin account: " + result);
 
         Bundle replyData = new Bundle();
-        replyData.putString("data", result);
-        createAndSendReply(message, StatusMessages.MSG_LOGIN, replyData);
+        replyData.putString("result", result);
+        createAndSendReply(message, GethMessages.MSG_LOGGED_IN, replyData);
 
         // Test signalEvent
         //signalEvent("{ \"type\": \"test\", \"event\": \"test event\" }");
     }
 
     private void completeTransaction(Message message){
-        
         Bundle data = message.getData();
         String hash = data.getString("hash");
         String password = data.getString("password");
@@ -278,50 +251,12 @@ public class StatusService extends Service {
         Log.d(TAG, "After CompleteTransaction: " + result);
 
         Bundle replyData = new Bundle();
-        replyData.putString("data", result);
-        createAndSendReply(message, StatusMessages.MSG_COMPLETE_TRANSACTION, replyData);
-    }
-
-    private void initJail(Message message){
-
-        Bundle data = message.getData();
-        String js = data.getString("js");
-
-        Statusgo.initJail(js);
-
-        Bundle replyData = new Bundle();
-        createAndSendReply(message, StatusMessages.MSG_JAIL_INIT, replyData);
-    }
-
-    private void parseJail(Message message){
-
-        Bundle data = message.getData();
-        String chatId = data.getString("chatId");
-        String js = data.getString("js");
-
-        String result = Statusgo.parse(chatId, js);
-
-        Bundle replyData = new Bundle();
-        replyData.putString("data", result);
-        createAndSendReply(message, StatusMessages.MSG_JAIL_PARSE, replyData);
-    }
-
-    private void callJail(Message message){
-
-        Bundle data = message.getData();
-        String chatId = data.getString("chatId");
-        String path = data.getString("path");
-        String params = data.getString("params");
-
-        String result = Statusgo.call(chatId, path, params);
-
-        Bundle replyData = new Bundle();
-        replyData.putString("data", result);
-        createAndSendReply(message, StatusMessages.MSG_JAIL_CALL, replyData);
+        replyData.putString("result", result);
+        createAndSendReply(message, GethMessages.MSG_TRANSACTION_COMPLETED, replyData);
     }
 
     public static boolean isRunning() {
-        return isStatusInitialized;
+        return isGethInitialized;
     }
 
     private static void createAndSendReply(Message message, int replyIdMessage, Bundle replyData) {
@@ -334,16 +269,15 @@ public class StatusService extends Service {
             replyData = new Bundle();
         }
         Bundle data = message.getData();
-        String callbackIdentifier = data.getString(StatusConnector.CALLBACK_IDENTIFIER);
+        String callbackIdentifier = data.getString(GethConnector.CALLBACK_IDENTIFIER);
         Log.d(TAG, "Callback identifier: " + callbackIdentifier);
-        replyData.putString(StatusConnector.CALLBACK_IDENTIFIER, callbackIdentifier);
+        replyData.putString(GethConnector.CALLBACK_IDENTIFIER, callbackIdentifier);
         replyMessage.setData(replyData);
 
         sendReply(message.replyTo, replyMessage);
     }
 
     private static void sendReply(Messenger messenger, Message message) {
-        
         try {
             messenger.send(message);
         } catch (Exception e) {

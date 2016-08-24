@@ -1,4 +1,4 @@
-package com.statusim.module;
+package com.statusim.geth.service;
 
 
 import android.content.ComponentName;
@@ -69,7 +69,6 @@ public class ServiceConnector {
             // interact with the service. We are communicating with the
             // service using a Messenger, so here we get a client-side
             // representation of that from the raw IBinder object.
-
             serviceMessenger = new Messenger(service);
             isBound = true;
             for (ConnectorHandler handler: handlers) {
