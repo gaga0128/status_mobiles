@@ -35,7 +35,6 @@
   (let [data       (json->clj result)
         public-key (:pubkey data)
         address    (:address data)
-        mnemonic   (:mnemonic data)
         account    {:public-key public-key
                     :address    address
                     :name       address
@@ -44,14 +43,15 @@
     (when (not (str/blank? public-key))
       (do
         (dispatch-sync [:add-account account])
-        (dispatch-sync [:save-password password mnemonic])
-        (dispatch-sync [:login-account address password])))))
+        (dispatch [:login-account address password])))))
 
-(register-handler
-  :create-account
-  (fn [db [_ password]]
-    (geth/create-account password (fn [result] (account-created result password)))
-    db))
+(register-handler :create-account
+  (after #(dispatch [:init-wallet-chat]))
+  (u/side-effect!
+    (fn [_ [_ password]]
+      (geth/create-account
+        password
+        #(account-created % password)))))
 
 (defn save-account-to-realm!
   [{:keys [current-account-id accounts]} _]
