@@ -16,19 +16,15 @@
   [db _]
   (assoc db :selected-participants #{}))
 
-(defn save-property!
-  [current-chat-id property-name value]
-  (r/write :account
-           (fn []
-             (-> (r/get-by-field :account :chat :chat-id current-chat-id)
-                 (r/single)
-                 (aset (name property-name) value)))))
-
 (defn save-chat-property!
   [db-name property-name]
   (fn [{:keys [current-chat-id] :as db} _]
     (let [property (db-name db)]
-      (save-property! current-chat-id property-name property))))
+      (r/write :account
+               (fn []
+                 (-> (r/get-by-field :account :chat :chat-id current-chat-id)
+                     (r/single)
+                     (aset (name property-name) property)))))))
 
 (defn update-chat-property
   [db-name property-name]
@@ -55,10 +51,8 @@
   (update-chat-property :new-chat-name :name))
 
 (register-handler :set-chat-color
-  (after (fn [{:keys [current-chat-id]} [_ color]]
-           (save-property! current-chat-id :color (name color))))
-  (fn [{:keys [current-chat-id] :as db} [_ color]]
-    (assoc-in db [:chats current-chat-id :color] color)))
+  (after (save-chat-property! :new-chat-color :color))
+  (update-chat-property :new-chat-color :color))
 
 (defn clear-messages
   [{:keys [current-chat-id] :as db} _]
