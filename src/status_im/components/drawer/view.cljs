@@ -63,7 +63,7 @@
                 :handler           #(dispatch [:navigate-to :discovery])
                 :platform-specific platform-specific}]
     [menu-item {:name              (label :t/contacts)
-                :handler           #(dispatch [:navigate-to :contact-list])
+                :handler           #(dispatch [:show-contacts])
                 :platform-specific platform-specific}]
     [menu-item {:name              (label :t/invite-friends)
                 :handler           (fn []

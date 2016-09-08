@@ -60,13 +60,13 @@
      [action-button-item
       {:title       (label :t/new-chat)
        :buttonColor :#9b59b6
-       :onPress     #(dispatch [:navigate-forget :group-contacts :people])}
+       :onPress     #(dispatch [:show-group-contacts :people])}
       [ion-icon {:name  :md-create
                  :style st/create-icon}]]
      [action-button-item
       {:title       (label :t/new-group-chat)
        :buttonColor :#1abc9c
-       :onPress     #(dispatch [:navigate-to :new-group])}
+       :onPress     #(dispatch [:show-group-new])}
       [ion-icon {:name  :md-person
                  :style st/person-stalker-icon}]]]]
    [bottom-gradient]])

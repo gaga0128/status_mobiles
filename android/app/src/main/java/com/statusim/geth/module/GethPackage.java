@@ -1,24 +1,22 @@
-package com.statusim.module;
+package com.statusim.geth.module;
 
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.JavaScriptModule;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.uimanager.ViewManager;
-import com.statusim.module.StatusService;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class StatusPackage implements ReactPackage {
+public class GethPackage implements ReactPackage {
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
-        System.loadLibrary("statusgoraw");
-        System.loadLibrary("statusgo");
-        modules.add(new StatusModule(reactContext));
+
+        modules.add(new GethModule(reactContext));
 
         return modules;
     }
