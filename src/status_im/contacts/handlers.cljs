@@ -4,13 +4,13 @@
             [status-im.models.contacts :as contacts]
             [status-im.utils.crypt :refer [encrypt]]
             [clojure.string :as s]
-            [status-im.protocol.core :as protocol]
+            [status-im.protocol.api :as api]
             [status-im.utils.utils :refer [http-post]]
             [status-im.utils.phone-number :refer [format-phone-number]]
             [status-im.utils.handlers :as u]
             [status-im.utils.utils :refer [require]]
-            [status-im.navigation.handlers :as nav]
-            [status-im.utils.random :as random]))
+            [status-im.utils.logging :as log]
+            [status-im.navigation.handlers :as nav]))
 
 
 (defmethod nav/preload-data! :group-contacts
@@ -32,30 +32,15 @@
   (contacts/save-contacts [contact]))
 
 (defn watch-contact
-  [{:keys [web3]} [_ {:keys [whisper-identity public-key private-key]}]]
-  (when (and public-key private-key)
-    (protocol/watch-user! {:web3     web3
-                           :identity whisper-identity
-                           :keypair  {:public  public-key
-                                      :private private-key}
-                           :callback #(dispatch [:incoming-message %1 %2])})))
+  [_ [_ {:keys [whisper-identity]}]]
+  (api/watch-user whisper-identity))
 
 (register-handler :watch-contact (u/side-effect! watch-contact))
 
 (defn send-contact-request
-  [{:keys [current-public-key web3 current-account-id accounts]} [_ contact]]
-  (let [{:keys [whisper-identity]} contact
-        {:keys [name photo-path updates-public-key updates-private-key]} (get accounts current-account-id)]
-    (protocol/contact-request!
-      {:web3    web3
-       :message {:from       current-public-key
-                 :to         whisper-identity
-                 :message-id (random/id)
-                 :payload    {:contact {:name          name
-                                        :profile-image photo-path
-                                        :address       current-account-id}
-                              :keypair {:public  updates-public-key
-                                        :private updates-private-key}}}})))
+  [{:keys [current-account-id accounts]} [_ contact]]
+  (let [account (get accounts current-account-id)]
+    (api/send-contact-request contact account)))
 
 (register-handler :update-contact!
   (-> (fn [db [_ {:keys [whisper-identity] :as contact}]]
@@ -122,7 +107,7 @@
 
 (defn request-stored-contacts [contacts]
   (let [contacts-by-hash (get-contacts-by-hash contacts)
-        data (or (keys contacts-by-hash) ())]
+        data             (or (keys contacts-by-hash) ())]
     (http-post "get-contacts" {:phone-number-hashes data}
                (fn [{:keys [contacts]}]
                  (let [contacts' (add-identity contacts-by-hash contacts)]
@@ -146,7 +131,7 @@
 
 (defn add-new-contacts
   [{:keys [contacts] :as db} [_ new-contacts]]
-  (let [identities (set (map :whisper-identity contacts))
+  (let [identities    (set (map :whisper-identity contacts))
         new-contacts' (->> new-contacts
                            (map #(update-pending-status contacts %))
                            (remove #(identities (:whisper-identity %)))
@@ -174,7 +159,8 @@
 (register-handler ::prepare-contact
   (-> add-new-contact
       ((after save-contact))
-      ((after send-contact-request))))
+      ((after send-contact-request))
+      ((after watch-contact))))
 
 (register-handler ::update-pending-contact
   (-> add-new-contact
@@ -182,21 +168,9 @@
 
 (register-handler :add-pending-contact
   (u/side-effect!
-    (fn [{:keys [current-public-key web3 current-account-id accounts]}
-         [_ {:keys [whisper-identity] :as contact}]]
-      (let [contact (assoc contact :pending false)
-            {:keys [name photo-path updates-public-key updates-private-key]}
-            (accounts current-account-id)]
-        (protocol/contact-request!
-          {:web3    web3
-           :message {:from       current-public-key
-                     :to         whisper-identity
-                     :message-id (random/id)
-                     :payload    {:contact {:name          name
-                                            :profile-image photo-path
-                                            :address       current-account-id}
-                                  :keypair {:public  updates-public-key
-                                            :private updates-private-key}}}})
+    (fn [_ [_ {:keys [whisper-identity] :as contact}]]
+      (let [contact (assoc contact :pending false)]
+        (api/send-discovery-keypair whisper-identity)
         (dispatch [::update-pending-contact contact])))))
 
 (defn set-contact-identity-from-qr
@@ -207,28 +181,34 @@
 
 (register-handler :contact-update-received
   (u/side-effect!
-    (fn [{:keys [chats] :as db} [_ {:keys [from payload]}]]
-      (let [{:keys [content timestamp]} payload
-            {:keys [status name profile-image]} (:profile content)
-            prev-last-updated (get-in db [:contacts from :last-updated])]
-        (if (<= prev-last-updated timestamp)
-          (let [contact {:whisper-identity from
-                         :name             name
-                         :photo-path       profile-image
-                         :status           status
-                         :last-updated     timestamp}]
+    ;; TODO: security issue: we should use `from` instead of `public-key` here, but for testing it is much easier to use `public-key`
+    (fn [db [_ from {{:keys [public-key last-updated name] :as account} :account}]]
+      (let [prev-last-updated (get-in db [:contacts public-key :last-updated])]
+        (if (<= prev-last-updated last-updated)
+          (let [contact (-> (assoc account :whisper-identity public-key)
+                            (dissoc :public-key))]
             (dispatch [:update-contact! contact])
-            (when (chats from)
-              (dispatch [:update-chat! {:chat-id from
-                                        :name    name}]))))))))
+            (dispatch [:update-chat! {:chat-id public-key
+                                      :name    name}])))))))
 
 (register-handler :contact-online-received
   (u/side-effect!
-    (fn [db [_ {:keys               [from]
-                {:keys [timestamp]} :payload}]]
+    (fn [db [_ from {last-online :at :as payload}]]
       (let [prev-last-online (get-in db [:contacts from :last-online])]
-        (when (< prev-last-online timestamp)
-          (protocol/reset-pending-messages! from)
+        (when (< prev-last-online last-online)
+          (api/resend-pending-messages from)
           (dispatch [:update-contact! {:whisper-identity from
-                                       :last-online      timestamp}]))))))
+                                       :last-online      last-online}]))))))
 
+(register-handler :contact-request-received
+  (u/side-effect!
+    (fn [_ [_ {:keys [contact from]}]]
+      (let [contact (assoc contact :whisper-identity from
+                                   :pending true)]
+        (dispatch [:add-contacts [contact]])))))
+
+(register-handler :contact-keypair-received
+  (u/side-effect!
+    (fn [_ [_ from]]
+      (api/stop-watching-user from)
+      (api/watch-user from))))

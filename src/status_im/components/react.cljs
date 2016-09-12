@@ -1,13 +1,13 @@
 (ns status-im.components.react
   (:require [reagent.core :as r]
             [status-im.components.styles :as st]
-            [status-im.utils.utils :as u]
-            [status-im.utils.platform :refer [platform-specific]]))
+            [status-im.utils.utils :as u]))
 
 (def react-native (u/require "react-native"))
 (def native-modules (.-NativeModules react-native))
 (def device-event-emitter (.-DeviceEventEmitter react-native))
 (def geth (.-Geth native-modules))
+(def react-native-dialogs (u/require "react-native-dialogs"))
 
 (def linear-gradient-module (u/require "react-native-linear-gradient"))
 (def dismiss-keyboard! (u/require "dismissKeyboard"))
@@ -64,15 +64,18 @@
 (defn text
   ([t]
    (r/as-element [text-class t]))
-  ([{:keys [style font] :as opts
+  ([{:keys [style platform-specific font] :as opts
      :or   {font :default}} t]
    (r/as-element
-     (let [font (get-in platform-specific [:fonts font])]
-       [text-class
+     [text-class
+      (cond
+        (and platform-specific font)
         (-> opts
-            (dissoc :font)
-            (assoc :style (merge style font)))
-        t]))))
+            (dissoc :platform-specific :font)
+            (assoc :style (st/with-font style platform-specific font)))
+        style opts
+        :else {:style opts})
+      t])))
 
 (defn text-input [props text]
   [text-input-class (merge
@@ -107,8 +110,22 @@
   [props & children]
   (vec (concat [linear-gradient-class (merge {:inverted true} props)] children)))
 
-(defn list-item [component]
-  (r/as-element component))
+
+;; List dialogs
+
+(defn show-dialog [{:keys [title options callback]}]
+  (let [dialog (new react-native-dialogs)]
+    (.set dialog (clj->js {:title         title
+                           :items         options
+                           :itemsCallback callback}))
+    (.show dialog)))
+
+(defn show-action-sheet [{:keys [options callback cancel-text]}]
+  (.showActionSheetWithOptions (get-class "ActionSheetIOS")
+                               (clj->js {:options           (conj options cancel-text)
+                                         :cancelButtonIndex (count options)})
+                               callback))
+
 
 ;; Image picker
 
@@ -120,4 +137,16 @@
         (.openPicker (clj->js {:multiple false}))
         (.then images-fn))))
 
+
+;; Platform
+
+(def platform
+  (when-let [pl (.-Platform react-native)] (.-OS pl)))
+
+(def android? (= platform "android"))
+
+(def ios? (= platform "ios"))
+
+(defn list-item [component]
+  (r/as-element component))
 

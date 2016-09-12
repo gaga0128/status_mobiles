@@ -4,9 +4,9 @@
             [status-im.persistence.realm.core :as realm]))
 
 (defn delivered-messages []
-  (-> (realm/get-by-fields :account :message :and {:outgoing       false
-                                                   :message-status nil})
-      (realm/realm-collection->list)))
+  (-> (realm/get-by-fields :account :message :and [[:delivery-status :delivered]
+                                                   [:outgoing false]])
+      (realm/collection->map)))
 
 (defn set-unviewed-messages [db]
   (let [messages (->> (::raw-unviewed-messages db)

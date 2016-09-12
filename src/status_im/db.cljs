@@ -11,7 +11,6 @@
 ;; initial state of app-db
 (def app-db {:identity-password      "replace-me-with-user-entered-password"
              :identity               "me"
-             :current-public-key     "me"
 
              :accounts               {}
              :current-account-id     nil
@@ -36,9 +35,9 @@
              :contacts-ids           #{}
              :selected-contacts      #{}
              :chats-updated-signal   0
-             :chat-ui-props          {:show-actions?     false
-                                      :show-bottom-info? false}
+             :show-actions           false
              :selected-participants  #{}
+             :signed-up              false
              :view-id                default-view
              :navigation-stack       (list default-view)
              :current-tag            nil
@@ -49,6 +48,7 @@
                                       :tabs-bar-value (anim/create-value 0)}
              :loading-allowed        true})
 
+(def protocol-initialized-path [:protocol-initialized])
 (defn chat-staged-commands-path [chat-id]
   [:chats chat-id :staged-commands])
 (defn chat-command-path [chat-id]

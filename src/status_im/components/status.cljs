@@ -3,7 +3,7 @@
   (:require [status-im.components.react :as r]
             [status-im.utils.types :as t]
             [re-frame.core :refer [dispatch]]
-            [taoensso.timbre :as log]))
+            [status-im.utils.logging :as log]))
 
 (def status-js (slurp "resources/status.js"))
 
@@ -17,9 +17,9 @@
 (.addListener r/device-event-emitter "gethEvent"
               #(dispatch [:signal-event (.-jsonEvent %)]))
 
-(defn start-node [on-result]
+(defn start-node [on-result on-already-running]
   (when status
-    (.startNode status on-result)))
+    (.startNode status on-result on-already-running)))
 
 (defn create-account [password on-result]
   (when status

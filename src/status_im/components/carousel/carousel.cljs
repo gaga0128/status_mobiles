@@ -1,10 +1,11 @@
 (ns status-im.components.carousel.carousel
-  (:require [status-im.components.react :refer [view
-                                                scroll-view
-                                                touchable-without-feedback
-                                                text]]
+  (:require [status-im.components.react :refer [android?
+                                              view
+                                              scroll-view
+                                              touchable-without-feedback
+                                              text]]
             [status-im.components.carousel.styles :as st]
-            [taoensso.timbre :as log]
+            [status-im.utils.logging :as log]
             [status-im.components.react :as r]))
 
 

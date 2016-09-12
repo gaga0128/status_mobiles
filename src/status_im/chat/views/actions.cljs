@@ -12,7 +12,7 @@
             [status-im.components.chat-icon.screen :refer [chat-icon-view-menu-item]]
             [status-im.chat.styles.screen :as st]
             [status-im.i18n :refer [label label-pluralize]]
-            [status-im.utils.platform :refer [platform-specific]]))
+            [status-im.utils.logging :as log]))
 
 (defview menu-item-icon-profile []
   [chat-id [:chat :chat-id]
@@ -97,14 +97,15 @@
     [view nil]]
    items])
 
-(defn action-view [{:keys     [icon-style
-                               custom-icon
-                               handler
-                               title
-                               subtitle]
-                    icon-name :icon}]
+(defn action-view [{{:keys     [icon-style
+                                custom-icon
+                                handler
+                                title
+                                subtitle]
+                     icon-name :icon} :action
+                    platform-specific :platform-specific}]
   [touchable-highlight {:on-press (fn []
-                                    (dispatch [:set-chat-ui-props :show-actions? false])
+                                    (dispatch [:set-show-actions false])
                                     (when handler
                                       (handler)))}
    [view st/action-icon-row
@@ -112,30 +113,33 @@
      (or custom-icon
          [icon icon-name icon-style])]
     [view st/action-view
-     [text {:style           st/action-title
-            :number-of-lines 1
-            :font            :medium} title]
+     [text {:style             st/action-title
+            :platform-specific platform-specific
+            :number-of-lines   1
+            :font              :medium} title]
      (when-let [subtitle subtitle]
-       [text {:style           st/action-subtitle
-              :number-of-lines 1
-              :font            :default}
+       [text {:style             st/action-subtitle
+              :platform-specific platform-specific
+              :number-of-lines   1
+              :font              :default}
         subtitle])]]])
 
-(defn actions-list-view []
+(defn actions-list-view [{styles :styles :as platform-specific}]
   (let [{:keys [group-chat chat-id]} (subscribe [:chat-properties [:group-chat :chat-id]])
         members (subscribe [:current-chat-contacts])
-        status-bar-height (get-in platform-specific [:component-styles :status-bar :default :height])]
+        status-bar-height (get-in styles [:components :status-bar :default :height])]
     (when-let [actions (if @group-chat
                          (group-chat-items @members)
                          (user-chat-items @chat-id (first @members)))]
       [view (-> (st/actions-wrapper status-bar-height)
-                (merge (get-in platform-specific [:component-styles :actions-list-view])))
+                (merge (get-in styles [:components :actions-list-view])))
        [view st/actions-separator]
        [view st/actions-view
         (for [action actions]
           (if action
-            ^{:key action} [action-view action]))]])))
+            ^{:key action} [action-view {:platform-specific platform-specific
+                                         :action            action}]))]])))
 
-(defn actions-view []
-  [overlay {:on-click-outside #(dispatch [:set-chat-ui-props :show-actions? false])}
-   [actions-list-view]])
+(defn actions-view [platform-specific]
+  [overlay {:on-click-outside #(dispatch [:set-show-actions false])}
+   [actions-list-view platform-specific]])

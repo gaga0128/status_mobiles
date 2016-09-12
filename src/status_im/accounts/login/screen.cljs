@@ -25,10 +25,11 @@
             [status-im.i18n :refer [label]]
             [status-im.accounts.login.styles :as st]))
 
-(defn toolbar-title []
+(defn toolbar-title [platform-specific]
   [view toolbar-title-container
-   [text {:style (merge toolbar-title-text {:color color-white})
-          :font  :medium}
+   [text {:style             (merge toolbar-title-text {:color color-white})
+          :platform-specific platform-specific
+          :font              :medium}
     (label :t/login)]])
 
 (defview address-input [address]
@@ -57,7 +58,7 @@
                      (dispatch [:set-in [:login :password] %])
                      (dispatch [:set-in [:login :error] ""]))}]])
 
-(defview login []
+(defview login [{platform-specific :platform-specific}]
   [{:keys [address password error]} [:get :login]
    keyboard-height [:get :keyboard-height]]
   [view st/screen-container
@@ -66,12 +67,13 @@
                      :end       [0.5, 1]
                      :locations [0, 0.8, 1]
                      :style     st/gradient-background}]
-   [status-bar {:type :transparent}]
+   [status-bar {:platform-specific platform-specific
+                :type              :transparent}]
    [toolbar {:background-color :transparent
              :nav-action       {:image   {:source {:uri :icon_back_white}
                                           :style  icon-back}
                                 :handler #(dispatch [:navigate-back])}
-             :custom-content   [toolbar-title]
+             :custom-content   [toolbar-title platform-specific]
              :action           {:image   {:style icon-search}
                                 :handler #()}}]
    [view st/form-container
@@ -83,5 +85,6 @@
      [touchable-highlight
       {:on-press #(dispatch [:login-account address password])}
       [view st/connect-button
-       [text {:style             st/connect-button-text}
+       [text {:style             st/connect-button-text
+              :platform-specific platform-specific}
         (label :t/connect)]]]]]])

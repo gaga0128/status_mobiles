@@ -24,12 +24,14 @@
             [status-im.accounts.recover.validations :as v]
             [cljs.spec :as s]
             [clojure.string :as str]
-            [taoensso.timbre :as log]))
+            [status-im.utils.logging :as log]))
 
-(defn toolbar-title []
+(defn toolbar-title
+  [platform-specific]
   [view toolbar-title-container
-   [text {:style toolbar-title-text
-          :font  :medium}
+   [text {:style             toolbar-title-text
+          :platform-specific platform-specific
+          :font              :medium}
     (label :t/recover-from-passphrase)]])
 
 (defview passphrase-input [passphrase]
@@ -67,7 +69,7 @@
        :inputStyle   st/input-style
        :onChangeText #(dispatch [:set-in [:recover :password] %])}]]))
 
-(defview recover []
+(defview recover [{platform-specific :platform-specific}]
   [{:keys [passphrase password passphrase-error password-error]} [:get :recover]]
   (let [valid-form? (and
                       (s/valid? ::v/passphrase passphrase)
@@ -77,20 +79,22 @@
                          "rgba(24, 52, 76, 0)"]
         _ (log/debug passphrase " - " password)]
   [view st/screen-container
-   [status-bar {:type :transparent}]
+   [status-bar {:platform-specific platform-specific
+                :type              :transparent}]
    [toolbar {:background-color :transparent
              :nav-action       {:image   {:source {:uri :icon_back}
                                           :style  icon-back}
                                 :handler #(dispatch [:navigate-back])}
-             :custom-content   [toolbar-title]
+             :custom-content   [toolbar-title platform-specific]
              :action           {:image   {:style icon-search}
                                 :handler #()}}]
    [linear-gradient {:locations [0 0.6 1]
                      :colors    gradient-colors
                      :style     toolbar-gradient}]
    [view st/recover-explain-container
-    [text {:style st/recover-explain-text
-           :font  :medium}
+    [text {:style   st/recover-explain-text
+           :platform-specific platform-specific
+           :font              :medium}
      (label :t/recover-explain)]]
    [view st/form-container
     [view st/form-container-inner
@@ -102,5 +106,6 @@
       {:on-press #(when valid-form?
                    (dispatch [:recover-account passphrase password]))}
       [view (st/recover-button valid-form?)
-       [text {:style st/recover-button-text}
+       [text {:style             st/recover-button-text
+              :platform-specific platform-specific}
         (label :t/recover)]]]]]]))

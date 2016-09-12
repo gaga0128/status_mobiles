@@ -1,6 +1,7 @@
 (ns status-im.chat.screen
   (:require-macros [status-im.utils.views :refer [defview]])
   (:require [re-frame.core :refer [subscribe dispatch]]
+            [clojure.string :as s]
             [status-im.components.react :refer [view
                                                 animated-view
                                                 text
@@ -15,7 +16,6 @@
             [status-im.utils.listview :refer [to-datasource-inverted]]
             [status-im.utils.utils :refer [truncate-str]]
             [status-im.utils.datetime :as time]
-            [status-im.utils.platform :refer [platform-specific]]
             [status-im.components.invertible-scroll-view :refer [invertible-scroll-view]]
             [status-im.components.toolbar :refer [toolbar]]
             [status-im.chat.views.message :refer [chat-message]]
@@ -23,7 +23,6 @@
             [status-im.chat.views.response :refer [response-view]]
             [status-im.chat.views.new-message :refer [chat-message-new]]
             [status-im.chat.views.actions :refer [actions-view]]
-            [status-im.chat.views.bottom-info :refer [bottom-info-view]]
             [status-im.i18n :refer [label label-pluralize]]
             [status-im.components.animation :as anim]
             [reagent.core :as r]
@@ -52,26 +51,40 @@
   ;; TODO stub data ('online' property)
   [chat-icon-view-action chat-id group-chat name color true])
 
-(defn typing [member]
+(defn typing [member platform-specific]
   [view st/typing-view
    [view st/typing-background
-    [text {:style st/typing-text
-           :font  :default}
+    [text {:style             st/typing-text
+           :platform-specific platform-specific
+           :font              :default}
      (str member " " (label :t/is-typing))]]])
 
-(defn typing-all []
+(defn typing-all [platform-specific]
   [view st/typing-all
    ;; TODO stub data
    (for [member ["Geoff" "Justas"]]
-     ^{:key member} [typing member])])
+     ^{:key member} [typing member platform-specific])])
 
-(defn message-row [{:keys [contact-by-identity group-chat messages-count]}]
+(defn message-row [{:keys [contact-by-identity platform-specific group-chat messages-count]}]
   (fn [row _ idx]
     (let [message (-> row
                       (add-message-color contact-by-identity)
                       (assoc :group-chat group-chat)
                       (assoc :last-message (= (js/parseInt idx) (dec messages-count))))]
-      (list-item [chat-message message]))))
+      (list-item [chat-message message platform-specific]))))
+
+(defn on-action-selected [position]
+  (case position
+    0 (dispatch [:navigate-to :add-participants])
+    1 (dispatch [:navigate-to :remove-participants])
+    2 (dispatch [:leave-group-chat])))
+
+(defn overlay [{:keys [on-click-outside]} items]
+  [view st/actions-overlay
+   [touchable-highlight {:on-press on-click-outside
+                         :style    st/overlay-highlight}
+    [view nil]]
+   items])
 
 (defn online-text [contact chat-id]
   (if contact
@@ -86,57 +99,61 @@
       (label :t/active-online)
       (label :t/active-unknown))))
 
-(defn toolbar-content []
+(defn toolbar-content [platform-specific]
   (let [{:keys [group-chat name contacts chat-id]} (subscribe [:chat-properties [:group-chat :name :contacts :chat-id]])
-        show-actions (subscribe [:chat-ui-props :show-actions?])
+        show-actions (subscribe [:show-actions])
         contact      (subscribe [:get-in [:contacts @chat-id]])]
-    (fn []
+    (fn [platform-specific]
       [view (st/chat-name-view @show-actions)
-       [text {:style           st/chat-name-text
-              :number-of-lines 1
-              :font            :medium}
+       [text {:style             st/chat-name-text
+              :platform-specific platform-specific
+              :number-of-lines   1
+              :font              :medium}
         (if (str/blank? @name)
           (label :t/user-anonymous)
           (or @name (label :t/chat-name)))]
        (if @group-chat
          [view {:flexDirection :row}
           [icon :group st/group-icon]
-          [text {:style st/members
-                 :font  :medium}
+          [text {:style             st/members
+                 :platform-specific platform-specific
+                 :font              :medium}
            (let [cnt (inc (count @contacts))]
              (label-pluralize cnt :t/members))]]
-         [text {:style st/last-activity
-                :font  :default}
+         [text {:style             st/last-activity
+                :platform-specific platform-specific
+                :font              :default}
           (online-text @contact @chat-id)])])))
 
 (defn toolbar-action []
-  (let [show-actions (subscribe [:chat-ui-props :show-actions?])]
+  (let [show-actions (subscribe [:show-actions])]
     (fn []
       (if @show-actions
         [touchable-highlight
-         {:on-press #(dispatch [:set-chat-ui-props :show-actions? false])}
+         {:on-press #(dispatch [:set-show-actions false])}
          [view st/action
           [icon :up st/up-icon]]]
         [touchable-highlight
-         {:on-press #(dispatch [:set-chat-ui-props :show-actions? true])}
+         {:on-press #(dispatch [:set-show-actions true])}
          [view st/action
           [chat-icon]]]))))
 
-(defview chat-toolbar []
-  [show-actions [:chat-ui-props :show-actions?]]
+(defview chat-toolbar [platform-specific]
+  [show-actions [:show-actions]]
   [view
-   [status-bar]
+   [status-bar {:platform-specific platform-specific}]
    [toolbar {:hide-nav?      show-actions
-             :custom-content [toolbar-content]
+             :custom-content [toolbar-content platform-specific]
              :custom-action  [toolbar-action]
-             :style          (get-in platform-specific [:component-styles :toolbar])}]])
+             :style          (get-in platform-specific [:styles :components :toolbar])}]])
 
-(defview messages-view [group-chat]
+(defview messages-view [platform-specific group-chat]
   [messages [:chat :messages]
    contacts [:chat :contacts]
    loaded?  [:all-messages-loaded?]]
   (let [contacts' (contacts-by-identity contacts)]
     [list-view {:renderRow                 (message-row {:contact-by-identity contacts'
+                                                         :platform-specific   platform-specific
                                                          :group-chat          group-chat
                                                          :messages-count      (count messages)})
                 :renderScrollComponent     #(invertible-scroll-view (js->clj %))
@@ -167,31 +184,26 @@
          [animated-view {:style (st/messages-container messages-offset)}
           messages])})))
 
-(defn chat []
+(defn chat [{platform-specific :platform-specific}]
   (let [group-chat (subscribe [:chat :group-chat])
-        show-actions? (subscribe [:chat-ui-props :show-actions?])
-        show-bottom-info? (subscribe [:chat-ui-props :show-bottom-info?])
+        show-actions (subscribe [:show-actions])
         command? (subscribe [:command?])
         layout-height (subscribe [:get :layout-height])]
     (r/create-class
       {:component-did-mount #(dispatch [:check-autorun])
        :reagent-render
-       (fn []
+       (fn [{platform-specific :platform-specific}]
          [view {:style    st/chat-view
                 :onLayout (fn [event]
                             (let [height (.. event -nativeEvent -layout -height)]
                               (when (not= height @layout-height)
                                 (dispatch [:set-layout-height height]))))}
-          [chat-toolbar]
+          [chat-toolbar platform-specific]
           [messages-container
-           [messages-view @group-chat]]
+           [messages-view platform-specific @group-chat]]
           ;; todo uncomment this
-          #_(when @group-chat [typing-all])
+          #_(when @group-chat [typing-all platform-specific])
           [response-view]
-          (when-not @command?
-            [suggestion-container])
-          [chat-message-new]
-          (when @show-actions?
-            [actions-view])
-          (when @show-bottom-info?
-            [bottom-info-view])])})))
+          (when-not @command? [suggestion-container])
+          [chat-message-new platform-specific]
+          (when @show-actions [actions-view platform-specific])])})))

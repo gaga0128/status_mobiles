@@ -12,7 +12,7 @@
             [status-im.components.text-field.styles :as st]
             [status-im.i18n :refer [label]]
             [status-im.components.animation :as anim]
-            [taoensso.timbre :as log]))
+            [status-im.utils.logging :as log]))
 
 
 (def config {:label-top                16

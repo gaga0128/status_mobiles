@@ -83,12 +83,12 @@
      [scan-button {:showLabel (zero? (count whisper-identity))
                    :handler   #(dispatch [:scan-qr-code {:toolbar-title (label :t/new-contact)} :set-contact-identity-from-qr])}]]))
 
-(defview new-contact []
+(defview new-contact [{platform-specific :platform-specific}]
   [new-contact-identity [:get :new-contact-identity]
    error [:get :new-contact-address-error]]
   [view st/contact-form-container
    [view
-    [status-bar]
+    [status-bar {:platform-specific platform-specific}]
     [toolbar {:background-color :white
               :nav-action       {:image   {:source {:uri :icon_back}
                                            :style  icon-back}
@@ -98,6 +98,7 @@
    [view st/form-container
     [contact-whisper-id-input new-contact-identity error]]
    [view st/address-explication-container
-    [text {:style st/address-explication
-           :font  :default}
+    [text {:style             st/address-explication
+           :platform-specific platform-specific
+           :font              :default}
      (label :t/address-explication)]]])

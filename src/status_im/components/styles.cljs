@@ -35,6 +35,10 @@
 
 (def toolbar-height 56)
 
+(defn with-font [style platform-specific font]
+  (let [font (get-in platform-specific [:styles :fonts font])]
+    (merge style font)))
+
 (def flex
   {:flex 1})
 

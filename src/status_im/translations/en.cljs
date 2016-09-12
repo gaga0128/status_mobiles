@@ -25,7 +25,6 @@
 
    ;messages
    :status-sending                        "Sending"
-   :status-pending                        "Sending"
    :status-sent                           "Sent"
    :status-seen-by-everyone               "Seen by everyone"
    :status-seen                           "Seen"

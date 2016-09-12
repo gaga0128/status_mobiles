@@ -1,7 +1,7 @@
 (ns status-im.handlers.server
   (:require [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [status-im.utils.utils :refer [on-error http-post]]
-            [taoensso.timbre :as log]))
+            [status-im.utils.logging :as log]))
 
 (defn sign-up
   [db phone-number handler]

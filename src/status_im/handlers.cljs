@@ -4,7 +4,9 @@
     [schema.core :as s :include-macros true]
     [status-im.db :refer [app-db schema]]
     [status-im.persistence.realm.core :as realm]
-    [taoensso.timbre :as log]
+    [status-im.persistence.simple-kv-store :as kv]
+    [status-im.protocol.state.storage :as storage]
+    [status-im.utils.logging :as log]
     [status-im.utils.crypt :refer [gen-random-bytes]]
     [status-im.components.status :as status]
     [status-im.utils.handlers :refer [register-handler] :as u]
@@ -21,8 +23,22 @@
     status-im.qr-scanner.handlers
     status-im.accounts.handlers
     status-im.protocol.handlers
-    status-im.transactions.handlers
-    [status-im.utils.types :as t]))
+    [status-im.utils.datetime :as time]
+    status-im.transactions.handlers))
+
+;; -- Middleware ------------------------------------------------------------
+;;
+;; See https://github.com/Day8/re-frame/wiki/Using-Handler-Middleware
+;;
+(defn check-and-throw
+  "throw an exception if db doesn't match the schema."
+  [a-schema db]
+  (if-let [problems (s/check a-schema db)]
+    (throw (js/Error. (str "schema check failed: " problems)))))
+
+(def validate-schema-mw
+  (after (partial check-and-throw schema)))
+
 
 ;; -- Common --------------------------------------------------------------
 
@@ -43,20 +59,22 @@
 (register-handler :initialize-db
   (fn [_ _]
     (realm/reset-account)
-    (assoc app-db :current-account-id nil)))
+    (assoc app-db :current-account-id nil
+                  :current-public-key nil)))
 
 (register-handler :initialize-account-db
   (fn [db _]
     (assoc db
-      :chats {}
-      :current-chat-id "console")))
+      :signed-up (storage/get kv/kv-store :signed-up)
+      :password (storage/get kv/kv-store :password))))
 
 (register-handler :initialize-account
   (u/side-effect!
     (fn [_ [_ address]]
-      (dispatch [:initialize-account-db])
       (dispatch [:initialize-protocol address])
+      (dispatch [:initialize-account-db])
       (dispatch [:initialize-chats])
+      (dispatch [:initialize-pending-messages])
       (dispatch [:load-contacts])
       (dispatch [:init-chat])
       (dispatch [:init-discoveries])
@@ -94,16 +112,8 @@
   (u/side-effect!
    (fn [db _]
      (log/debug "Starting node")
-     (status/start-node (fn [result] (node-started db result))))))
-
-(register-handler :signal-event
-  (u/side-effect!
-    (fn [_ [_ event-str]]
-      (let [{:keys [type event]} (t/json->clj event-str)]
-        (case type
-          "transaction.queued" (dispatch [:transaction-queued event])
-          "node.started" (log/debug "Event *node.started* received")
-          (log/debug "Event " type " not handled"))))))
+     (status/start-node (fn [result] (node-started db result))
+                        #(log/debug "Geth already initialized")))))
 
 (register-handler :crypt-initialized
   (u/side-effect!

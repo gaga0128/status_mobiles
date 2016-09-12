@@ -27,10 +27,10 @@
                      (.log js/console type error))]
     (img->base64 path on-success on-error)))
 
-(defn profile-photo-capture []
+(defn profile-photo-capture [{platform-specific :platform-specific}]
   (let [camera-ref (r/atom nil)]
     [view st/container
-     [status-bar]
+     [status-bar {:platform-specific platform-specific}]
      [toolbar {:title            (label :t/image-source-title)
                :nav-action       {:image   {:source {:uri :icon_back}
                                             :style  icon-back}

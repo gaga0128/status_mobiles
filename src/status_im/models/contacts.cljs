@@ -2,12 +2,13 @@
   (:require [status-im.persistence.realm.core :as r]
             [status-im.utils.identicon :refer [identicon]]
             [status-im.persistence.realm-queries :refer [include-query
-                                                         exclude-query]]))
+                                                         exclude-query]]
+            [status-im.utils.logging :as log]))
 
 (defn get-contacts []
   (-> (r/get-all :account :contact)
       (r/sorted :name :asc)
-      r/realm-collection->list))
+      r/collection->map))
 
 (defn get-contact [id]
   (r/get-one-by-field :account :contact :whisper-identity id))

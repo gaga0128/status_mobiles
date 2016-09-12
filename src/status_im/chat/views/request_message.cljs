@@ -68,7 +68,7 @@
                      :style  st/command-request-image}]]]))})))
 
 (defn message-content-command-request
-  [{:keys [message-id content from incoming-group]}]
+  [{:keys [message-id content from incoming-group]} platform-specific]
   (let [commands-atom (subscribe [:get-responses])]
     (fn [{:keys [message-id content from incoming-group]}]
       (let [commands @commands-atom
@@ -76,15 +76,18 @@
         [view st/comand-request-view
          [view st/command-request-message-view
           (when incoming-group
-            [text {:style st/command-request-from-text
-                   :font  :default}
+            [text {:style             st/command-request-from-text
+                   :platform-specific platform-specific
+                   :font              :default}
              from])
-          [text {:style st/style-message-text
-                 :font  :default}
+          [text {:style             st/style-message-text
+                 :platform-specific platform-specific
+                 :font              :default}
            content]]
          [request-button message-id command]
          (when (:request-text command)
            [view st/command-request-text-view
-            [text {:style st/style-sub-text
-                   :font  :default}
+            [text {:style             st/style-sub-text
+                   :platform-specific platform-specific
+                   :font              :default}
              (:request-text command)]])]))))

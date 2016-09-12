@@ -9,6 +9,7 @@
                                                 image
                                                 touchable-highlight]]
             [status-im.utils.listview :refer [to-datasource]]
+            [reagent.core :as r]
             [status-im.chats-list.views.chat-list-item :refer [chat-list-item]]
             [status-im.components.action-button :refer [action-button
                                                         action-button-item]]
@@ -25,10 +26,10 @@
             [status-im.components.tabs.bottom-gradient :refer [bottom-gradient]]
             [status-im.components.tabs.styles :refer [tabs-height]]))
 
-(defview chats-list-toolbar []
+(defview chats-list-toolbar [platform-specific]
   [chats-scrolled? [:get :chats-scrolled?]]
   [view
-   [status-bar]
+   [status-bar {:platform-specific platform-specific}]
    [toolbar {:nav-action       {:image   {:source {:uri :icon_hamburger}
                                           :style  st/hamburger-icon}
                                 :handler open-drawer}
@@ -41,12 +42,12 @@
                                           :style  st/search-icon}
                                 :handler (fn [])}}]])
 
-(defview chats-list []
+(defview chats-list [{platform-specific :platform-specific}]
   [chats [:get :chats]]
   ;; todo what is this?!
   #_(dispatch [:set :chats-scrolled? false])
   [view st/chats-container
-   [chats-list-toolbar]
+   [chats-list-toolbar platform-specific]
    [list-view {:dataSource (to-datasource chats)
                :renderRow  (fn [row _ _]
                              (list-item [chat-list-item row]))

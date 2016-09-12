@@ -12,7 +12,6 @@
             [status-im.components.animation :as anim]
             [status-im.chat.views.request-message :refer [message-content-command-request]]
             [status-im.chat.styles.message :as st]
-            [status-im.models.chats :refer [chat-by-id]]
             [status-im.models.commands :refer [parse-command-message-content
                                                parse-command-request]]
             [status-im.resources :as res]
@@ -21,14 +20,14 @@
                                          content-type-status
                                          content-type-command
                                          content-type-command-request]]
-            [status-im.utils.identicon :refer [identicon]]
-            [status-im.chat.utils :as cu]))
+            [status-im.utils.logging :as log]))
 
-(defn message-date [timestamp]
+(defn message-date [timestamp platform-specific]
   [view {}
    [view st/message-date-container
-    [text {:style st/message-date-text
-           :font  :default}
+    [text {:style             st/message-date-text
+           :platform-specific platform-specific
+           :font              :default}
      (time/to-short-str timestamp)]]])
 
 (defn contact-photo [{:keys [photo-path]}]
@@ -44,19 +43,21 @@
      [view st/online-dot-left]
      [view st/online-dot-right]]))
 
-(defn message-content-status [{:keys [from content]}]
+(defn message-content-status [{:keys [from content]} platform-specific]
   [view st/status-container
    [view st/status-image-view
     [contact-photo {}]
     [contact-online {:online true}]]
-   [text {:style st/status-from
-          :font  :default}
+   [text {:style             st/status-from
+          :platform-specific platform-specific
+          :font              :default}
     from]
-   [text {:style st/status-text
-          :font  :default}
+   [text {:style             st/status-text
+          :platform-specific platform-specific
+          :font              :default}
     content]])
 
-(defn message-content-audio [_]
+(defn message-content-audio [{:keys [platform-specific]}]
   [view st/audio-container
    [view st/play-view
     [image {:source res/play
@@ -64,19 +65,21 @@
    [view st/track-container
     [view st/track]
     [view st/track-mark]
-    [text {:style st/track-duration-text
-           :font  :default}
+    [text {:style             st/track-duration-text
+           :platform-specific platform-specific
+           :font              :default}
      "03:39"]]])
 
-(defview message-content-command [content preview]
+(defview message-content-command [content preview platform-specific]
   [commands [:get-commands-and-responses]]
   (let [{:keys [command content]} (parse-command-message-content commands content)
         {:keys [name icon type]} command]
     [view st/content-command-view
      [view st/command-container
       [view (st/command-view command)
-       [text {:style st/command-name
-              :font  :default}
+       [text {:style             st/command-name
+              :platform-specific platform-specific
+              :font              :default}
         (str (if (= :command type) "!" "") name)]]]
      (when icon
        [view st/command-image-view
@@ -84,8 +87,9 @@
                 :style  st/command-image}]])
      (if preview
        preview
-       [text {:style st/command-text
-              :font  :default}
+       [text {:style             st/command-text
+              :platform-specific platform-specific
+              :font              :default}
         (str content)])]))
 
 (defn set-chat-command [message-id command]
@@ -103,94 +107,53 @@
                             (message :content-type)))
 
 (defmethod message-content content-type-command-request
-  [wrapper message]
-  [wrapper message [message-content-command-request message]])
+  [wrapper message platform-specific]
+  [wrapper message [message-content-command-request message platform-specific] platform-specific])
 
 (defn text-message
-  [{:keys [content] :as message}]
+  [{:keys [content] :as message} platform-specific]
   [message-view message
-   [text {:style (st/text-message message)
-          :font  :default}
+   [text {:style             (st/text-message message)
+          :platform-specific platform-specific
+          :font              :default}
     (str content)]])
 
 (defmethod message-content text-content-type
-  [wrapper message]
-  [wrapper message [text-message message]])
+  [wrapper message platform-specific]
+  [wrapper message [text-message message platform-specific] platform-specific])
 
 (defmethod message-content content-type-status
-  [_ message]
-  [message-content-status message])
+  [_ message platform-specific]
+  [message-content-status message platform-specific])
 
 (defmethod message-content content-type-command
-  [wrapper {:keys [content rendered-preview] :as message}]
+  [wrapper {:keys [content rendered-preview] :as message} platform-specific]
   [wrapper message
-   [message-view message [message-content-command content rendered-preview]]])
+   [message-view message [message-content-command content rendered-preview platform-specific]]
+   platform-specific])
 
 (defmethod message-content :default
-  [wrapper {:keys [content-type content] :as message}]
+  [wrapper {:keys [content-type content] :as message} platform-specific]
   [wrapper message
    [message-view message
-    [message-content-audio {:content      content
-                            :content-type content-type}]]])
+    [message-content-audio {:content           content
+                            :content-type      content-type
+                            :platform-specific platform-specific}]]
+   platform-specific])
 
-(defview group-message-delivery-status [{:keys [message-id group-id message-status user-statuses] :as msg}]
-  [app-db-message-user-statuses [:get-in [:message-user-statuses message-id]]
-   app-db-message-status-value [:get-in [:message-statuses message-id :status]]
-   chat [:get-chat-by-id group-id]
-   contacts [:get-contacts]]
-  (let [status            (or message-status app-db-message-status-value :sending)
-        user-statuses     (merge user-statuses app-db-message-user-statuses)
-        participants      (:contacts chat)
-        seen-by-everyone? (and (= (count user-statuses) (count participants))
-                               (every? (fn [[_ {:keys [status]}]]
-                                         (= (keyword status) :seen)) user-statuses))]
-    (if (or (zero? (count user-statuses))
-            seen-by-everyone?)
-      [view st/delivery-view
-       [image {:source (case status
-                         :seen {:uri :icon_ok_small}
-                         :failed res/delivery-failed-icon
-                         nil)
-               :style  st/delivery-image}]
-       [text {:style st/delivery-text
-              :font  :default}
-        (message-status-label
-          (if seen-by-everyone?
-            :seen-by-everyone
-            status))]]
-      [touchable-highlight
-       {:on-press (fn []
-                    (dispatch [:show-message-details {:message-status status
-                                                      :user-statuses  user-statuses
-                                                      :participants   participants}]))}
-       [view st/delivery-view
-        (for [[_ {:keys [whisper-identity]}] (take 3 user-statuses)]
-          ^{:key whisper-identity}
-          [image {:source {:uri (or (get-in contacts [whisper-identity :photo-path])
-                                    (identicon whisper-identity))}
-                  :style  {:width        16
-                           :height       16
-                           :borderRadius 8}}])
-        (if (> (count user-statuses) 3)
-          [text {:style st/delivery-text
-                 :font  :default}
-           (str "+ " (- (count user-statuses) 3))])]])))
-
-(defview message-delivery-status [{:keys [message-id chat-id message-status user-statuses]}]
-  [app-db-message-status-value [:get-in [:message-statuses message-id :status]]]
-  (let [delivery-status (get-in user-statuses [chat-id :status])
-        status          (if (cu/console? chat-id)
-                          :seen
-                          (or delivery-status message-status app-db-message-status-value :sending))]
-    [view st/delivery-view
-     [image {:source (case status
-                       :seen {:uri :icon_ok_small}
-                       :failed res/delivery-failed-icon
-                       nil)
-             :style  st/delivery-image}]
-     [text {:style st/delivery-text
-            :font  :default}
-      (message-status-label status)]]))
+(defview message-delivery-status [{:keys [delivery-status chat-id message-id] :as message} platform-specific]
+  [status [:get-in [:message-status chat-id message-id]]]
+  [view st/delivery-view
+   [image {:source (case (or status delivery-status)
+                     :seen {:uri :icon_ok_small}
+                     :seen-by-everyone {:uri :icon_ok_small}
+                     :failed res/delivery-failed-icon
+                     nil)
+           :style  st/delivery-image}]
+   [text {:style             st/delivery-text
+          :platform-specific platform-specific
+          :font              :default}
+    (message-status-label (or status delivery-status))]])
 
 (defview member-photo [from]
   [photo-path [:photo-path from]]
@@ -201,12 +164,13 @@
            :style  st/photo}]])
 
 (defn incoming-group-message-body
-  [{:keys [selected same-author from] :as message} content]
+  [{:keys [selected same-author from] :as message} content platform-specific]
   (let [delivery-status :seen-by-everyone]
     [view st/group-message-wrapper
      (when selected
-       [text {:style st/selected-message
-              :font  :default}
+       [text {:style             st/selected-message
+              :platform-specific platform-specific
+              :font              :default}
         "Mar 7th, 15:22"])
      [view (st/incoming-group-message-body-st message)
       [view st/message-author
@@ -215,16 +179,14 @@
        content
        ;; TODO show for last or selected
        (when (and selected delivery-status)
-         [message-delivery-status message])]]]))
+         [message-delivery-status {:delivery-status delivery-status} platform-specific])]]]))
 
 (defn message-body
-  [{:keys [outgoing message-type] :as message} content]
+  [{:keys [outgoing] :as message} content platform-specific]
   [view (st/message-body message)
    content
    (when outgoing
-     (if (= (keyword message-type) :group-user-message)
-       [group-message-delivery-status message]
-       [message-delivery-status message]))])
+     [message-delivery-status message platform-specific])])
 
 (defn message-container-animation-logic [{:keys [to-value val callback]}]
   (fn [_]
@@ -260,28 +222,31 @@
                   children)])}))
     (into [view] children)))
 
-(defn chat-message [{:keys [outgoing message-id chat-id user-statuses from]}]
-  (let [my-identity (subscribe [:get :current-public-key])
-        status      (subscribe [:get-in [:message-user-statuses message-id my-identity]])]
+(defn chat-message [{:keys [outgoing delivery-status timestamp new-day group-chat message-id chat-id]
+                     :as   message}
+                    platform-specific]
+  (let [status (subscribe [:get-in [:message-status chat-id message-id]])]
     (r/create-class
       {:component-did-mount
        (fn []
          (when (and (not outgoing)
-                    (not= :seen (keyword @status))
-                    (not= :seen (keyword (get-in user-statuses [@my-identity :status]))))
-           (dispatch [:send-seen! {:chat-id    chat-id
-                                   :from       from
-                                   :message-id message-id}])))
+                    (not= :seen delivery-status)
+                    (not= :seen @status))
+           (dispatch [:send-seen! chat-id message-id])))
        :reagent-render
-       (fn [{:keys [outgoing timestamp new-day group-chat] :as message}]
+       (fn [{:keys [outgoing delivery-status timestamp new-day group-chat]
+             :as   message}
+            platform-specific]
          [message-container message
           ;; TODO there is no new-day info in message
           (when new-day
-            [message-date timestamp])
+            [message-date timestamp platform-specific])
           [view
            (let [incoming-group (and group-chat (not outgoing))]
              [message-content
               (if incoming-group
                 incoming-group-message-body
                 message-body)
-              (merge message {:incoming-group incoming-group})])]])})))
+              (merge message {:delivery-status (keyword delivery-status)
+                              :incoming-group  incoming-group})
+              platform-specific])]])})))

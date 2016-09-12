@@ -1,7 +1,6 @@
 (ns status-im.utils.handlers
   (:require [re-frame.core :refer [after dispatch debug] :as re-core]
-            [re-frame.utils :refer [log]]
-            [clojure.string :as str]))
+            [re-frame.utils :refer [log]]))
 
 (defn side-effect!
   "Middleware for handlers that will not affect db."
@@ -25,10 +24,3 @@
   ([name handler] (register-handler name nil handler))
   ([name middleware handler]
    (re-core/register-handler name [debug-handlers-names middleware] handler)))
-
-(defn get-hashtags [status]
-  (if status
-    (let [hashtags (map #(str/lower-case (subs % 1))
-                        (re-seq #"#[^ !?,;:.]+" status))]
-      (set (or hashtags [])))
-    #{}))

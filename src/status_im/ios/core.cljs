@@ -3,9 +3,11 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [status-im.handlers]
             [status-im.subs]
+            [status-im.ios.styles :refer [styles]]
             [status-im.components.react :refer [app-registry
                                                 keyboard
-                                                orientation]]
+                                                orientation
+                                                show-action-sheet]]
             [status-im.components.main-tabs :refer [main-tabs]]
             [status-im.contacts.views.contact-list :refer [contact-list]]
             [status-im.contacts.views.new-contact :refer [new-contact]]
@@ -23,14 +25,15 @@
             [status-im.profile.screen :refer [profile my-profile]]
             [status-im.profile.photo-capture.screen :refer [profile-photo-capture]]
             [status-im.utils.utils :refer [toast]]
+            [status-im.utils.encryption]
             status-im.persistence.realm.core
-            [taoensso.timbre :as log]))
+            [status-im.utils.logging :as log]))
 
 (defn orientation->keyword [o]
   (keyword (.toLowerCase o)))
 
 (defn app-root []
-  (let [signed-up       (subscribe [:signed-up?])
+  (let [signed-up       (subscribe [:get :signed-up])
         _               (log/debug "signed up: " @signed-up)
         view-id         (subscribe [:get :view-id])
         account-id      (subscribe [:get :current-account-id])
@@ -84,7 +87,8 @@
                              :accounts accounts
                              :login login
                              :my-profile my-profile)]
-             [component])))})))
+             [component {:platform-specific {:styles            styles
+                                             :list-selection-fn show-action-sheet}}])))})))
 
 (defn init []
   (dispatch-sync [:reset-app])

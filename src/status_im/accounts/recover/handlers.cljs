@@ -3,22 +3,22 @@
             [status-im.components.status :as status]
             [status-im.utils.types :refer [json->clj]]
             [status-im.utils.identicon :refer [identicon]]
-            [taoensso.timbre :as log]
-            [clojure.string :as str]
-            [status-im.protocol.core :as protocol]))
+            [status-im.utils.logging :as log]
+            [clojure.string :as str]))
+
+(defn on-account-changed
+  [error address new-account?]
+  (dispatch [:navigate-to-clean :accounts]))
 
 (defn account-recovered [result password]
   (let [_ (log/debug result)
         data       (json->clj result)
         public-key (:pubkey data)
         address    (:address data)
-        {:keys [public private]} (protocol/new-keypair!)
-        account {:public-key          public-key
-                 :address             address
-                 :name                address
-                 :photo-path          (identicon public-key)
-                 :updates-public-key  public
-                 :updates-private-key private}]
+        account    {:public-key public-key
+                    :address    address
+                    :name       address
+                    :photo-path (identicon public-key)}]
     (log/debug "account-recovered")
     (when (not (str/blank? public-key))
       (do

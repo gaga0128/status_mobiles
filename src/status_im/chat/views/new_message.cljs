@@ -6,7 +6,6 @@
     [status-im.chat.views.message-input :refer [plain-message-input-view]]
     [status-im.chat.views.staged-command :refer [simple-command-staged-view]]
     [status-im.utils.phone-number :refer [valid-mobile-number?]]
-    [status-im.utils.platform :refer [platform-specific]]
     [status-im.chat.styles.message :as st]))
 
 (defn staged-command-view [stage-command]
@@ -37,10 +36,10 @@
   [plain-message-input-view
    (when command? (get-options parameter type))])
 
-(defview chat-message-new []
+(defview chat-message-new [platform-specific]
   [staged-commands [:get-chat-staged-commands]
    margin [:input-margin]]
-  (let [style (get-in platform-specific [:component-styles :chat :new-message])]
+  (let [style (get-in platform-specific [:styles :components :chat :new-message])]
     [view (merge (st/new-message-container margin)
                  style)
      (when (seq staged-commands)

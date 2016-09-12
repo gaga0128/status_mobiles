@@ -1,6 +1,8 @@
 (ns status-im.discovery.model
-  (:require [taoensso.timbre :as log]
-            [status-im.persistence.realm.core :as r]))
+  ;status-im.models.discoveries
+  (:require [status-im.utils.logging :as log]
+            [status-im.persistence.realm.core :as r]
+            [status-im.constants :as c]))
 
 (defn get-tag [tag]
   (log/debug "Getting tag: " tag)
@@ -37,7 +39,7 @@
 (defn discovery-list []
   (->> (-> (r/get-all :account :discovery)
            (r/sorted :priority :desc)
-           (r/realm-collection->list))
+           (r/collection->map))
        (mapv #(update % :tags vals))))
 
 (defn- add-discoveries [discoveries]
@@ -63,5 +65,5 @@
 (defn all-tags []
   (-> (r/get-all :account :tag)
       (r/sorted :count :desc)
-      r/realm-collection->list))
+      r/collection->map))
 

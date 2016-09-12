@@ -1,11 +1,11 @@
 (ns status-im.chat.subs
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :refer [register-sub dispatch subscribe path]]
-            [status-im.utils.platform :refer [ios?]]
+            [status-im.components.react :refer [ios?]]
             [status-im.models.commands :as commands]
-            [status-im.models.chats :as chats]
             [status-im.constants :refer [response-suggesstion-resize-duration]]
             [status-im.chat.constants :as c]
+            [status-im.handlers.content-suggestions :refer [get-content-suggestions]]
             [status-im.chat.views.plain-message :as plain-message]
             [status-im.chat.views.command :as command]))
 
@@ -19,9 +19,9 @@
          (into {}))))
 
 (register-sub
-  :chat-ui-props
-  (fn [db [_ ui-element]]
-    (reaction (get-in @db [:chat-ui-props ui-element]))))
+  :show-actions
+  (fn [db _]
+    (reaction (:show-actions @db))))
 
 (register-sub :chat
   (fn [db [_ k]]
@@ -47,10 +47,6 @@
 (register-sub :get-commands
   (fn [db _]
     (reaction (commands/get-commands @db))))
-
-(register-sub :get-chat-by-id
-  (fn [_ [_ chat-id]]
-    (reaction (chats/chat-by-id chat-id))))
 
 (register-sub :get-responses
   (fn [db _]

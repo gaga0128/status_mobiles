@@ -105,9 +105,9 @@
   [view st/action
    [chat-icon-view-action chat-id group-chat name color false]])
 
-(defn new-group-toolbar []
+(defn new-group-toolbar [platform-specific]
   [view
-   [status-bar]
+   [status-bar {:platform-specific platform-specific}]
    [toolbar {:title         (label :t/chat-settings)
              :custom-action [chat-icon]}]])
 
@@ -145,9 +145,9 @@
    (when (pos? (count validation-messages))
      [text {:style st/chat-name-validation-message} (first validation-messages)])])
 
-(defn group-settings []
+(defn group-settings [{platform-specific :platform-specific}]
   [view st/group-settings
-   [new-group-toolbar]
+   [new-group-toolbar platform-specific]
    [scroll-view st/body
     [chat-name]
     [text {:style st/members-text} (label :t/members-title)]
