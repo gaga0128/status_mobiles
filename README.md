@@ -27,4 +27,4 @@ Please see the [Developers' Guide](https://github.com/status-im/status-react/wik
 
 ## License
 
-Licensed under the Mozilla Public License v2.0
+Copyright © 2016 FIXME

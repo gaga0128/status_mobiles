@@ -3,25 +3,18 @@
             [status-im.protocol.ack :as ack]
             [status-im.protocol.web3.utils :as u]
             [status-im.protocol.encryption :as e]
-            [taoensso.timbre :refer-macros [debug] :as log]))
+            [taoensso.timbre :refer-macros [debug]]))
 
 (defn- parse-payload [payload]
   (debug :parse-payload)
   (r/read-string (u/to-utf8 payload)))
-
-(defn- decrypt [key content]
-  (try
-    (r/read-string (e/decrypt key content))
-    (catch :default err
-      (log/warn :decrypt-error err)
-      nil)))
 
 (defn- parse-content [key {:keys [content]} was-encrypted?]
   (debug :parse-content
          "Key exitsts:" (not (nil? key))
          "Content exists:" (not (nil? content)))
   (if (and (not was-encrypted?) key content)
-    (decrypt key content)
+    (r/read-string (e/decrypt key content))
     content))
 
 (defn message-listener
