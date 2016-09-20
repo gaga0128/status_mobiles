@@ -7,8 +7,8 @@
 (defn message [{:keys [title description]}]
   (c/list-item
     [c/view
-     [c/text {:style st/title} title]
-     [c/text {:style st/description} description]]))
+     [c/text st/title title]
+     [c/text st/description description]]))
 
 (defn messages-list [errors]
   [c/list-view {:renderRow                 message
