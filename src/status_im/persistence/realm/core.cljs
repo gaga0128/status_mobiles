@@ -4,7 +4,7 @@
             [status-im.utils.types :refer [to-string]]
             [status-im.utils.utils :as u]
             [status-im.utils.fs :as fs]
-            [status-im.utils.logging :as log]
+            [taoensso.timbre :as log]
             [status-im.persistence.realm.schemas :refer [base account]]
             [clojure.string :as str])
   (:refer-clojure :exclude [exists?]))
@@ -168,8 +168,8 @@
 (defn delete [schema obj]
   (.delete (realm schema) obj))
 
-(defn exists? [schema schema-name field value]
-  (pos? (.-length (get-by-field schema schema-name field value))))
+(defn exists? [schema schema-name fields]
+  (pos? (.-length (get-by-fields schema schema-name :and fields))))
 
 (defn get-count [objs]
   (.-length objs))
@@ -177,7 +177,7 @@
 (defn get-list [schema schema-name]
   (vals (js->clj (.objects (realm schema) (to-string schema-name)) :keywordize-keys true)))
 
-(defn collection->map [collection]
+(defn realm-collection->list [collection]
   (-> (.map collection (fn [object _ _] object))
       (js->clj :keywordize-keys true)))
 
