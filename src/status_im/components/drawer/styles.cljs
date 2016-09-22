@@ -1,5 +1,6 @@
 (ns status-im.components.drawer.styles
-  (:require [status-im.components.styles :refer [color-light-blue-transparent
+  (:require [status-im.components.styles :refer [font
+                                                 color-light-blue-transparent
                                                  color-white
                                                  color-black
                                                  color-blue

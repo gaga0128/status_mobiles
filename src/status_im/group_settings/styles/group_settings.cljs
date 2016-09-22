@@ -1,13 +1,16 @@
 (ns status-im.group-settings.styles.group-settings
-  (:require [status-im.components.styles :refer [color-white
-                                                 color-purple
-                                                 chat-background
-                                                 online-color
-                                                 selected-message-color
-                                                 separator-color
-                                                 text1-color
-                                                 text2-color
-                                                 toolbar-background1]]))
+  (:require [status-im.components.styles :refer [font
+                                               font-medium
+                                               title-font
+                                               color-white
+                                               color-purple
+                                               chat-background
+                                               online-color
+                                               selected-message-color
+                                               separator-color
+                                               text1-color
+                                               text2-color
+                                               toolbar-background1]]))
 
 (def modal-container
   {:flex           1
@@ -22,12 +25,14 @@
 
 (def modal-member-name
   {:color      text2-color
+   :fontFamily font
    :fontSize   14
    :lineHeight 20})
 
 (def modal-remove-text
   {:margin     10
    :color      text1-color
+   :fontFamily font
    :fontSize   14
    :lineHeight 20})
 
@@ -40,6 +45,7 @@
   {:margin     10
    :alignSelf  :center
    :color      text1-color
+   :fontFamily font
    :fontSize   14
    :lineHeight 20})
 
@@ -66,6 +72,7 @@
    :marginLeft   16
    :marginBottom 16
    :color        text2-color
+   :fontFamily   font-medium
    :fontSize     14
    :lineHeight   20})
 
@@ -81,6 +88,7 @@
 (def chat-name-value
   {:flex       1
    :fontSize   16
+   :fontFamily font
    :color      text1-color})
 
 (def chat-name-validation-message
@@ -95,6 +103,7 @@
 
 (def chat-name-btn-edit-text
   {:color      text2-color
+   :fontFamily font
    :fontSize   16
    :lineHeight 20})
 
@@ -103,6 +112,7 @@
    :marginLeft   16
    :marginBottom 16
    :color        text2-color
+   :fontFamily   font-medium
    :fontSize     14
    :lineHeight   20})
 
@@ -120,6 +130,7 @@
   {:marginTop  18
    :marginLeft 32
    :color      text2-color
+   :fontFamily font
    :fontSize   16
    :lineHeight 20})
 
@@ -128,6 +139,7 @@
    :marginLeft   16
    :marginBottom 16
    :color        text2-color
+   :fontFamily   font-medium
    :fontSize     14
    :lineHeight   20})
 
@@ -153,12 +165,14 @@
 (def setting-title
   {:marginTop  -2.5
    :color      text1-color
-   :fontSize   16})
+   :fontSize   16
+   :fontFamily font})
 
 (def setting-subtitle
   {:marginTop  1
    :color      text2-color
-   :fontSize   12})
+   :fontSize   12
+   :fontFamily font})
 
 (defn chat-color-icon [color]
   {:borderRadius    12

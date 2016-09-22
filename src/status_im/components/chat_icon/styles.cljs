@@ -1,5 +1,7 @@
 (ns status-im.components.chat-icon.styles
-  (:require [status-im.components.styles :refer [color-white
+  (:require [status-im.components.styles :refer [font
+                                                 title-font
+                                                 color-white
                                                  chat-background
                                                  online-color
                                                  selected-message-color
@@ -35,6 +37,7 @@
 (def default-chat-icon-text
   {:marginTop  -2
    :color      color-white
+   :fontFamily font
    :fontSize   16
    :lineHeight 20})
 
@@ -94,8 +97,7 @@
 (def online-dot-right (merge online-dot {:left 9}))
 
 (def photo-pencil
-  {:margin-left 5
-   :margin-right 5
+  {:margin-left 6
    :margin-top  3
    :font-size   12
    :color       :white})

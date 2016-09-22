@@ -7,7 +7,7 @@
                                                 view
                                                 text
                                                 image
-                                                drawer-layout
+                                                drawer-layout-android
                                                 touchable-opacity]]
             [status-im.resources :as res]
             [status-im.components.drawer.styles :as st]
@@ -76,8 +76,9 @@
       (label :t/switch-users)]]]])
 
 (defn drawer-view [items]
-  [drawer-layout {:drawerWidth            260
-                  :render-navigation-view #(r/as-element [drawer-menu])
-                  :ref                    (fn [drawer]
-                                            (reset! drawer-atom drawer))}
+  [drawer-layout-android {:drawerWidth            260
+                          :drawerPosition         js/ReactNative.DrawerLayoutAndroid.positions.Left
+                          :render-navigation-view #(r/as-element [drawer-menu])
+                          :ref                    (fn [drawer]
+                                                    (reset! drawer-atom drawer))}
    items])

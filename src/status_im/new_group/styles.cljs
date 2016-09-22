@@ -1,9 +1,11 @@
 (ns status-im.new-group.styles
-  (:require [status-im.components.styles :refer [color-white
-                                                 color-purple
-                                                 text1-color
-                                                 text2-color
-                                                 toolbar-background1]]))
+  (:require [status-im.components.styles :refer [font
+                                               title-font
+                                               color-white
+                                               color-purple
+                                               text1-color
+                                               text2-color
+                                               toolbar-background1]]))
 
 (defn toolbar-icon [enabled?]
   {:width   20
@@ -22,12 +24,14 @@
   {:marginTop    24
    :marginBottom 16
    :color        text2-color
+   :fontFamily   font
    :fontSize     14
    :lineHeight   20})
 
 (def group-name-input
   {:marginLeft -4
    :fontSize   14
+   :fontFamily font
    :color      text1-color})
 
 (def group-name-validation-message
@@ -37,6 +41,7 @@
   {:marginTop    24
    :marginBottom 16
    :color        text2-color
+   :fontFamily   font
    :fontSize     14
    :lineHeight   20})
 
@@ -54,6 +59,7 @@
   {:marginTop  18
    :marginLeft 32
    :color      text2-color
+   :fontFamily font
    :fontSize   14
    :lineHeight 20})
 

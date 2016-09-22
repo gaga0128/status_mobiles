@@ -12,7 +12,6 @@
 (def linear-gradient-module (u/require "react-native-linear-gradient"))
 (def dismiss-keyboard! (u/require "dismissKeyboard"))
 (def orientation (u/require "react-native-orientation"))
-(def drawer (u/require "react-native-drawer-layout"))
 
 ;; Getters
 
@@ -35,7 +34,7 @@
 (def linear-gradient-class (adapt-class linear-gradient-module))
 
 (def status-bar (get-class "StatusBar"))
-(def drawer-layout (adapt-class drawer))
+(def drawer-layout-android (get-class "DrawerLayoutAndroid"))
 
 (def list-view-class (get-class "ListView"))
 (def scroll-view (get-class "ScrollView"))
@@ -77,11 +76,11 @@
 
 (defn text-input [props text]
   [text-input-class (merge
-                      {:underline-color-android :transparent
-                       :placeholder-text-color  st/text2-color
-                       :placeholder             "Type"
-                       :value                   text}
-                      props)])
+                      {:underlineColorAndroid :transparent
+                       :placeholderTextColor  st/text2-color
+                       :placeholder           "Type"}
+                      props)
+   text])
 
 (defn icon
   ([n] (icon n {}))

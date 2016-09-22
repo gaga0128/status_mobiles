@@ -1,12 +1,14 @@
 (ns status-im.accounts.login.styles
-  (:require [status-im.components.styles :refer [text1-color
+  (:require [status-im.components.styles :refer [title-font
+                                                 text1-color
                                                  color-white
                                                  toolbar-background2
                                                  online-color]]))
 
 
-(defn screen-container [height]
-  {:height height})
+(def screen-container
+  {:flex  1
+   :color :white})
 
 (def gradient-background
   {:position :absolute

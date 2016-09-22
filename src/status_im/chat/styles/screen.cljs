@@ -1,5 +1,7 @@
 (ns status-im.chat.styles.screen
-  (:require [status-im.components.styles :refer [color-white
+  (:require [status-im.components.styles :refer [font
+                                                 title-font
+                                                 color-white
                                                  color-black
                                                  chat-background
                                                  online-color
@@ -48,7 +50,8 @@
 (def chat-name-text
   {:marginTop  -2.5
    :color      text1-color
-   :fontSize   16})
+   :fontSize   16
+   :fontFamily font})
 
 (def group-icon
   {:marginTop 4
@@ -62,13 +65,15 @@
 (def members
   {:marginTop  -0.5
    :marginLeft 4
+   :fontFamily font
    :fontSize   12
    :color      text2-color})
 
 (def last-activity
   {:marginTop  1
    :color      text2-color
-   :fontSize   12})
+   :fontSize   12
+   :fontFamily font})
 
 (defn actions-wrapper [status-bar-height]
   {:backgroundColor toolbar-background1
@@ -137,6 +142,7 @@
 (def typing-text
   {:marginTop  -2
    :fontSize   12
+   :fontFamily font
    :color      text2-color})
 
 (def overlay-highlight

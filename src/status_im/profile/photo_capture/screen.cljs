@@ -2,7 +2,6 @@
   (:require [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [clojure.walk :refer [keywordize-keys]]
             [status-im.components.react :refer [view
-                                                text
                                                 image
                                                 touchable-highlight]]
             [status-im.components.camera :refer [camera

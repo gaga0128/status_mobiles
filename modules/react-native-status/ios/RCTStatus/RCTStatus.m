@@ -2,9 +2,8 @@
 
 #import <Statusgo/Statusgo.h>
 
-static bool isStatusInitialized;
-
 @implementation Status{
+    bool isStatusInitialized;
 }
 
 
@@ -48,7 +47,8 @@ RCT_EXPORT_METHOD(callJail:(NSString *)chatId
 ////////////////////////////////////////////////////////////////////
 #pragma mark - startNode
 //////////////////////////////////////////////////////////////////// startNode
-RCT_EXPORT_METHOD(startNode:(RCTResponseSenderBlock)onResultCallback) {
+RCT_EXPORT_METHOD(startNode:(RCTResponseSenderBlock)onResultCallback
+                  callback:(RCTResponseSenderBlock)onAlreadyRunningCallback) {
 #if DEBUG
     NSLog(@"startNode() method called");
 #endif
@@ -82,6 +82,7 @@ RCT_EXPORT_METHOD(startNode:(RCTResponseSenderBlock)onResultCallback) {
         onResultCallback(@[[NSNull null]]);
         return;
     }
+    onAlreadyRunningCallback(@[[NSNull null]]);
 }
 
 RCT_EXPORT_METHOD(stopNode:(RCTResponseSenderBlock)callback) {

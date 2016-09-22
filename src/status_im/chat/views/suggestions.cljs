@@ -16,7 +16,6 @@
             [reagent.core :as r]
             [status-im.components.animation :as anim]
             [status-im.components.drag-drop :as drag]
-            [status-im.utils.platform :refer [ios?]]
             [status-im.chat.suggestions-responder :as resp]
             [status-im.chat.constants :as c]))
 
@@ -109,7 +108,6 @@
   (let [;; todo to-response-height, cur-response-height must be specific
         ;; for each chat
         to-response-height (subscribe [:command-suggestions-height])
-        keyboard-height    (subscribe [:get :keyboard-height])
         changed (subscribe [:animations :commands-height-changed])
         animate? (subscribe [:animate?])
         context {:to-value to-response-height
@@ -124,7 +122,7 @@
        :reagent-render
        (fn [h & elements]
          @to-response-height @changed
-         (into [animated-view {:style (st/container (if ios? @keyboard-height 0) h)}] elements))})))
+         (into [animated-view {:style (st/container h)}] elements))})))
 
 (defn suggestion-container []
   (let [h (anim/create-value c/input-height)]

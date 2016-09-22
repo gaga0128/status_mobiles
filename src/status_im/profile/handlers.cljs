@@ -5,7 +5,6 @@
             [status-im.utils.image-processing :refer [img->base64]]
             [status-im.i18n :refer [label]]
             [status-im.utils.handlers :as u :refer [get-hashtags]]
-            [status-im.utils.platform :refer [ios?]]
             [clojure.string :as str]))
 
 (defn message-user [identity]
@@ -37,8 +36,9 @@
      (fn [_ _]
        (show-image-picker
          (fn [image]
-           (let [path       (get (js->clj image) "path")
-                 path       (if ios? path (subs path 12))
+           (let [path       (-> (js->clj image)
+                                (get "path")
+                                (subs 7))
                  on-success (fn [base64]
                               (dispatch [:set-in [:profile-edit :photo-path] (str "data:image/jpeg;base64," base64)]))
                  on-error   (fn [type error]

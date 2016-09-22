@@ -1,10 +1,11 @@
 (ns status-im.chat.styles.input
-  (:require [status-im.components.styles :refer [color-white
-                                                 color-blue
-                                                 text1-color
-                                                 text2-color
-                                                 chat-background
-                                                 color-black]]))
+  (:require [status-im.components.styles :refer [font
+                                               color-white
+                                               color-blue
+                                               text1-color
+                                               text2-color
+                                               chat-background
+                                               color-black]]))
 
 (def command-input-and-suggestions-container
   {:flexDirection :column})
@@ -35,6 +36,7 @@
   {:marginTop        3
    :marginHorizontal 12
    :fontSize         12
+   :fontFamily       font
    :color            color-white})
 
 (def command-input
@@ -43,6 +45,7 @@
    :marginTop  -2
    :padding    0
    :fontSize   14
+   :fontFamily font
    :color      text1-color})
 
 (def send-container
@@ -98,6 +101,7 @@
 
 (def staged-command-text
   {:fontSize   12
+   :fontFamily font
    :color      color-white})
 
 (def staged-command-cancel
@@ -113,4 +117,5 @@
   {:marginTop        5
    :marginHorizontal 0
    :fontSize         14
+   :fontFamily       font
    :color            color-black})

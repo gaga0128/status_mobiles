@@ -2,40 +2,39 @@
 
 
 (def text-field-container
-  {:position       :relative
-   :height         72
-   :padding-top    30
-   :padding-bottom 7})
+  {:position :relative
+   :height 72
+   :paddingTop 30
+   :paddingBottom 7})
 
 (def text-input
-  {:font-size           16
-   :height              34
-   :line-height         34
-   :padding-bottom      5
-   :text-align-vertical :top})
+  {:fontSize 16
+   :height 34
+   :lineHeight 34
+   :paddingBottom 5
+   :textAlignVertical :top})
 
 (defn label [top font-size color]
-  {:position         :absolute
-   :top              top
-   :left             0
-   :color            color
-   :font-size        font-size
-   :background-color :transparent})
+  {:position :absolute
+   :top top
+   :left 0
+   :color color
+   :fontSize font-size
+   :backgroundColor :transparent})
 
 (def label-float
   {})
 
-(defn underline-container [background-color]
-  {:background-color background-color
-   :height           1
-   :align-items      :center})
+(defn underline-container [backgroundColor]
+  {:backgroundColor backgroundColor
+   :height 1
+   :alignItems :center})
 
-(defn underline [background-color width]
-  {:background-color background-color
-   :height           1
-   :width            width})
+(defn underline [backgroundColor width]
+  {:backgroundColor backgroundColor
+   :height 1
+   :width width})
 
 (defn error-text [color]
-  {:color            color
-   :background-color :transparent
-   :font-size        12})
+  {:color color
+   :fontSize 12})

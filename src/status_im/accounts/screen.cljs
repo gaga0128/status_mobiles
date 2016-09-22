@@ -89,4 +89,5 @@
                   :style  st/icon-plus}]
           [text {:style st/add-account-text
                  :font  :default}
-           (label :t/add-account)]]]]]]]))
+           (label :t/add-account)]]]]
+       ]]]))

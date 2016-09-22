@@ -208,11 +208,10 @@
 
 (register-handler :stop-listening-confirmation-code-sms
   (fn [db [_]]
-    (if (:confirmation-code-sms-listener db)
-      (sign-up-service/stop-listening-confirmation-code-sms db)
-      db)))
+    (sign-up-service/stop-listening-confirmation-code-sms db)))
 
 (register-handler :sign-up-confirm
+  (after #(dispatch [:init-wallet-chat]))
   (u/side-effect!
     (fn [_ [_ confirmation-code]]
       (server/sign-up-confirm confirmation-code sign-up-service/on-send-code-response))))

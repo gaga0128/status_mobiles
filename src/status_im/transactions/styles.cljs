@@ -37,7 +37,8 @@
    :justifyContent :center})
 
 (def title-bar-text
-  {:color "#838c93"
+  {:fontFamily "sans-serif-medium"
+   :color "#838c93"
    :fontSize 13
    :marginLeft 12})
 

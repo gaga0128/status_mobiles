@@ -7,6 +7,7 @@
             [status-im.components.react :refer [view
                                                 animated-view
                                                 icon
+                                                image
                                                 text
                                                 text-input
                                                 touchable-highlight
@@ -19,7 +20,6 @@
             [status-im.chat.suggestions-responder :as resp]
             [status-im.chat.constants :as c]
             [status-im.chat.views.command-validation :as cv]
-            [status-im.utils.platform :refer [ios?]]
             [status-im.components.webview-bridge :refer [webview-bridge]]))
 
 (defn drag-icon []
@@ -71,13 +71,12 @@
   (let [;; todo to-response-height, cur-response-height must be specific
         ;; for each chat
         to-response-height (subscribe [:response-height])
-        changed            (subscribe [:animations :response-height-changed])
-        animate?           (subscribe [:animate?])
-        keyboard-height    (subscribe [:get :keyboard-height])
-        context            {:to-value to-response-height
-                            :val      response-height
-                            :animate? animate?}
-        on-update          #(container-animation-logic context)]
+        changed (subscribe [:animations :response-height-changed])
+        animate? (subscribe [:animate?])
+        context {:to-value to-response-height
+                 :val      response-height
+                 :animate? animate?}
+        on-update #(container-animation-logic context)]
     (r/create-class
       {:component-did-mount
        on-update
@@ -86,9 +85,7 @@
        :reagent-render
        (fn [response-height & children]
          @to-response-height @changed
-         (into [animated-view {:style (st/response-view
-                                        (if ios? @keyboard-height 0)
-                                        response-height)}]
+         (into [animated-view {:style (st/response-view response-height)}]
                children))})))
 
 (defn on-navigation-change
