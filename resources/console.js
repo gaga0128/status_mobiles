@@ -1,3 +1,4 @@
+
 var phones = [
     {
         number: "89171111111",
@@ -184,18 +185,6 @@ status.response({
             event: "save-password",
             params: [params.value]
         };
-    },
-    validator: function (params) {
-        if(!params.value || params.value.length < 6){
-            return {
-                errors: [
-                    status.components.validationMessage(
-                        "Password",
-                        "Password should be not less then 6 symbols."
-                    )
-                ]
-            };
-        }
     },
     preview: function (params) {
         return status.components.text(

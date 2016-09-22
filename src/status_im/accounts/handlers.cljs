@@ -46,6 +46,7 @@
         (dispatch-sync [:login-account address password])))))
 
 (register-handler :create-account
+  (after #(dispatch [:init-wallet-chat]))
   (u/side-effect!
     (fn [_ [_ password]]
       (status/create-account
