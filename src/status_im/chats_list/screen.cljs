@@ -41,6 +41,8 @@
 
 (defview chats-list []
   [chats [:get :chats]]
+  ;; todo what is this?!
+  #_(dispatch [:set :chats-scrolled? false])
   [view st/chats-container
    [chats-list-toolbar]
    [list-view {:dataSource (to-datasource chats)
