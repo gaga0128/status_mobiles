@@ -27,24 +27,20 @@
 
 (defview chats-list-toolbar []
   [chats-scrolled? [:get :chats-scrolled?]]
-  [view
-   [status-bar]
-   [toolbar {:nav-action       {:image   {:source {:uri :icon_hamburger}
-                                          :style  st/hamburger-icon}
-                                :handler open-drawer}
-             :title            (label :t/chats)
-             :background-color (if chats-scrolled?
-                                 toolbar-background1
-                                 toolbar-background2)
-             ;; TODO implement search
-             :action           {:image   {:source {:uri :icon_search}
-                                          :style  st/search-icon}
-                                :handler (fn [])}}]])
+  [toolbar {:nav-action       {:image   {:source {:uri :icon_hamburger}
+                                         :style  st/hamburger-icon}
+                               :handler open-drawer}
+            :title            (label :t/chats)
+            :background-color (if chats-scrolled?
+                                toolbar-background1
+                                toolbar-background2)
+            ;; TODO implement search
+            :action           {:image   {:source {:uri :icon_search}
+                                         :style  st/search-icon}
+                               :handler (fn [])}}])
 
 (defview chats-list []
   [chats [:get :chats]]
-  ;; todo what is this?!
-  #_(dispatch [:set :chats-scrolled? false])
   [view st/chats-container
    [chats-list-toolbar]
    [list-view {:dataSource (to-datasource chats)
