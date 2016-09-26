@@ -7,8 +7,7 @@
             [status-im.persistence.realm.core :as realm]
             [status-im.components.status :as status]
             [status-im.utils.types :refer [json->clj]]
-            [status-im.commands.utils :refer [reg-handler]]
-            [status-im.constants :refer [console-chat-id wallet-chat-id]]))
+            [status-im.commands.utils :refer [reg-handler]]))
 
 (def commands-js "commands.js")
 
@@ -26,10 +25,10 @@
   (when true
     ;-let [url (get-in db [:chats identity :dapp-url])]
     (cond
-      (= console-chat-id identity)
+      (= "console" identity)
       (dispatch [::validate-hash identity (slurp "resources/console.js")])
 
-      (= wallet-chat-id identity)
+      (= "wallet" identity)
       (dispatch [::validate-hash identity (slurp "resources/wallet.js")])
 
       :else

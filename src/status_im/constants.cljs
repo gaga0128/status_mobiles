@@ -19,6 +19,3 @@
 (def default-number-of-messages 20)
 
 (def default-number-of-discovery-search-results 20)
-
-(def console-chat-id "console")
-(def wallet-chat-id "wallet")

@@ -1,8 +1,7 @@
 (ns status-im.db
   (:require [schema.core :as s :include-macros true]
             [status-im.components.react :refer [animated]]
-            [status-im.components.animation :as anim]
-            [status-im.constants :refer [console-chat-id]]))
+            [status-im.components.animation :as anim]))
 
 ;; schema of app-db
 (def schema {:greeting s/Str})
@@ -32,7 +31,7 @@
              :chats                  {}
              :chat                   {:command      nil
                                       :last-message nil}
-             :current-chat-id        console-chat-id
+             :current-chat-id        "console"
 
              :contacts-ids           #{}
              :selected-contacts      #{}
@@ -45,6 +44,7 @@
              :current-tag            nil
              :qr-codes               {}
              :keyboard-height        0
+             :disable-group-creation false
              :animations             {;; todo clear this
                                       :tabs-bar-value (anim/create-value 0)}
              :loading-allowed        true})

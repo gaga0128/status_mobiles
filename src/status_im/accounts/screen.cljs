@@ -26,8 +26,7 @@
             [status-im.utils.listview :as lw]
             [status-im.accounts.views.account :refer [account-view]]
             [status-im.i18n :refer [label]]
-            [status-im.accounts.styles :as st]
-            [status-im.constants :refer [console-chat-id]]))
+            [status-im.accounts.styles :as st]))
 
 (defn toolbar-title []
   (let [style (merge toolbar-title-text {:color color-white})]
@@ -47,7 +46,7 @@
   (dispatch-sync [:reset-app])
   ; add accounts screen to history ( maybe there is a better way ? )
   (dispatch [:navigate-to-clean :accounts])
-  (dispatch [:navigate-to :chat console-chat-id]))
+  (dispatch [:navigate-to :chat "console"]))
 
 (defview accounts []
   [accounts [:get :accounts]

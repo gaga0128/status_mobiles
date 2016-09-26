@@ -159,8 +159,8 @@
    :left     0})
 
 (def form-container
-  {:margin-left 16
-   :margin-top  16})
+  {:marginLeft 16
+   :margin-top 16})
 
 (def address-explication-container
   {:flex 1

@@ -14,8 +14,7 @@
             status-im.accounts.recover.handlers
             [clojure.string :as str]
             [status-im.utils.datetime :as time]
-            [status-im.utils.handlers :as u]
-            [status-im.constants :refer [console-chat-id]]))
+            [status-im.utils.handlers :as u]))
 
 
 (defn save-account [_ [_ account]]
@@ -118,7 +117,7 @@
                                :content (label :t/keypair-generated)}
                 :content-type content-type-command-request
                 :outgoing     false
-                :from         console-chat-id
+                :from         "console"
                 :to           "me"}])
     db))
 

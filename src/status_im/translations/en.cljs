@@ -56,8 +56,6 @@
    :email                                 "Email"
    :profile-no-status                     "No status"
    :add-to-contacts                       "Add to contacts"
-   :error-incorrect-name                  "Please select another name"
-   :error-incorrect-email                 "Incorrect e-mail"
 
    ;;make_photo
    :image-source-title                    "Profile image"
@@ -139,9 +137,7 @@
    :help-command-description              "Help"
 
    ;new-group
-   :group-chat-name                       "Chat name"
-   :empty-group-chat-name                 "Please enter a name"
-   :illegal-group-chat-name               "Please select another name"
+   :group-name                            "Group Name"
 
    ;participants
    :add-participants                      "Add Participants"

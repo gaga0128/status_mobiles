@@ -81,11 +81,11 @@
    :width      12
    :height     12})
 
-(defn command-input [ml disable?]
+(defn command-input [ml disbale?]
   {:flex        1
    :marginRight 16
    :margin-left (- ml 5)
-   :margin-top  4
+   :marginTop   -2
    :padding     0
    :fontSize    14
-   :color       (if disable? color-white text1-color)})
+   :color       (if disbale? color-white text1-color)})
