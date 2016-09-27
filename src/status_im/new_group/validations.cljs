@@ -1,4 +1,4 @@
-(ns status-im.profile.validations
+(ns status-im.new-group.validations
   (:require [cljs.spec :as s]
             [status-im.utils.phone-number :refer [valid-mobile-number?]]
             [status-im.constants :refer [console-chat-id wallet-chat-id]]
@@ -6,17 +6,13 @@
 
 (def homoglyph-finder (js/require "homoglyph-finder"))
 
-(defn correct-name? [username]
+(defn not-illegal-name? [username]
   (let [username (some-> username (str/trim))]
     (and (not (.isMatches homoglyph-finder username console-chat-id))
          (not (.isMatches homoglyph-finder username wallet-chat-id)))))
 
-(defn correct-email? [email]
-  (let [pattern #"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?"]
-    (or (str/blank? email)
-        (and (string? email) (re-matches pattern email)))))
+(s/def ::not-empty-string (s/and string? not-empty))
+(s/def ::not-illegal-name not-illegal-name?)
 
-(s/def ::name correct-name?)
-(s/def ::email correct-email?)
-
-(s/def ::profile (s/keys :req-un [::name ::email]))
+(s/def ::name (s/and ::not-empty-string
+                     ::not-illegal-name))

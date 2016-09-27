@@ -5,6 +5,7 @@
     [status-im.components.react :refer [view]]
     [status-im.chat.views.message-input :refer [plain-message-input-view]]
     [status-im.chat.views.staged-command :refer [simple-command-staged-view]]
+    [status-im.utils.phone-number :refer [valid-mobile-number?]]
     [status-im.utils.platform :refer [platform-specific]]
     [status-im.chat.styles.message :as st]))
 
