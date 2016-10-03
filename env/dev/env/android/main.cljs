@@ -3,7 +3,9 @@
             [status-im.android.core :as core]
             [figwheel.client :as figwheel :include-macros true]))
 
-(enable-console-print!)
+ (enable-console-print!)
+
+(set! js/console.disableYellowBox true)
 
 (def cnt (r/atom 0))
 (defn reloader [] @cnt [core/app-root])

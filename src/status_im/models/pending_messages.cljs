@@ -9,8 +9,7 @@
             [status-im.utils.types :refer [clj->json json->clj]]
             [status-im.commands.utils :refer [generate-hiccup]]
             [cljs.reader :as reader]
-            [clojure.string :as str]
-            [status-im.utils.hex :as i]))
+            [clojure.string :as str]))
 
 (defn get-pending-messages! []
   (->> (r/get-all :account :pending-message)
@@ -20,7 +19,9 @@
 
 (defn- get-id
   [message-id to]
-  (let [to' (i/normalize-hex to)
+  (let [to' (if (and to (str/starts-with? to "0x"))
+              (subs to 2)
+              to)
         to'' (when to' (subs to' 0 7))
         id' (if to''
               (str message-id "-" (subs to'' 0 7))
