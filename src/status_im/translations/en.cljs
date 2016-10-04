@@ -17,12 +17,16 @@
    :is-typing                             "is typing"
    :and-you                               "and you"
    :search-chat                           "Search chat"
-   :members                               {:one   "1 member, 1 active"
+   :members                               {:one   "1 member"
+                                           :other "{{count}} members"
+                                           :zero  "no members"}
+   :members-active                        {:one   "1 member, 1 active"
                                            :other "{{count}} members, {{count}} active"
                                            :zero  "no members"}
    :active-online                         "online"
    :active-unknown                        "unknown"
    :available                             "available"
+   :no-messages                           "No messages"
 
    ;messages
    :status-sending                        "Sending"
@@ -45,6 +49,7 @@
    :datetime-multiple                     "s"
    :datetime-ago                          "ago"
    :datetime-yesterday                    "yesterday"
+   :datetime-today                        "today"
 
    ;profile
    :profile                               "Profile"
@@ -71,6 +76,9 @@
    :confirmation-code                     (str "Thanks! We've sent you a text message with a confirmation "
                                                "code. Please provide that code to confirm your phone number")
    :incorrect-code                        (str "Sorry the code was incorrect, please enter again")
+   :password-saved                        (str "OK great! Your password has been saved. Just to let you "
+                                               "know you can always change it in the Console by the way "
+                                               "it's me the Console nice to meet you!")
    :generate-passphrase                   (str "I'll generate a passphrase for you so you can restore your "
                                                "access or log in from another device")
    :here-is-your-passphrase               "Here is your passphrase, *write this down and keep this safe!* You will need it to recover your account."
@@ -81,8 +89,8 @@
 
    ;chats
    :chats                                 "Chats"
-   :new-chat                              "New Chat"
-   :new-group-chat                        "New Group Chat"
+   :new-chat                              "New chat"
+   :new-group-chat                        "New group chat"
 
    ;discover
    :discovery                             "Discovery"
@@ -98,8 +106,9 @@
    :contacts                              "Contacts"
    :new-contact                           "New Contact"
    :show-all                              "SHOW ALL"
-   :contacs-group-dapps                   "Dapps"
-   :contacs-group-people                  "People"
+   :contacts-group-dapps                  "Dapps"
+   :contacts-group-people                 "People"
+   :contacts-group-new-chat               "Start new chat"
    :no-contacts                           "No contacts yet"
 
    ;group-settings
@@ -191,6 +200,4 @@
    :recipient                             "Recipient"
    :one-more-item                         "One more item"
    :fee                                   "Fee"
-   :value                                 "Value"
-
-   })
+   :value                                 "Value"})

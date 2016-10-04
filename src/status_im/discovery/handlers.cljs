@@ -5,10 +5,10 @@
             [status-im.protocol.core :as protocol]
             [status-im.navigation.handlers :as nav]
             [status-im.data-store.discovery :as discoveries]
-            [status-im.data-store.contacts :as contacts]
             [status-im.utils.handlers :as u]
             [status-im.utils.datetime :as time]
-            [status-im.utils.random :as random]))
+            [status-im.utils.random :as random]
+            [status-im.data-store.contacts :as contacts]))
 
 (register-handler :init-discoveries
   (fn [db _]

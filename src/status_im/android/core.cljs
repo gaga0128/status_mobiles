@@ -44,15 +44,8 @@
 (defn orientation->keyword [o]
   (keyword (.toLowerCase o)))
 
-(defn validate-current-view
-  [current-view signed-up?]
-  (if (or (contains? #{:login :chat :recover :accounts} current-view)
-          signed-up?)
-    current-view
-    :chat))
-
 (defn app-root []
-  (let [signed-up?      (subscribe [:signed-up?])
+  (let [signed-up       (subscribe [:signed-up?])
         view-id         (subscribe [:get :view-id])
         account-id      (subscribe [:get :current-account-id])
         keyboard-height (subscribe [:get :keyboard-height])]
@@ -78,9 +71,17 @@
                          (dispatch [:set :keyboard-height 0]))))
        :render
        (fn []
-         (let [current-view (validate-current-view @view-id @signed-up?)]
-           (log/debug current-view)
-           (let [component (case current-view
+         (let [startup-view (if @account-id
+                              (if @signed-up
+                                @view-id
+                                (if (= @view-id :accounts)
+                                  :accounts
+                                  :chat))
+                              (if (contains? #{:login :chat :recover} @view-id)
+                                @view-id
+                                :accounts))]
+           (log/debug startup-view)
+           (let [component (case (if true startup-view :chat)
                              :discovery main-tabs
                              :discovery-tag discovery-tag
                              :discovery-search-results discovery-search-results
