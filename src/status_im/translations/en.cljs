@@ -17,16 +17,12 @@
    :is-typing                             "is typing"
    :and-you                               "and you"
    :search-chat                           "Search chat"
-   :members                               {:one   "1 member"
-                                           :other "{{count}} members"
-                                           :zero  "no members"}
-   :members-active                        {:one   "1 member, 1 active"
+   :members                               {:one   "1 member, 1 active"
                                            :other "{{count}} members, {{count}} active"
                                            :zero  "no members"}
    :active-online                         "online"
    :active-unknown                        "unknown"
    :available                             "available"
-   :no-messages                           "No messages"
 
    ;messages
    :status-sending                        "Sending"
@@ -88,8 +84,8 @@
 
    ;chats
    :chats                                 "Chats"
-   :new-chat                              "New chat"
-   :new-group-chat                        "New group chat"
+   :new-chat                              "New Chat"
+   :new-group-chat                        "New Group Chat"
 
    ;discover
    :discovery                             "Discovery"
@@ -105,9 +101,8 @@
    :contacts                              "Contacts"
    :new-contact                           "New Contact"
    :show-all                              "SHOW ALL"
-   :contacts-group-dapps                  "Dapps"
-   :contacts-group-people                 "People"
-   :contacts-group-new-chat               "Start new chat"
+   :contacs-group-dapps                   "Dapps"
+   :contacs-group-people                  "People"
    :no-contacts                           "No contacts yet"
 
    ;group-settings
@@ -199,4 +194,6 @@
    :recipient                             "Recipient"
    :one-more-item                         "One more item"
    :fee                                   "Fee"
-   :value                                 "Value"})
+   :value                                 "Value"
+
+   })

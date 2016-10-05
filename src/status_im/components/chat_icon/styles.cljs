@@ -1,14 +1,20 @@
 (ns status-im.components.chat-icon.styles
   (:require [status-im.components.styles :refer [color-white
-                                                 online-color]]))
+                                                 chat-background
+                                                 online-color
+                                                 selected-message-color
+                                                 separator-color
+                                                 text1-color
+                                                 text2-color
+                                                 toolbar-background1]]))
 
 (defn default-chat-icon [color]
   {:margin          4
-   :width           40
-   :height          40
+   :width           36
+   :height          36
    :alignItems      :center
    :justifyContent  :center
-   :borderRadius    20
+   :borderRadius    18
    :backgroundColor color})
 
 (defn default-chat-icon-chat-list [color]
@@ -34,9 +40,9 @@
 
 (def chat-icon
   {:margin       4
-   :borderRadius 20
-   :width        40
-   :height       40})
+   :borderRadius 18
+   :width        36
+   :height       36})
 
 (def chat-icon-chat-list
   (merge chat-icon

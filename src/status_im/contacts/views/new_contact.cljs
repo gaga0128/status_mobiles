@@ -11,14 +11,19 @@
             [status-im.components.text-field.view :refer [text-field]]
             [status-im.utils.identicon :refer [identicon]]
             [status-im.components.status-bar :refer [status-bar]]
-            [status-im.components.toolbar.view :refer [toolbar]]
-            [status-im.components.toolbar.styles :refer [toolbar-title-container
-                                                         toolbar-title-text]]
+            [status-im.components.toolbar :refer [toolbar]]
             [status-im.utils.utils :refer [log http-post]]
-            [status-im.components.styles :refer [icon-search
+            [status-im.components.styles :refer [color-purple
+                                                 color-white
+                                                 icon-search
                                                  icon-back
+                                                 icon-qr
+                                                 toolbar-background1
+                                                 toolbar-title-container
+                                                 toolbar-title-text
                                                  button-input-container
-                                                 button-input]]
+                                                 button-input
+                                                 form-text-input]]
             [status-im.qr-scanner.views.scan-button :refer [scan-button]]
             [status-im.i18n :refer [label]]
             [cljs.spec :as s]
@@ -63,14 +68,14 @@
 
     :else error))
 
-(defn toolbar-actions [new-contact-identity account error]
+(defn toolbar-action [new-contact-identity account error]
   (let [error-message (validation-error-message new-contact-identity account error)]
-    [{:image   {:source {:uri (if (str/blank? error-message)
-                                :icon_ok_blue
-                                :icon_ok_disabled)}
-                :style  icon-search}
-      :handler #(when (str/blank? error-message)
-                 (on-add-contact new-contact-identity))}]))
+    {:image   {:source {:uri (if (str/blank? error-message)
+                               :icon_ok_blue
+                               :icon_ok_disabled)}
+               :style  icon-search}
+     :handler #(when (str/blank? error-message)
+                (on-add-contact new-contact-identity))}))
 
 (defview contact-whisper-id-input [whisper-identity error]
   [current-account [:get-current-account]]
@@ -103,7 +108,7 @@
                                            :style  icon-back}
                                  :handler #(dispatch [:navigate-back])}
               :custom-content   toolbar-title
-              :actions          (toolbar-actions new-contact-identity accounts error)}]]
+              :action           (toolbar-action new-contact-identity account error)}]]
    [view st/form-container
     [contact-whisper-id-input new-contact-identity error]]
    [view st/address-explication-container

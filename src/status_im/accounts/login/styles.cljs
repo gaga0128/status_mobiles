@@ -1,5 +1,8 @@
 (ns status-im.accounts.login.styles
-  (:require [status-im.components.styles :refer [color-white]]))
+  (:require [status-im.components.styles :refer [text1-color
+                                                 color-white
+                                                 toolbar-background2
+                                                 online-color]]))
 
 
 (defn screen-container [height]

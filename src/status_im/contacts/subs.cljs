@@ -9,12 +9,8 @@
       (reaction @contacts))))
 
 (defn sort-contacts [contacts]
-  (->> (vals contacts)
-       (sort (fn [c1 c2]
-               (let [name1 (or (:name c1) (:address c1) (:whisper-identity c1))
-                     name2 (or (:name c2) (:address c2) (:whisper-identity c2))]
-                 (compare (clojure.string/lower-case name1)
-                          (clojure.string/lower-case name2)))))))
+  (sort-by :name #(compare (clojure.string/lower-case %1)
+                           (clojure.string/lower-case %2)) (vals contacts)))
 
 (register-sub :all-added-contacts
   (fn [db _]

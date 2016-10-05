@@ -10,16 +10,19 @@
                                                 linear-gradient
                                                 touchable-highlight]]
             [status-im.components.status-bar :refer [status-bar]]
-            [status-im.components.toolbar.view :refer [toolbar]]
+            [status-im.components.toolbar :refer [toolbar]]
             [status-im.components.styles :refer [color-purple
                                                  color-white
                                                  icon-search
                                                  icon-back
                                                  icon-qr
                                                  icon-plus
+                                                 toolbar-background1
+                                                 toolbar-title-container
+                                                 toolbar-title-text
+                                                 button-input-container
+                                                 button-input
                                                  white-form-text-input]]
-            [status-im.components.toolbar.styles :refer [toolbar-title-container
-                                                         toolbar-title-text]]
             [status-im.utils.listview :as lw]
             [status-im.accounts.views.account :refer [account-view]]
             [status-im.i18n :refer [label]]
@@ -65,8 +68,8 @@
                                              :style  icon-back}
                                    :handler (if show-back? #(dispatch [:navigate-back]) nil)}
                 :custom-content   [toolbar-title]
-                :actions          [{:image   {:style icon-search}
-                                    :handler #()}]}]
+                :action           {:image   {:style icon-search}
+                                   :handler #()}}]
       [list-view {:dataSource            (lw/to-datasource accounts)
                   :enableEmptySections   true
                   :renderRow             render-row
@@ -83,7 +86,7 @@
         [touchable-highlight {:on-press            create-account
                               :accessibility-label :create-account}
          [view st/add-account-button
-          [image {:source {:uri :icon_add_white}
+          [image {:source {:uri :icon_add}
                   :style  st/icon-plus}]
           [text {:style st/add-account-text
                  :font  :default}
