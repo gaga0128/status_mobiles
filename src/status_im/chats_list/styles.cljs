@@ -1,83 +1,64 @@
 (ns status-im.chats-list.styles
   (:require [status-im.components.styles :refer [color-white
-                                                 color-light-gray
-                                                 color-separator
                                                  color-blue
+                                                 online-color
                                                  text1-color
                                                  text2-color
                                                  new-messages-count-color]]
             [status-im.components.tabs.styles :refer [tabs-height]]))
 
-(def gradient-top-bottom-shadow
-  ["rgba(24, 52, 76, 0.165)"
-   "rgba(24, 52, 76, 0.03)"
-   "rgba(24, 52, 76, 0.01)"])
-
-(def chat-separator-wrapper
-  {:background-color color-white
-   :height           0.5
-   :padding-left     74})
-
-(def chat-separator-item
-  {:border-bottom-width 0.5
-   :border-bottom-color color-separator})
-
 (def chat-container
-  {:flex-direction      :row
-   :background-color    color-white
-   :height              94})
+  {:flexDirection     :row
+   :paddingVertical   15
+   :paddingHorizontal 16
+   :height            90})
 
 (def chat-icon-container
-  {:margin-top  -2
-   :margin-left -4
-   :padding     16
-   :width       48
-   :height      48})
+  {:marginTop  -2
+   :marginLeft -4
+   :width      48
+   :height     48})
 
 (def item-container
-  {:flex-direction      :column
-   :margin-left         30
-   :padding-top         16
-   :padding-right       16
-   :flex                1})
+  {:flexDirection :column
+   :marginLeft    12
+   :flex          1})
 
 (def name-view
-  {:flex-direction :row})
+  {:flexDirection :row})
 
 (def name-text
-  {:color      text1-color
-   :font-size  14})
+  {:marginTop  -2.5
+   :color      text1-color
+   :fontSize   14})
 
 (def group-icon
-  {:margin-top  5
-   :margin-left 8
-   :width       14
-   :height      9})
+  {:marginTop  4
+   :marginLeft 8
+   :width      14
+   :height     9})
 
 (def memebers-text
-  {:marginTop  2
+  {:marginTop  -0.5
    :marginLeft 4
    :fontSize   12
    :color      text2-color})
 
 (def last-message-text
-  {:margin-top   5
-   :margin-right 40
-   :color        text1-color
-   :fontSize     14
-   :lineHeight   20})
-
-(def last-message-text-no-messages
-  (merge last-message-text
-         {:color text2-color}))
+  {:marginTop   7
+   :marginRight 40
+   :color       text1-color
+   :fontSize    14
+   :lineHeight  20})
 
 (def status-container
-  {:flex-direction :row
-   :top            18
-   :right          16})
+  {:flexDirection :row
+   :position      :absolute
+   :top           0
+   :right         0})
 
 (def status-image
-  {:marginTop 4
+  {:marginTop 6
    :width     9
    :height    7})
 
@@ -88,43 +69,44 @@
 
 (def new-messages-container
   {:position        :absolute
-   :top             54
-   :right           16
+   :top             36
+   :right           0
    :width           24
    :height          24
    :backgroundColor new-messages-count-color
    :borderRadius    50})
 
 (def new-messages-text
-  {:top       5
-   :left      0
-   :fontSize  10
-   :color     color-blue
-   :textAlign :center})
+  {:top        4
+   :left       0
+   :fontSize   10
+   :color      color-blue
+   :textAlign  :center})
 
 (def hamburger-icon
   {:width  16
    :height 12})
 
-(def toolbar-icon
+(def search-icon
   {:width  17
    :height 17})
 
 (def chats-container
-  {:flex 1})
+  {:flex            1
+   :backgroundColor :white})
 
 (def list-container
-  {:background-color color-light-gray})
+  {:backgroundColor :white})
 
 (def create-icon
   {:fontSize 20
    :height   22
-   :color    color-white})
+   :color    :white})
 
 (def person-stalker-icon
   {:fontSize 20
    :height   22
-   :color    color-white})
+   :color    :white})
 
 (defn action-buttons-container [animation? offset-y]
   ;; todo fix overlaying of parent view

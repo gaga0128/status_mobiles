@@ -193,10 +193,10 @@
   (fn [db _]
     (init-console-chat db false)))
 
-(register-handler :save-password
-  (fn [db [_ _ mnemonic]]
-    (sign-up-service/passpharse-messages mnemonic)
-    (assoc db :password-saved true)))
+(register-handler :show-mnemonic
+  (u/side-effect!
+    (fn [_ [_ mnemonic]]
+      (sign-up-service/passpharse-messages mnemonic))))
 
 (register-handler :sign-up
   (after (fn [_ [_ phone-number]]
@@ -248,8 +248,7 @@
   [{:keys [loaded-chats] :as db} _]
   (let [chats (->> loaded-chats
                    (map (fn [{:keys [chat-id] :as chat}]
-                          (let [last-message (messages/get-last-message chat-id)]
-                            [chat-id (assoc chat :last-message last-message)])))
+                          [chat-id chat]))
                    (into {}))
         ids   (set (keys chats))]
 
@@ -276,8 +275,7 @@
         db'      (assoc db :current-chat-id chat-id)]
     (dispatch [:load-requests! chat-id])
     (dispatch [:load-commands! chat-id])
-    (if (and (seq messages)
-             (not= (count messages) 1))
+    (if (seq messages)
       db'
       (-> db'
           load-messages!
