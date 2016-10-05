@@ -218,7 +218,6 @@
                          :photo-path       profile-image
                          :status           status
                          :last-updated     timestamp}]
-            (dispatch [:check-status! contact payload])
             (dispatch [:update-contact! contact])
             (when (chats from)
               (dispatch [:update-chat! {:chat-id from
