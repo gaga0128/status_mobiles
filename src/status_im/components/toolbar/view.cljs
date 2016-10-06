@@ -32,7 +32,8 @@
                     :style  icon-back}]]]))]
      (or custom-content
          [view {:style st/toolbar-title-container}
-          [text {:style st/toolbar-title-text}
+          [text {:style st/toolbar-title-text
+                 :font  :medium}
            title]])
      [view st/toolbar-actions-container
       (if actions
