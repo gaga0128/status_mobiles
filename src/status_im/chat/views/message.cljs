@@ -251,8 +251,9 @@
     (let [to-value @to-value]
       (when (< 0 to-value)
         (anim/start
-          (anim/timing val {:toValue  to-value
-                            :duration 250})
+          (anim/spring val {:toValue  to-value
+                            :friction 4
+                            :tension  10})
           (fn [arg]
             (when (.-finished arg)
               (callback))))))))
