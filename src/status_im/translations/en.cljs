@@ -133,7 +133,6 @@
    :request-command-description           "Send request"
    :keypair-password-command-description  ""
    :help-command-description              "Help"
-   :request                               "Request"
 
    ;new-group
    :group-chat-name                       "Chat name"

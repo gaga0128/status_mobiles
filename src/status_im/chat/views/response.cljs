@@ -7,7 +7,6 @@
             [status-im.components.react :refer [view
                                                 animated-view
                                                 icon
-                                                image
                                                 text
                                                 text-input
                                                 touchable-highlight
@@ -21,49 +20,38 @@
             [status-im.chat.constants :as c]
             [status-im.chat.views.command-validation :as cv]
             [status-im.utils.platform :refer [ios?]]
-            [status-im.components.webview-bridge :refer [webview-bridge]]
-            [status-im.i18n :refer [label]]
-            [status-im.utils.datetime :as dt]))
+            [status-im.components.webview-bridge :refer [webview-bridge]]))
 
 (defn drag-icon []
   [view st/drag-container
    [icon :drag_white st/drag-icon]])
 
-(defn command-icon [{icon-path :icon
-                     color     :color}]
+(defn command-icon []
   [view st/command-icon-container
-   (when icon-path
-     [icon icon-path (st/command-icon color)])])
+   ;; TODO stub data: command icon
+   [icon :dollar_green st/command-icon]])
 
-(defview info-container
-  [command]
-  [{:keys [name chat-id]} [:get-current-chat]
-   {:keys [added]}        [:get-current-request]]
+(defn info-container [command]
   [view st/info-container
    [text {:style st/command-name}
-    (str (:description command) " " (label :t/request))]
-   (when added
-     [text {:style st/message-info}
-      (str "By " (or name chat-id) ", "
-           (dt/format-date "MMM" added)
-           " "
-           (dt/get-ordinal-date added)
-           " at "
-           (dt/format-date "HH:mm" added))])])
+    (:description command)]
+   [text {:style st/message-info}
+    ;; TODO stub data: request message info
+    "By ???, MMM 1st at HH:mm"]])
 
 (defn request-info [response-height]
   (let [layout-height (subscribe [:get :layout-height])
         pan-responder (resp/pan-responder response-height
                                           layout-height
                                           :fix-response-height)
-        command       (subscribe [:get-chat-command])]
+        command (subscribe [:get-chat-command])]
     (fn [response-height]
       (if (= :response (:type @command))
         [view (merge (drag/pan-handlers pan-responder)
                      {:style (st/request-info (:color @command))})
          [drag-icon]
          [view st/inner-container
-          [command-icon @command]
+          [command-icon nil]
           [info-container @command]
           [touchable-highlight {:on-press #(dispatch [:start-cancel-command])}
            [view st/cancel-container

@@ -8,8 +8,7 @@
             [status-im.components.status :as status]
             [status-im.utils.types :refer [json->clj]]
             [status-im.commands.utils :refer [reg-handler]]
-            [status-im.constants :refer [console-chat-id wallet-chat-id]]
-            [taoensso.timbre :as log]))
+            [status-im.constants :refer [console-chat-id wallet-chat-id]]))
 
 (def commands-js "commands.js")
 
@@ -96,7 +95,7 @@
                           (name reason)
                           details])]
       (show-popup "Error" m)
-      (log/debug m))))
+      (println m))))
 
 (reg-handler :load-commands! (u/side-effect! load-commands!))
 (reg-handler ::fetch-commands! (u/side-effect! fetch-commands!))

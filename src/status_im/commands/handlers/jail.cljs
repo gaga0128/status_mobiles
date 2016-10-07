@@ -7,8 +7,7 @@
             [status-im.commands.utils :refer [generate-hiccup reg-handler]]
             [clojure.string :as s]
             [status-im.components.react :as r]
-            [status-im.constants :refer [console-chat-id]]
-            [taoensso.timbre :as log]))
+            [status-im.constants :refer [console-chat-id]]))
 
 (defn init-render-command!
   [_ [chat-id command message-id data]]
@@ -79,7 +78,7 @@
   (fn [_ params]
     (when (:error (last params))
       (show-popup "Error" (s/join "\n" [message params]))
-      (log/debug message params))))
+      (println message params))))
 
 (reg-handler :init-render-command! init-render-command!)
 (reg-handler ::render-command render-command)

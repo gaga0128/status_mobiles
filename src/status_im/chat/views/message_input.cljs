@@ -30,7 +30,9 @@
 
 (defn on-press-commands-handler
   [{:keys [suggestions-trigger]}]
-  #(dispatch [:send-command!]))
+  (if (= :on-send (keyword suggestions-trigger))
+    #(dispatch [:invoke-commands-suggestions!])
+    command/send-command))
 
 (defn command-input-options [command icon-width disable?]
   {:style             (st-response/command-input icon-width disable?)
@@ -100,8 +102,7 @@
                 [message-input input-options set-layout-size])]
              ;; TODO emoticons: not implemented
              [plain-message/smile-button height]
-             (when (or (and @command? (not (str/blank? @input-command)))
-                       @valid-plain-message?)
+             (when (or @command? @valid-plain-message?)
                (let [on-press (if @command?
                                 (on-press-commands-handler @command)
                                 plain-message/send)]

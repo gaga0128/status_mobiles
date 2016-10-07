@@ -15,8 +15,8 @@
    :justifyContent :center})
 
 (def drag-icon
-  {:width  14
-   :height 3})
+  {:width    14
+   :height   3})
 
 (def command-icon-container
   {:marginTop       1
@@ -28,25 +28,24 @@
    :borderRadius    16
    :backgroundColor color-white})
 
-(defn command-icon [color]
-  {:width      13
-   :height     13
-   :tint-color color})
+(def command-icon
+  {:width  9
+   :height 15})
 
 (def info-container
   {:flex       1
    :marginLeft 12})
 
 (def command-name
-  {:marginTop 0
-   :fontSize  12
-   :color     color-white})
+  {:marginTop  0
+   :fontSize   12
+   :color      color-white})
 
 (def message-info
-  {:marginTop 1
-   :fontSize  12
-   :opacity   0.69
-   :color     color-white})
+  {:marginTop  1
+   :fontSize   12
+   :opacity    0.69
+   :color      color-white})
 
 (defn response-view [keyboard-height height]
   {:flexDirection   :column

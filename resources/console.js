@@ -59,11 +59,11 @@ function startsWith(str1, str2) {
 
 function phoneSuggestions(params) {
     var ph, suggestions;
-    if (!params.phone || params.phone == "") {
+    if (!params.value || params.value == "") {
         ph = phones;
     } else {
         ph = phones.filter(function (phone) {
-            return startsWith(phone.number, params.phone);
+            return startsWith(phone.number, params.value);
         });
     }
 
@@ -104,7 +104,7 @@ var phoneConfig = {
     validator: function (params) {
         return {
             validationHandler: "phone",
-            parameters: [params.phone]
+            parameters: [params.value]
         };
     },
     params: [{
@@ -116,7 +116,7 @@ var phoneConfig = {
     handler: function (params) {
         return {
             event: "sign-up",
-            params: [params.phone, params]
+            params: [params.value]
         };
     }
 };
@@ -155,11 +155,11 @@ status.response({
     handler: function (params) {
         return {
             event: "confirm-sign-up",
-            params: [params.code]
+            params: [params.value]
         };
     },
-    validator: function (params) {
-        if (!/^[\d]{4}$/.test(params.code)) {
+    validator: function(params){
+        if(!/^[\d]{4}$/.test(params.value)){
             var error = status.components.validationMessage(
                 "Confirmation code",
                 "Wrong format"
@@ -173,56 +173,32 @@ status.response({
 status.response({
     name: "password",
     color: "#7099e6",
-    description: "Password",
-    icon: "lock_white",
+    description: "Password Request",
+    icon: "icon_lock_white",
     params: [{
         name: "password",
         type: status.types.PASSWORD,
         placeholder: "Type your password"
-    }, {
-        name: "password-confirmation",
-        type: status.types.PASSWORD,
-        placeholder: "Please re-enter password to confirm"
     }],
     handler: function (params) {
         return {
             event: "save-password",
-            params: [params.password]
+            params: [params.value]
         };
     },
-    validator: function (params, context) {
-        var errorMessages = [];
-        var currentParameter = context["current-parameter"];
-
-        if (
-            currentParameter == "password" &&
-            params.password.length < 6
-        ) {
-            errorMessages.push("Password should be not less then 6 symbols.");
-        }
-
-        if (currentParameter == "password-confirmation" &&
-            params.password != params["password-confirmation"]) {
-            errorMessages.push("Password confirmation doesn't match password.");
-        }
-
-        if (errorMessages.length) {
-            var errors = [];
-            for (var idx in errorMessages) {
-                errors.push(
+    validator: function (params) {
+        if(!params.value || params.value.length < 6){
+            return {
+                errors: [
                     status.components.validationMessage(
                         "Password",
-                        errorMessages[idx]
+                        "Password should be not less then 6 symbols."
                     )
-                );
-            }
-
-            return {errors: errors};
+                ]
+            };
         }
-
-        return {params: params, context: context};
     },
-    preview: function (params, context) {
+    preview: function (params) {
         var style = {
             marginTop: 5,
             marginHorizontal: 0,
@@ -230,7 +206,7 @@ status.response({
             color: "black"
         };
 
-        if (context.platform == "ios") {
+        if(params.platform == "ios"){
             style.fontSize = 8;
             style.marginTop = 10;
             style.marginBottom = 2;
