@@ -10,20 +10,16 @@
             [status-im.components.tabs.styles :as st]
             [status-im.components.animation :as anim]))
 
-(defn animation-logic [val to-value]
+(defn animation-logic [val]
   (fn []
-    (anim/start (anim/spring val {:toValue to-value
-                                  :tension 40}))))
+    (anim/start (anim/spring val {:toValue 0.1
+                                  :tension 30}))))
 
 (defview tab [_]
-  (let [icon-anim-value         (anim/create-value 0)
-        text-anim-value         (anim/create-value 0)
-        icon-reverse-anim-value (anim/create-value 0)
-        text-reverse-anim-value (anim/create-value 0)
-        on-update               (comp (animation-logic icon-anim-value 0)
-                                      (animation-logic text-anim-value 0)
-                                      (animation-logic icon-reverse-anim-value 0)
-                                      (animation-logic text-reverse-anim-value 30))]
+  (let [icon-anim-value (anim/create-value 10)
+        text-anim-value (anim/create-value 20)
+        on-update       (comp (animation-logic icon-anim-value)
+                              (animation-logic text-anim-value))]
     (r/create-class
       {:component-did-mount
        on-update
@@ -31,28 +27,19 @@
        on-update
        :component-will-receive-props
        (fn []
-         (anim/set-value icon-anim-value 8)
-         (anim/set-value text-anim-value 30)
-         (anim/set-value icon-reverse-anim-value -8)
-         (anim/set-value text-reverse-anim-value -8))
+         (anim/set-value icon-anim-value 5)
+         (anim/set-value text-anim-value 20))
        :reagent-render
-       (fn [{:keys [view-id title icon selected-view-id prev-view-id]}]
+       (fn [{:keys [view-id title icon selected-view-id]}]
          [touchable-highlight {:style    st/tab
                                :disabled (= view-id selected-view-id)
                                :onPress  #(dispatch [:navigate-to-tab view-id])}
-          [view {:style (st/tab-container (= selected-view-id view-id))}
-           [animated-view {:style (st/animated-offset (cond
-                                                        (= selected-view-id view-id) icon-anim-value
-                                                        (= prev-view-id view-id) icon-reverse-anim-value
-                                                        :else 0))}
+          [view {:style st/tab-container}
+           [animated-view {:style (st/animated-offset (if (= selected-view-id view-id)
+                                                        icon-anim-value
+                                                        0))}
             [image {:source {:uri icon}
                     :style  st/tab-icon}]]
-           [animated-view {:style (st/animated-offset (cond
-                                                        (= selected-view-id view-id) text-anim-value
-                                                        (= prev-view-id view-id) text-reverse-anim-value
-                                                        :else 0))}
-            [text {:style st/tab-title}
-             (if (or (= selected-view-id view-id)
-                       (= prev-view-id view-id))
-               title
-               " ")]]]])})))
+           (when (= selected-view-id view-id)
+             [animated-view {:style (st/animated-offset text-anim-value)}
+              [text {:style st/tab-title} title]])]])})))

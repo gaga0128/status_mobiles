@@ -2,7 +2,7 @@
   (:require [status-im.components.styles :refer [color-white]]))
 
 (def tabs-height 60)
-(def tab-height 58)
+(def tab-height 56)
 
 (defn tabs-container [hidden? animation? offset-y]
   {:position        :absolute
@@ -36,21 +36,19 @@
    :alignItems     :center})
 
 (def tab-title
-  {:font-size 12
-   :height    16
-   :color     "#6e93d8"})
+  {:fontSize   14
+   :color      "#6e93d8"})
 
 (def tab-icon
   {:width        24
    :height       24
    :marginBottom 1})
 
-(defn tab-container [active?]
+(def tab-container
   {:flex           1
    :height         tab-height
    :justifyContent :center
-   :alignItems     :center
-   :top            (if active? 0 8)})
+   :alignItems     :center})
 
 (defn tab-view-container [offset-x]
   {:position       :absolute
