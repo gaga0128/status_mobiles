@@ -70,23 +70,19 @@
 
 (defn message-content-command-request
   [{:keys [message-id content from incoming-group]}]
-  (let [commands-atom (subscribe [:get-responses])
-        answered? (subscribe [:is-request-answered? message-id])]
+  (let [commands-atom (subscribe [:get-responses])]
     (fn [{:keys [message-id content from incoming-group]}]
       (let [commands @commands-atom
             {:keys [command content]} (parse-command-request commands content)]
         [view st/comand-request-view
-         [touchable-highlight
-          {:on-press            (when-not @answered?
-                                  #(set-chat-command message-id command))}
-          [view st/command-request-message-view
-           (when incoming-group
-             [text {:style st/command-request-from-text
-                    :font  :default}
-              from])
-           [text {:style st/style-message-text
-                  :font  :default}
-            content]]]
+         [view st/command-request-message-view
+          (when incoming-group
+            [text {:style st/command-request-from-text
+                   :font  :default}
+             from])
+          [text {:style st/style-message-text
+                 :font  :default}
+           content]]
          [request-button message-id command]
          (when (:request-text command)
            [view st/command-request-text-view
