@@ -32,8 +32,7 @@
   {:width           toolbar-height
    :height          toolbar-height
    :align-items     :center
-   :justify-content :center
-   :padding-right   12})
+   :justify-content :center})
 
 (def toolbar-title-container
   {:flex           1

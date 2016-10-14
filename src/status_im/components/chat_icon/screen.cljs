@@ -21,11 +21,10 @@
           :style  (:chat-icon styles)}])
 
 (defn dapp-badge [styles]
-  [view st/online-view-wrapper
-   [view (:online-view styles)
-    [view
-     [view (:online-dot-left styles)]
-     [view (:online-dot-right styles)]]]])
+  [view (:online-view styles)
+   [view
+    [view (:online-dot-left styles)]
+    [view (:online-dot-right styles)]]])
 
 (defn contact-badge [type styles]
   (when (= type :edit)
@@ -40,12 +39,12 @@
 
 (defview chat-icon-view [chat-id group-chat name online styles]
   [photo-path [:chat-photo chat-id]
-   dapp-url [:chat :dapp-url]]
+   dapp? [:get-in [:contacts chat-id :dapp?]]]
   [view (:container styles)
    (if-not (s/blank? photo-path)
      [chat-icon photo-path styles]
      [default-chat-icon name styles])
-   (when dapp-url
+   (when dapp?
      [dapp-badge styles])])
 
 (defn chat-icon-view-chat-list [chat-id group-chat name color online]
@@ -64,8 +63,8 @@
     :online-view            st/online-view
     :online-dot-left        st/online-dot-left
     :online-dot-right       st/online-dot-right
-    :chat-icon              st/chat-icon-view-action
-    :default-chat-icon      (st/default-chat-icon-view-action color)
+    :chat-icon              st/chat-icon
+    :default-chat-icon      (st/default-chat-icon color)
     :default-chat-icon-text st/default-chat-icon-text}])
 
 (defn chat-icon-view-menu-item [chat-id group-chat name color online]
