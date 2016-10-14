@@ -14,9 +14,8 @@
             status-im.accounts.recover.handlers
             [clojure.string :as str]
             [status-im.utils.datetime :as time]
-            [status-im.utils.handlers :as u :refer [get-hashtags]]
+            [status-im.utils.handlers :as u]
             [status-im.accounts.statuses :as statuses]
-            [status-im.utils.gfycat.core :refer [generate-gfy]]
             [status-im.constants :refer [console-chat-id]]))
 
 
@@ -37,7 +36,7 @@
         {:keys [public private]} (protocol/new-keypair!)
         account {:public-key          public-key
                  :address             address
-                 :name                (generate-gfy)
+                 :name                address
                  :status              (rand-nth statuses/data)
                  :signed-up?          true
                  :updates-public-key  public
@@ -74,18 +73,6 @@
                  :payload    {:profile {:name          name
                                         :status        status
                                         :profile-image photo-path}}}})))
-
-(register-handler
-  :check-status-change
-  (u/side-effect!
-    (fn [{:keys [current-account-id accounts]} [_ status]]
-      (let [{old-status :status :as account} (get accounts current-account-id)
-            status-updated? (and (not= status nil)
-                                 (not= status old-status))]
-        (when status-updated?
-          (let [hashtags (get-hashtags status)]
-            (when-not (empty? hashtags)
-              (dispatch [:broadcast-status status hashtags]))))))))
 
 (register-handler
   :account-update

@@ -24,7 +24,6 @@
             [cljs.spec :as s]
             [status-im.contacts.validations :as v]
             [status-im.contacts.styles :as st]
-            [status-im.utils.gfycat.core :refer [generate-gfy]]
             [status-im.utils.hex :refer [normalize-hex]]))
 
 
@@ -39,13 +38,13 @@
                (fn [{:keys [contacts]}]
                  (if (> (count contacts) 0)
                    (let [{:keys [whisper-identity]} (first contacts)
-                         contact {:name             (generate-gfy)
+                         contact {:name             ""
                                   :address          id
                                   :photo-path       (identicon whisper-identity)
                                   :whisper-identity whisper-identity}]
                      (dispatch [:add-new-contact contact]))
                    (dispatch [:set :new-contact-address-error (label :t/unknown-address)]))))
-    (dispatch [:add-new-contact {:name             (generate-gfy)
+    (dispatch [:add-new-contact {:name             ""
                                  :photo-path       (identicon id)
                                  :whisper-identity id}])))
 

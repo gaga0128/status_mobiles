@@ -5,7 +5,6 @@
                                                 animated-view
                                                 text
                                                 image
-                                                icon
                                                 touchable-highlight]]
             [status-im.chat.styles.message :as st]
             [status-im.models.commands :refer [parse-command-request]]
@@ -65,8 +64,9 @@
              :style               st/command-request-image-touchable
              :accessibility-label (label command)}
             [animated-view {:style (st/command-request-image-view command scale-anim-val)}
-             (when command-icon
-               [icon command-icon st/command-request-image])]]))})))
+             (if command-icon
+               [image {:source {:uri command-icon}
+                       :style  st/command-request-image}])]]))})))
 
 (defn message-content-command-request
   [{:keys [message-id content from incoming-group]}]

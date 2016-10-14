@@ -14,8 +14,8 @@
             [status-im.components.text-field.view :refer [text-field]]
             [status-im.components.drawer.styles :as st]
             [status-im.profile.validations :as v]
+            [status-im.profile.handlers :refer [update-profile]]
             [status-im.resources :as res]
-            [status-im.utils.gfycat.core :refer [generate-gfy]]
             [status-im.i18n :refer [label]]
             [status-im.components.react :refer [dismiss-keyboard!]]))
 
@@ -43,8 +43,8 @@
     name]])
 
 (defview drawer-menu []
-  [{:keys [name photo-path status]} [:get-current-account]
-   {new-name :name new-status :status} [:get :profile-edit]
+  [{:keys [name address photo-path status] :as account} [:get-current-account]
+   {new-name :name :as profile-edit-data} [:get :profile-edit]
    keyboard-height [:get :keyboard-height]]
   [view st/drawer-menu
    [touchable-without-feedback {:on-press #(dismiss-keyboard!)}
@@ -56,13 +56,14 @@
       [text-field
        {:line-color       :white
         :focus-line-color :white
-        :placeholder      (generate-gfy)
+        :placeholder      (label :t/user-anonymous)
         :editable         true
         :input-style      (st/name-input-text (s/valid? ::v/name (or new-name name)))
         :wrapper-style    st/name-input-wrapper
-        :value            name
+        :value            (if (not= name address)
+                            name)
         :on-change-text   #(dispatch [:set-in [:profile-edit :name] %])
-        :on-end-editing   #(dispatch [:account-update {:name new-name}])}]]
+        :on-end-editing   #(update-profile account profile-edit-data)}]]
      [view st/status-container
       [text-input {:style               st/status-input
                    :editable            true
@@ -72,9 +73,7 @@
                    :accessibility-label :input
                    :placeholder         (label :t/profile-no-status)
                    :on-change-text      #(dispatch [:set-in [:profile-edit :status] %])
-                   :on-blur             (fn[]
-                                          (dispatch [:check-status-change new-status])
-                                          (dispatch [:account-update {:status new-status}]))
+                   :on-blur             #(update-profile account profile-edit-data)
                    :default-value       status}]]
      [view st/menu-items-container
       [menu-item {:name    (label :t/profile)

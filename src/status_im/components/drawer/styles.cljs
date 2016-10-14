@@ -10,8 +10,7 @@
                                                  text1-color
                                                  text2-color
                                                  text3-color
-                                                 color-red]]
-            [status-im.utils.platform :as p]))
+                                                 color-red]]))
 
 (def drawer-menu
   {:flex             1
@@ -29,10 +28,10 @@
    :height        64})
 
 (def name-container
-  {:margin-top    (if p/ios? -13 -19)
+  {:margin-top   -16
    :margin-bottom -16
-   :margin-left   16
-   :margin-right  16})
+   :margin-left  16
+   :margin-right 16})
 
 (def name-input-wrapper
   {})
@@ -45,7 +44,7 @@
 (def status-container
   {:margin-left  16
    :margin-right 16
-   :margin-top   (if p/ios? 5 5)
+   :margin-top   4
    :align-items  :center})
 
 (def status-input
@@ -53,6 +52,7 @@
    :height              56
    :font-size           14
    :padding-left        4
+   :line-height         20
    :text-align          :center
    :text-align-vertical :top
    :color               text2-color})
