@@ -96,7 +96,8 @@
 (defn remove-contacts
   [chat-id identities]
   (let [contacts (get-contacts chat-id)]
-    (delete-contacts identities contacts)))
+    (realm/write @realm/account-realm
+                 #(delete-contacts identities contacts))))
 
 (defn save-property
   [chat-id property-name value]
