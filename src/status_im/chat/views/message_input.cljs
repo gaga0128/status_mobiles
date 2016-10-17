@@ -63,7 +63,7 @@
    disable? [:get :disable-input]]
   [text-input (merge
                 (command-input-options command icon-width disable?)
-                {:auto-focus          false
+                {:auto-focus          true
                  :blur-on-submit      false
                  :accessibility-label :input
                  :on-focus            #(dispatch [:set :focused true])

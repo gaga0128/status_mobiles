@@ -76,14 +76,13 @@
   (when-let [to-value @to-value]
     (when-not (= to-value (.-_value val))
       (if (or (nil? @animate?) @animate?)
-        (anim/start (anim/timing val {:toValue  to-value
-                                      :duration 300}))
+        (anim/start (anim/spring val {:toValue to-value}))
         (anim/set-value val to-value)))))
 
 (defn container [response-height & children]
   (let [;; todo to-response-height, cur-response-height must be specific
         ;; for each chat
-        to-response-height (subscribe [:response-height :default])
+        to-response-height (subscribe [:response-height])
         changed            (subscribe [:animations :response-height-changed])
         animate?           (subscribe [:animate?])
         keyboard-height    (subscribe [:get :keyboard-height])
@@ -121,7 +120,7 @@
       :source                     {:uri url}
       :java-script-enabled        true
       :injected-java-script       (slurp "resources/webview.js")
-      :bounces                    false
+      :style                      {:height 300}
       :on-navigation-state-change on-navigation-change}]))
 
 (defview placeholder []

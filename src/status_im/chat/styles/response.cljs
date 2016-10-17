@@ -7,8 +7,7 @@
                                                  color-black]]
             [status-im.chat.constants :refer [input-height
                                               request-info-height
-                                              response-height-normal]]
-            [status-im.utils.platform :as p]))
+                                              response-height-normal]]))
 
 (def drag-container
   {:height         16
@@ -84,9 +83,9 @@
    :height     12})
 
 (defn command-input [ml disable?]
-  {:flex         1
-   :margin-right 16
-   :margin-left  (- ml 5)
-   :padding      0
-   :font-size    14
-   :color        (if disable? color-white text1-color)})
+  {:flex        1
+   :marginRight 16
+   :margin-left (- ml 5)
+   :padding     0
+   :fontSize    14
+   :color       (if disable? color-white text1-color)})
