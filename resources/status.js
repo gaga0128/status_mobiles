@@ -1,8 +1,7 @@
 var _status_catalog = {
-        commands: {},
-        responses: {}
-    },
-    status = {};
+    commands: {},
+    responses: {}
+};
 
 function Command() {
 }
@@ -45,25 +44,10 @@ Response.prototype.onReceiveResponse = function (handler) {
     this.onReceive = handler;
 };
 
-var context = {}
-
-function addContext(ns, key, value) {
-    context[ns][key] = value;
-}
-
 function call(pathStr, paramsStr) {
     var params = JSON.parse(paramsStr),
         path = JSON.parse(pathStr),
-        fn, callResult, message_id;
-
-    if (typeof params.context !== "undefined" &&
-        typeof params.context["message-id"] !== "undefined") {
-        message_id = params.context["message-id"];
-    } else {
-        message_id = null;
-    }
-    context[message_id] = {};
-    status.message_id = message_id;
+        fn, res;
 
     fn = path.reduce(function (catalog, name) {
             if (catalog && catalog[name]) {
@@ -77,13 +61,9 @@ function call(pathStr, paramsStr) {
         return null;
     }
 
-    callResult = fn(params.parameters, params.context);
-    result = {
-        returned: callResult,
-        context: context[message_id]
-    };
+    res = fn(params.parameters, params.context);
 
-    return JSON.stringify(result);
+    return JSON.stringify(res);
 }
 
 function text(options, s) {

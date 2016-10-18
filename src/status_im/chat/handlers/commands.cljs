@@ -91,7 +91,7 @@
     (fn [_ [_ {:keys [chat-id handler]} {:keys [error result]}]]
       ;; todo handle error
       (when-not error
-        (let [{:keys [errors validationHandler parameters]} (:returned result)]
+        (let [{:keys [errors validationHandler parameters]} result]
           (cond errors
                 (dispatch [::add-validation-errors chat-id errors])
 
@@ -128,7 +128,6 @@
                         :id         (random/id)}]
       (-> db
           (commands/stage-command command-info)
-          (assoc-in [:command->chat (:id command-info)] chat-id)
           (assoc :staged-command command-info)
           (assoc-in [:disable-staging chat-id] true)))))
 
@@ -226,7 +225,7 @@
 
 (register-handler ::start-command-validation!
   (u/side-effect!
-    (fn [db [_ {:keys [command-input chat-id address] :as data}]]
+    (fn [db [_ {:keys [command-input chat-id] :as data}]]
       (let [command-input'    (or command-input (commands/get-command-input db))
             {:keys [parameter-idx params command]} command-input'
             {:keys [name type]} command
@@ -234,8 +233,7 @@
                                   :params
                                   (get parameter-idx)
                                   :name)
-            context           {:current-parameter current-parameter
-                               :from              address}
+            context           {:current-parameter current-parameter}
             path              [(if (= :command type) :commands :responses)
                                name
                                :validator]

@@ -275,13 +275,11 @@
   [{:keys [current-chat-id] :as db} [_ _ id]]
   (let [chat-id  (or id current-chat-id)
         messages (get-in db [:chats chat-id :messages])
-        db'      (assoc db :current-chat-id chat-id)
-        commands-loaded? (get-in db [:chats chat-id :commands-loaded])]
+        db'      (assoc db :current-chat-id chat-id)]
     (when (= current-chat-id wallet-chat-id)
       (dispatch [:cancel-command]))
     (dispatch [:load-requests! chat-id])
-    (when-not commands-loaded?
-      (dispatch [:load-commands! chat-id]))
+    (dispatch [:load-commands! chat-id])
     (if (and (seq messages)
              (not= (count messages) 1))
       db'

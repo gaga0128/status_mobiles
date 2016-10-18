@@ -102,7 +102,6 @@
 (register-handler :signal-event
   (u/side-effect!
     (fn [_ [_ event-str]]
-      (log/debug :event-str event-str)
       (let [{:keys [type event]} (t/json->clj event-str)]
         (case type
           "transaction.queued" (dispatch [:transaction-queued event])
