@@ -13,7 +13,8 @@
             [status-im.constants :refer [text-content-type
                                          content-type-command
                                          content-type-command-request
-                                         default-number-of-messages]]
+                                         default-number-of-messages
+                                         wallet-chat-id]]
             [status-im.utils.random :as random]
             [status-im.chat.sign-up :as sign-up-service]
             [status-im.navigation.handlers :as nav]
@@ -26,6 +27,7 @@
             [status-im.chat.handlers.commands :refer [command-prefix]]
             [status-im.chat.utils :refer [console? not-console?]]
             [status-im.constants :refer [console-chat-id]]
+            [status-im.utils.gfycat.core :refer [generate-gfy]]
             status-im.chat.handlers.animation
             status-im.chat.handlers.requests
             status-im.chat.handlers.unviewed-messages
@@ -274,6 +276,8 @@
   (let [chat-id  (or id current-chat-id)
         messages (get-in db [:chats chat-id :messages])
         db'      (assoc db :current-chat-id chat-id)]
+    (when (= current-chat-id wallet-chat-id)
+      (dispatch [:cancel-command]))
     (dispatch [:load-requests! chat-id])
     (dispatch [:load-commands! chat-id])
     (if (and (seq messages)
@@ -284,15 +288,15 @@
           init-chat))))
 
 (defn prepare-chat
-  [{:keys [contacts] :as db} [_ contcat-id options]]
-  (let [name (get-in contacts [contcat-id :name])
-        chat (merge {:chat-id    contcat-id
-                     :name       (or name contcat-id)
+  [{:keys [contacts] :as db} [_ contact-id options]]
+  (let [name (get-in contacts [contact-id :name])
+        chat (merge {:chat-id    contact-id
+                     :name       (or name (generate-gfy))
                      :color      default-chat-color
                      :group-chat false
                      :is-active  true
                      :timestamp  (.getTime (js/Date.))
-                     :contacts   [{:identity contcat-id}]
+                     :contacts   [{:identity contact-id}]
                      :dapp-url   nil
                      :dapp-hash  nil}
                     options)]
