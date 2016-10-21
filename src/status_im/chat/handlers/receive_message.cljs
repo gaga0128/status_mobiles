@@ -7,8 +7,7 @@
             [status-im.utils.random :as random]
             [status-im.constants :refer [content-type-command-request]]
             [cljs.reader :refer [read-string]]
-            [status-im.data-store.chats :as chats]
-            [taoensso.timbre :as log]))
+            [status-im.data-store.chats :as chats]))
 
 (defn check-preview [{:keys [content] :as message}]
   (if-let [preview (:preview content)]
@@ -26,17 +25,12 @@
   (:public-key (accounts current-account-id)))
 
 (defn receive-message
-  [db [_ {:keys [from group-id chat-id message-id timestamp clock-value] :as message :or {clock-value 0}}]]
-  (let [same-message     (messages/get-by-id message-id)
+  [db [_ {:keys [from group-id chat-id message-id timestamp] :as message}]]
+  (let [same-message (messages/get-by-id message-id)
         current-identity (get-current-identity db)
-        chat-id'         (or group-id chat-id from)
-        exists?          (chats/exists? chat-id')
-        active?          (chats/is-active? chat-id')
-        clock-value      (if (= clock-value 0)
-                           (-> (chats/get-by-id chat-id')
-                               (get :clock-value)
-                               (inc))
-                           clock-value)]
+        chat-id' (or group-id chat-id from)
+        exists? (chats/exists? chat-id')
+        active? (chats/is-active? chat-id')]
     (when (and (not same-message)
                (not= from current-identity)
                (or (not exists?) active?))
@@ -46,12 +40,10 @@
                                  (cu/check-author-direction previous-message)
                                  (check-preview))
                        :chat-id chat-id'
-                       :timestamp (or timestamp (random/timestamp))
-                       :clock-value clock-value)]
+                       :timestamp (or timestamp (random/timestamp)))]
         (store-message message')
-        (dispatch [:upsert-chat! {:chat-id     chat-id'
-                                  :group-chat  group-chat?
-                                  :clock-value clock-value}])
+        (when-not exists?
+          (dispatch [:add-chat chat-id' (when group-chat? {:group-chat true})]))
         (dispatch [::add-message message'])
         (when (= (:content-type message') content-type-command-request)
           (dispatch [:add-request chat-id' message']))
@@ -61,9 +53,9 @@
   (u/side-effect!
     (fn [_ [_ {:keys [from to payload]}]]
       (dispatch [:received-message (merge payload
-                                          {:from        from
-                                           :to          to
-                                           :chat-id     from})]))))
+                                          {:from    from
+                                           :to      to
+                                           :chat-id from})]))))
 
 (register-handler :received-message
   (u/side-effect! receive-message))

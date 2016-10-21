@@ -31,8 +31,7 @@
             [status-im.components.sync-state.offline :refer [offline-view]]
             [status-im.constants :refer [content-type-status]]
             [reagent.core :as r]
-            [cljs-time.core :as t]
-            [taoensso.timbre :as log]))
+            [cljs-time.core :as t]))
 
 (defn contacts-by-identity [contacts]
   (->> contacts
@@ -81,6 +80,7 @@
                     (add-message-color contact-by-identity)
                     (assoc :group-chat group-chat)
                     (assoc :messages-count messages-count)
+                    (assoc :index index)
                     (assoc :last-message (= (js/parseInt index) (dec messages-count))))]
     (list-item [chat-message message])))
 
@@ -121,7 +121,6 @@
                          (concat all-messages [status-message])
                          all-messages)
         messages       (->> all-messages
-                            (sort-by :clock-value >)
                             (map #(assoc % :datemark (time/day-relative (:timestamp %))))
                             (group-by :datemark)
                             (map (fn [[k v]] [v {:type :datemark :value k}]))

@@ -23,7 +23,7 @@
                    content)
 
         payload' (-> message
-                     (select-keys [:message-id :requires-ack? :type :clock-value])
+                     (select-keys [:message-id :requires-ack? :type])
                      (merge payload)
                      (assoc :content content')
                      prn-str

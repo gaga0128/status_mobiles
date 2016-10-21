@@ -35,8 +35,7 @@
             status-im.chat.handlers.receive-message
             [cljs.core.async :as a]
             status-im.chat.handlers.webview-bridge
-            status-im.chat.handlers.wallet-chat
-            [taoensso.timbre :as log]))
+            status-im.chat.handlers.wallet-chat))
 
 (register-handler :set-chat-ui-props
   (fn [db [_ ui-element value]]
@@ -290,22 +289,20 @@
           load-messages!
           init-chat))))
 
-(defn prepare-chat [{:keys [contacts]} chat-id chat]
-  (let [name (get-in contacts [chat-id :name])]
-    (merge {:chat-id    chat-id
-            :name       (or name (generate-gfy))
-            :color      default-chat-color
-            :group-chat false
-            :is-active  true
-            :timestamp  (.getTime (js/Date.))
-            :contacts   [{:identity chat-id}]
-            :dapp-url   nil
-            :dapp-hash  nil}
-           chat)))
-
-(defn add-new-chat
-  [db [_ chat-id chat]]
-  (assoc db :new-chat (prepare-chat db chat-id chat)))
+(defn prepare-chat
+  [{:keys [contacts] :as db} [_ contact-id options]]
+  (let [name (get-in contacts [contact-id :name])
+        chat (merge {:chat-id    contact-id
+                     :name       (or name (generate-gfy))
+                     :color      default-chat-color
+                     :group-chat false
+                     :is-active  true
+                     :timestamp  (.getTime (js/Date.))
+                     :contacts   [{:identity contact-id}]
+                     :dapp-url   nil
+                     :dapp-hash  nil}
+                    options)]
+    (assoc db :new-chat chat)))
 
 (defn add-chat [{:keys [new-chat] :as db} [_ chat-id]]
   (-> db
@@ -321,7 +318,7 @@
   (dispatch [(or navigation-type :navigate-to) :chat chat-id]))
 
 (register-handler ::start-chat!
-  (-> add-new-chat
+  (-> prepare-chat
       ((enrich add-chat))
       ((after save-new-chat!))
       ((after open-chat!))))
@@ -334,29 +331,9 @@
         (dispatch [::start-chat! contact-id options navigation-type])))))
 
 (register-handler :add-chat
-  (-> add-new-chat
+  (-> prepare-chat
       ((enrich add-chat))
       ((after save-new-chat!))))
-
-(defn update-chat!
-  [_ [_ chat]]
-  (chats/save chat))
-
-(register-handler :update-chat!
-  (-> (fn [db [_ {:keys [chat-id] :as chat}]]
-        (if (get-in db [:chats chat-id])
-          (update-in db [:chats chat-id] merge chat)
-          db))
-      ((after update-chat!))))
-
-(register-handler :upsert-chat!
-  (fn [db [_ {:keys [chat-id clock-value] :as opts}]]
-    (let [chat (if (chats/exists? chat-id)
-                 (let [{old-clock-value :clock-value :as chat} (chats/get-by-id chat-id)]
-                   (assoc chat :clock-value (+ (max old-clock-value clock-value)) 1))
-                 (prepare-chat db chat-id opts))]
-      (chats/save chat)
-      (update-in db [:chats chat-id] merge chat))))
 
 (register-handler :switch-command-suggestions!
   (u/side-effect!
@@ -476,6 +453,17 @@
   (fn [db [_ chat-id mode]]
     (assoc-in db [:kb-mode chat-id] mode)))
 
+(defn update-chat!
+  [_ [_ chat]]
+  (chats/save chat))
+
+(register-handler :update-chat!
+  (-> (fn [db [_ {:keys [chat-id] :as chat}]]
+        (if (get-in db [:chats chat-id])
+          (update-in db [:chats chat-id] merge chat)
+          db))
+      ((after update-chat!))))
+
 (register-handler :check-autorun
   (u/side-effect!
     (fn [{:keys [current-chat-id] :as db}]
@@ -486,10 +474,3 @@
             (a/<! (a/timeout 100))
             (dispatch [:set-chat-command (keyword autorun)])
             (dispatch [:animate-command-suggestions])))))))
-
-(register-handler :inc-clock
-  (u/side-effect!
-    (fn [_ [_ chat-id]]
-      (let [chat (-> (chats/get-by-id chat-id)
-                     (update :clock-value inc))]
-        (dispatch [:update-chat! chat])))))

@@ -13,8 +13,7 @@
             [status-im.chat.styles.plain-message :as st-message]
             [status-im.chat.styles.response :as st-response]
             [reagent.core :as r]
-            [clojure.string :as str]
-            [taoensso.timbre :as log]))
+            [clojure.string :as str]))
 
 (defn send-button [{:keys [on-press accessibility-label]}]
   [touchable-highlight {:on-press            on-press
@@ -58,13 +57,13 @@
                  :default-value          (or input-message "")}
                 input-options)])
 
-(defview command-input [input-options {:keys [fullscreen] :as command}]
+(defview command-input [input-options command]
   [input-command [:get-chat-command-content]
    icon-width [:command-icon-width]
    disable? [:get :disable-input]]
   [text-input (merge
                 (command-input-options command icon-width disable?)
-                {:auto-focus          (not fullscreen)
+                {:auto-focus          false
                  :blur-on-submit      false
                  :accessibility-label :input
                  :on-focus            #(dispatch [:set :focused true])
