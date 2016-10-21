@@ -225,7 +225,7 @@
            :style  st/photo}]])
 
 (defn incoming-group-message-body
-  [{:keys [selected same-author from index] :as message} content]
+  [{:keys [selected same-author from] :as message} content]
   (let [delivery-status :seen-by-everyone]
     [view st/group-message-wrapper
      (when selected
@@ -234,8 +234,7 @@
         "Mar 7th, 15:22"])
      [view (st/incoming-group-message-body-st message)
       [view st/message-author
-       (when (or (= index 1)
-                 (not same-author)) [member-photo from])]
+       (when (not same-author) [member-photo from])]
       [view st/group-message-view
        content
        ;; TODO show for last or selected
