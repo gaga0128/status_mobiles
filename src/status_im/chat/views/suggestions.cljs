@@ -19,7 +19,7 @@
             [status-im.utils.platform :refer [ios?]]
             [status-im.chat.suggestions-responder :as resp]
             [status-im.chat.constants :as c]
-            [status-im.i18n :refer [label]]))
+            [taoensso.timbre :as log]))
 
 (defn set-command-input [command]
   (dispatch [:set-chat-command command]))
@@ -40,6 +40,12 @@
      [text {:style st/request-message-info}
       "By console, today at 14:50"]]]])
 
+(defn render-request-row
+  [{:keys [chat-id message-id] :as row} _ _]
+  (list-item
+    ^{:key [chat-id message-id]}
+    [request-item row]))
+
 (defn suggestion-list-item
   [[command {:keys [description]
              name  :name
@@ -57,6 +63,9 @@
         [view (st/suggestion-background suggestion)
          [text {:style st/suggestion-text} label]]]]]]))
 
+(defn render-row [row _ _]
+  (list-item [suggestion-list-item row]))
+
 (defn title [s]
   [view st/title-container
    [text {:style st/title-text} s]])
@@ -64,18 +73,20 @@
 (defview suggestions-view []
   [suggestions [:get-suggestions]
    requests [:get-requests]]
-  [view {:flex 1}
-   [scroll-view {:keyboardShouldPersistTaps true}
-    (when (seq requests)
-      [title (label :t/suggestions-requests)])
-    (when (seq requests)
-      (for [{:keys [chat-id message-id] :as request} requests]
-        ^{:key [chat-id message-id]}
-        [request-item request]))
-    [title (label :t/suggestions-commands)]
-    (for [suggestion suggestions]
-      ^{:key (first suggestion)}
-      [suggestion-list-item suggestion])]])
+  [scroll-view {:keyboardShouldPersistTaps true}
+   ;; todo translations
+   (when (seq requests) [title "Requests"])
+   (when (seq requests)
+     [view
+      [list-view {:dataSource                (to-datasource requests)
+                  :keyboardShouldPersistTaps true
+                  :renderRow                 render-request-row}]])
+   ;; todo translations
+   [title "Commands"]
+   [view
+    [list-view {:dataSource                (to-datasource suggestions)
+                :keyboardShouldPersistTaps true
+                :renderRow                 render-row}]]])
 
 (defn header [h]
   (let [layout-height (subscribe [:max-layout-height :default])

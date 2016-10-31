@@ -175,6 +175,7 @@
   {:marginTop 4
    :height    14})
 
+
 (def content-command-view
   {:flexDirection :column})
 
@@ -261,7 +262,7 @@
    :color      text2-color})
 
 (defn message-container [height]
-  {:top height})
+  {:height height})
 
 (defn new-message-container [margin on-top?]
   {:background-color color-white
