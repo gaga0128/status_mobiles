@@ -205,7 +205,7 @@
   {:position :absolute
    :bottom   0
    :right    0
-   :width    220
+   :width    200
    :height   170})
 
 (def qr-input
