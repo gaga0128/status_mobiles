@@ -125,10 +125,6 @@ public class StatusService extends Service {
                 completeTransaction(message);
                 break;
 
-            case StatusMessages.MSG_DISCARD_TRANSACTION:
-                discardTransaction(message);
-                break;
-
             case StatusMessages.MSG_JAIL_INIT:
                 initJail(message);
                 break;
@@ -224,6 +220,9 @@ public class StatusService extends Service {
         Bundle replyData = new Bundle();
         replyData.putString("data", result);
         createAndSendReply(message, StatusMessages.MSG_LOGIN, replyData);
+
+        // Test signalEvent
+        //signalEvent("{ \"type\": \"test\", \"event\": \"test event\" }");
     }
 
     private void completeTransaction(Message message){
@@ -239,16 +238,6 @@ public class StatusService extends Service {
         Bundle replyData = new Bundle();
         replyData.putString("data", result);
         createAndSendReply(message, StatusMessages.MSG_COMPLETE_TRANSACTION, replyData);
-    }
-
-    private void discardTransaction(Message message){
-
-        Bundle data = message.getData();
-        String id = data.getString("id");
-
-        Log.d(TAG, "Before DiscardTransaction: " + id);
-        String result = Statusgo.DiscardTransaction(id);
-        Log.d(TAG, "After DiscardTransaction: " + result);
     }
 
     private void initJail(Message message){

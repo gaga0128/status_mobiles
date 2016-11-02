@@ -205,18 +205,6 @@ class StatusModule extends ReactContextBaseJavaModule implements LifecycleEventL
         status.completeTransaction(callbackIdentifier, hash, password);
     }
 
-
-    @ReactMethod
-    public void discardTransaction(String id) {
-        Log.d(TAG, "discardTransaction");
-        if (!checkAvailability()) {
-            return;
-        }
-
-        Log.d(TAG, "Discard transaction: " + id);
-        status.discardTransaction(id);
-    }
-
     // Jail
 
     @ReactMethod
