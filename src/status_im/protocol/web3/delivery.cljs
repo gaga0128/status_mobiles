@@ -207,10 +207,12 @@
 
 (defn reset-pending-messages! [to]
   (doseq [key (@recipient->pending-message to)]
-    (when (get-in @messages key)
-      (swap! messages #(update-in % key assoc
-                                  :last-attempt 0
-                                  :attempts 0)))))
+    (swap! messages
+           (fn [messages]
+             (when (get-in messages key)
+               (update-in messages key assoc
+                          :last-attempt 0
+                          :attempts 0))))))
 
 (defn reset-all-pending-messages! []
   (reset! messages {}))
