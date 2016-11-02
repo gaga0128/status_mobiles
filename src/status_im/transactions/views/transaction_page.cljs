@@ -11,15 +11,11 @@
             [status-im.components.styles :refer [icon-ok
                                                  icon-close]]
             [status-im.transactions.styles :as st]
-            [status-im.i18n :refer [label label-pluralize]]
-            [taoensso.timbre :as log]))
+            [status-im.i18n :refer [label label-pluralize]]))
 
 (defn title-bar [title id]
   [view st/title-bar
-   [text {:style           st/title-bar-text
-          :font            :medium
-          :number-of-lines 1}
-    title]
+   [text {:style st/title-bar-text} title]
    [touchable-highlight {:style    st/icon-close-container
                          :on-press #(dispatch [:deny-transaction id])}
     [view [image {:source {:uri :icon_close_gray}
@@ -36,10 +32,10 @@
 
 (defview transaction-page [{:keys [id from to value] :as transaction}]
   [{:keys [name] :as contact} [:contact-by-address to]]
-  (let [eth-value         (.fromWei js/Web3.prototype value "ether")
-        title             (str eth-value " ETH to " (or name to))
+  (let [eth-value (.fromWei js/Web3.prototype value "ether")
+        title (str eth-value " ETH to " name)
         transactions-info [[(label :t/status) (label :t/pending-confirmation)]
-                           [(label :t/recipient) (or name to)]
+                           [(label :t/recipient) name]
                            [(label :t/value) (str eth-value " ETH")]]]
     [view {:style st/transaction-page
            :key   id}
