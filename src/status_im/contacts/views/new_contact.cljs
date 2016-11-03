@@ -13,10 +13,9 @@
             [status-im.components.status-bar :refer [status-bar]]
             [status-im.components.toolbar.view :refer [toolbar]]
             [status-im.components.toolbar.styles :refer [toolbar-title-container
-                                                         toolbar-title-text
-                                                         toolbar-background1]]
+                                                         toolbar-title-text]]
             [status-im.utils.utils :refer [log http-post]]
-            [status-im.components.styles :refer [icon-ok
+            [status-im.components.styles :refer [icon-search
                                                  icon-back
                                                  button-input-container
                                                  button-input]]
@@ -26,8 +25,7 @@
             [status-im.contacts.validations :as v]
             [status-im.contacts.styles :as st]
             [status-im.utils.gfycat.core :refer [generate-gfy]]
-            [status-im.utils.hex :refer [normalize-hex]]
-            [status-im.utils.platform :refer [platform-specific]]))
+            [status-im.utils.hex :refer [normalize-hex]]))
 
 
 (def toolbar-title
@@ -71,7 +69,7 @@
     [{:image   {:source {:uri (if (str/blank? error-message)
                                 :icon_ok_blue
                                 :icon_ok_disabled)}
-                :style  icon-ok}
+                :style  icon-search}
       :handler #(when (str/blank? error-message)
                  (on-add-contact new-contact-identity))}]))
 
@@ -91,9 +89,7 @@
                          (dispatch [:set-in [:new-contact-identity] %])
                          (dispatch [:set :new-contact-address-error nil]))}]
      [scan-button {:showLabel (zero? (count whisper-identity))
-                   :handler   #(dispatch [:scan-qr-code
-                                          {:toolbar-title (label :t/new-contact)}
-                                          :set-contact-identity-from-qr])}]]))
+                   :handler   #(dispatch [:scan-qr-code {:toolbar-title (label :t/new-contact)} :set-contact-identity-from-qr])}]]))
 
 
 (defview new-contact []
@@ -101,14 +97,14 @@
    error [:get :new-contact-address-error]
    account [:get-current-account]]
   [view st/contact-form-container
-   [status-bar]
-   [toolbar {:background-color toolbar-background1
-             :style            (get-in platform-specific [:component-styles :toolbar])
-             :nav-action       {:image   {:source {:uri :icon_back}
-                                          :style  icon-back}
-                                :handler #(dispatch [:navigate-back])}
-             :title            (label :t/add-new-contact)
-             :actions          (toolbar-actions new-contact-identity account error)}]
+   [view
+    [status-bar]
+    [toolbar {:background-color :white
+              :nav-action       {:image   {:source {:uri :icon_back}
+                                           :style  icon-back}
+                                 :handler #(dispatch [:navigate-back])}
+              :custom-content   toolbar-title
+              :actions          (toolbar-actions new-contact-identity account error)}]]
    [view st/form-container
     [contact-whisper-id-input new-contact-identity error]]
    [view st/address-explication-container
