@@ -43,7 +43,7 @@
       (anim/start
         (button-animation val min-scale loop? answered?)))))
 
-(defn request-button [message-id command status-initialized?]
+(defn request-button [message-id command status-initialized? top-offset?]
   (let [scale-anim-val (anim/create-value min-scale)
         answered?      (subscribe [:is-request-answered? message-id])
         loop?          (r/atom true)
@@ -53,16 +53,16 @@
                         :loop?     loop?}]
     (r/create-class
       {:component-did-mount
-       (if @answered? #(request-button-animation-logic context) (fn []))
+       (when-not @answered? #(request-button-animation-logic context))
        :component-will-unmount
        #(reset! loop? false)
        :reagent-render
        (fn [message-id {command-icon :icon :as command} status-initialized?]
-         (when command
+         (if command
            [touchable-highlight
             {:on-press            (when (and (not @answered?) status-initialized?)
                                     #(set-chat-command message-id command))
-             :style               st/command-request-image-touchable
+             :style               (st/command-request-image-touchable top-offset?)
              :accessibility-label (label command)}
             [animated-view {:style (st/command-request-image-view command scale-anim-val)}
              (when command-icon
@@ -70,7 +70,8 @@
 
 (defn message-content-command-request
   [{:keys [message-id content from incoming-group]}]
-  (let [commands-atom       (subscribe [:get-responses])
+  (let [top-offset          (r/atom {:specified? false})
+        commands-atom       (subscribe [:get-responses])
         answered?           (subscribe [:is-request-answered? message-id])
         status-initialized? (subscribe [:get :status-module-initialized?])]
     (fn [{:keys [message-id content from incoming-group]}]
@@ -86,6 +87,11 @@
                     :font  :default}
               from])
            [text {:style st/style-message-text
+                  :on-layout #(reset! top-offset {:specified? true
+                                                  :value      (-> (.-nativeEvent %)
+                                                                  (.-layout)
+                                                                  (.-height) 
+                                                                  (> 25))})
                   :font  :default}
             content]]]
          (when (:request-text command)
@@ -93,4 +99,5 @@
             [text {:style st/style-sub-text
                    :font  :default}
              (:request-text command)]])
-         [request-button message-id command @status-initialized?]]))))
+         (when (:specified? @top-offset)
+           [request-button message-id command @status-initialized? (:value @top-offset)])]))))
