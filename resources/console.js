@@ -23,8 +23,7 @@ function suggestionsContainerStyle(suggestionsCount) {
         marginHorizontal: 0,
         height: Math.min(150, (56 * suggestionsCount)),
         backgroundColor: "white",
-        borderRadius: 5,
-        flex: 1
+        borderRadius: 5
     };
 }
 
@@ -89,14 +88,6 @@ function phoneSuggestions(params) {
                     ])])
         );
     });
-
-    /*var view = status.components.view(
-        {style: {flex: 1, flexDirection: "column"}},
-        [status.components.scrollView(
-            suggestionsContainerStyle(ph.length),
-            suggestions
-        )]
-    );*/
 
     var view = status.components.scrollView(
         suggestionsContainerStyle(ph.length),
