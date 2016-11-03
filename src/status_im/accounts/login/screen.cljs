@@ -20,6 +20,7 @@
                                                  icon-qr
                                                  button-input
                                                  white-form-text-input]]
+            [status-im.qr-scanner.views.scan-button :refer [scan-button]]
             [status-im.i18n :refer [label]]
             [status-im.accounts.login.styles :as st]))
 
