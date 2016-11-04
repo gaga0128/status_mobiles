@@ -140,9 +140,9 @@
 (def command-request-from-text
   (merge style-sub-text {:marginBottom 2}))
 
-(defn command-request-image-touchable [top-offset?]
+(def command-request-image-touchable
   {:position       :absolute
-   :top            (if top-offset? 4 -1)
+   :top            4
    :right          -8
    :alignItems     :center
    :justifyContent :center
