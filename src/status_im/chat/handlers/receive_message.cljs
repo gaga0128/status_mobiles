@@ -9,8 +9,7 @@
                                          content-type-command-request]]
             [cljs.reader :refer [read-string]]
             [status-im.data-store.chats :as chats]
-            [taoensso.timbre :as log]
-            [status-im.utils.scheduler :as s]))
+            [taoensso.timbre :as log]))
 
 (defn check-preview [{:keys [content] :as message}]
   (if-let [preview (:preview content)]
@@ -45,7 +44,7 @@
                (not= from current-identity)
                (or (not exists?) active?))
       (let [group-chat?      (not (nil? group-id))
-            previous-message (messages/get-last-message db chat-id')
+            previous-message (messages/get-last-message chat-id')
             message'         (assoc (->> message
                                          (cu/check-author-direction previous-message)
                                          (check-preview))
@@ -74,9 +73,9 @@
   (u/side-effect!
     (fn [_ [_ {:keys [from to payload]}]]
       (dispatch [:received-message (merge payload
-                                          {:from    from
-                                           :to      to
-                                           :chat-id from})]))))
+                                          {:from        from
+                                           :to          to
+                                           :chat-id     from})]))))
 
 (register-handler :received-message
   (u/side-effect!
@@ -86,17 +85,3 @@
 (register-handler ::add-message
   (fn [db [_ add-to-chat-id {:keys [chat-id new?] :as message}]]
     (cu/add-message-to-db db add-to-chat-id chat-id message new?)))
-
-(defn commands-loaded? [db chat-id]
-  (get-in db [:chats chat-id :commands-loaded]))
-
-(def timeout 50)
-
-(register-handler :received-message-when-commands-loaded
-  (u/side-effect!
-    (fn [db [_ chat-id message]]
-      (if (commands-loaded? db chat-id)
-        (dispatch [:received-message message])
-        (s/execute-later
-          #(dispatch [:received-message-when-commands-loaded chat-id message])
-          timeout)))))

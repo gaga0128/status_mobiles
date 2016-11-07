@@ -42,16 +42,15 @@
     (assoc-in db [:animations k] v)))
 
 (register-handler :initialize-db
-  (fn [{:keys [status-module-initialized?]} _]
+  (fn [_ _]
     (data-store/init)
-    (let [db' (assoc app-db :current-account-id nil)]
-      (if status-module-initialized?
-        (assoc db' :status-module-initialized? true)
-        db'))))
+    (assoc app-db :current-account-id nil)))
 
 (register-handler :initialize-account-db
   (fn [db _]
-    (assoc db :current-chat-id console-chat-id)))
+    (assoc db
+      :chats {}
+      :current-chat-id console-chat-id)))
 
 (register-handler :initialize-account
   (u/side-effect!

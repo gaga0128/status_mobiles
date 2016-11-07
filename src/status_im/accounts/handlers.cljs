@@ -16,8 +16,7 @@
             [status-im.utils.handlers :as u :refer [get-hashtags]]
             [status-im.accounts.statuses :as statuses]
             [status-im.utils.gfycat.core :refer [generate-gfy]]
-            [status-im.constants :refer [console-chat-id]]
-            [status-im.utils.scheduler :as s]))
+            [status-im.constants :refer [console-chat-id]]))
 
 
 (defn save-account [_ [_ account]]
@@ -30,29 +29,29 @@
       (update db :accounts assoc address account))))
 
 (defn account-created [result password]
-  (let [data       (json->clj result)
+  (let [data (json->clj result)
         public-key (:pubkey data)
-        address    (:address data)
-        mnemonic   (:mnemonic data)
+        address (:address data)
+        mnemonic (:mnemonic data)
         {:keys [public private]} (protocol/new-keypair!)
-        account    {:public-key          public-key
-                    :address             address
-                    :name                (generate-gfy)
-                    :status              (rand-nth statuses/data)
-                    :signed-up?          true
-                    :updates-public-key  public
-                    :updates-private-key private
-                    :photo-path          (identicon public-key)}]
+        account {:public-key          public-key
+                 :address             address
+                 :name                (generate-gfy)
+                 :status              (rand-nth statuses/data)
+                 :signed-up?          true
+                 :updates-public-key  public
+                 :updates-private-key private
+                 :photo-path          (identicon public-key)}]
     (log/debug "account-created")
     (when-not (str/blank? public-key)
-      (dispatch [:show-mnemonic mnemonic])
-      (dispatch [:add-account account])
-      (dispatch [:login-account address password true]))))
+      (do
+        (dispatch [:add-account account])
+        (dispatch [:show-mnemonic mnemonic])
+        (dispatch [:login-account address password])))))
 
 (register-handler :create-account
   (u/side-effect!
     (fn [_ [_ password]]
-      (s/execute-later #(dispatch [:account-generation-message]) 400)
       (status/create-account
         password
         #(account-created % password)))))
@@ -90,7 +89,7 @@
 (register-handler
   :account-update
   (-> (fn [{:keys [current-account-id accounts] :as db} [_ data]]
-        (let [data    (assoc data :last-updated (time/now-ms))
+        (let [data (assoc data :last-updated (time/now-ms))
               account (merge (get accounts current-account-id) data)]
           (assoc-in db [:accounts current-account-id] account)))
       ((after save-account!))
@@ -101,7 +100,7 @@
   (u/side-effect!
     (fn [{:keys [current-account-id accounts]} _]
       (let [{:keys [last-updated]} (get accounts current-account-id)
-            now           (time/now-ms)
+            now (time/now-ms)
             needs-update? (> (- now last-updated) time/week)]
         (log/info "Need to send account-update: " needs-update?)
         (when needs-update?
