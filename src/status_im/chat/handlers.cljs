@@ -38,8 +38,7 @@
             status-im.chat.handlers.webview-bridge
             status-im.chat.handlers.wallet-chat
             status-im.chat.handlers.console
-            [taoensso.timbre :as log]
-            [tailrecursion.priority-map :refer [priority-map-by]]))
+            [taoensso.timbre :as log]))
 
 (register-handler :set-chat-ui-props
   (fn [db [_ ui-element value]]
@@ -286,10 +285,6 @@
       ((enrich init-chat))
       ((after load-commands!))))
 
-(defn compare-chats
-  [{timesatmp1 :timestamp} {timestamp2 :timestamp}]
-  (compare timestamp2 timesatmp1))
-
 (defn initialize-chats
   [{:keys [loaded-chats account-creation? chats] :as db} _]
   (let [chats' (if account-creation?
@@ -298,7 +293,7 @@
                       (map (fn [{:keys [chat-id] :as chat}]
                              (let [last-message (messages/get-last-message db chat-id)]
                                [chat-id (assoc chat :last-message last-message)])))
-                      (into (priority-map-by compare-chats))))
+                      (into {})))
         ids    (set (keys chats'))]
 
     (-> db
@@ -437,8 +432,7 @@
   (fn [db [_ {:keys [chat-id clock-value] :as opts}]]
     (let [chat (if (chats/exists? chat-id)
                  (let [{old-clock-value :clock-value :as chat} (chats/get-by-id chat-id)]
-                   (assoc chat :clock-value (max old-clock-value clock-value)
-                               :timestamp (random/timestamp)))
+                   (assoc chat :clock-value (max old-clock-value clock-value)))
                  (prepare-chat db chat-id opts))]
       (chats/save chat)
       (update-in db [:chats chat-id] merge chat))))
@@ -576,6 +570,5 @@
   (u/side-effect!
     (fn [_ [_ chat-id]]
       (let [chat (-> (chats/get-by-id chat-id)
-                     (update :clock-value inc)
-                     (assoc :timestamp (random/timestamp)))]
+                     (update :clock-value inc))]
         (dispatch [:update-chat! chat])))))
