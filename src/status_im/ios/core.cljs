@@ -3,9 +3,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [status-im.handlers]
             [status-im.subs]
-            [status-im.components.react :refer [view
-                                                modal
-                                                app-registry
+            [status-im.components.react :refer [app-registry
                                                 keyboard
                                                 orientation]]
             [status-im.components.main-tabs :refer [main-tabs]]
@@ -26,9 +24,7 @@
             [status-im.profile.screen :refer [profile my-profile]]
             [status-im.profile.photo-capture.screen :refer [profile-photo-capture]]
             status-im.data-store.core
-            [taoensso.timbre :as log]
-            [status-im.chat.styles.screen :as st]
-            [status-im.accounts.views.wallet-qr-code :refer [wallet-qr-code]]))
+            [taoensso.timbre :as log]))
 
 (defn orientation->keyword [o]
   (keyword (.toLowerCase o)))
@@ -42,7 +38,7 @@
 
 (defn app-root []
   (let [signed-up?      (subscribe [:signed-up?])
-        modal-view      (subscribe [:get :modal])
+        _               (log/debug "signed up: " @signed-up?)
         view-id         (subscribe [:get :view-id])
         account-id      (subscribe [:get :current-account-id])
         keyboard-height (subscribe [:get :keyboard-height])]
@@ -90,21 +86,7 @@
                                :login login
                                :confirm confirm
                                :my-profile my-profile)]
-               [view
-                {:flex 1}
-                [component]
-                (when @modal-view
-                  [view
-                   st/chat-modal
-                   [modal {:animation-type   :slide
-                           :transparent      false
-                           :on-request-close #(dispatch [:navigate-back])}
-                    (let [component (case @modal-view
-                                      :qr-scanner qr-scanner
-                                      :wallet-qr-code wallet-qr-code
-                                      :confirm confirm
-                                      :contact-list-modal contact-list)]
-                      [component])]])]))))})))
+               [component]))))})))
 
 (defn init []
   (dispatch-sync [:reset-app])

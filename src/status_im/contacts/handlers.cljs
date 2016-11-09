@@ -30,13 +30,6 @@
   [db [_ _ click-handler]]
   (assoc db :contacts-click-handler click-handler))
 
-
-(register-handler :remove-contacts-click-handler
-  (fn [db]
-    (dissoc db
-            :contacts-click-handler
-            :contacts-click-action)))
-
 (defn save-contact
   [_ [_ contact]]
   (contacts/save contact))
@@ -179,8 +172,7 @@
   (u/side-effect!
     (fn [_ [_ {:keys [whisper-identity] :as contact}]]
       (when-not (contacts/get-by-id whisper-identity)
-        (dispatch [::prepare-contact contact])
-        (dispatch [:start-chat whisper-identity {} :navigation-replace])))))
+        (dispatch [::prepare-contact contact])))))
 
 (register-handler ::prepare-contact
   (-> add-new-contact

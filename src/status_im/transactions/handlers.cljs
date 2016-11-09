@@ -30,7 +30,7 @@
       (assoc-in [:confirm-transactions :password] 0)))
 
 (defn on-unlock
-  [ids password]
+  [ids password previous-view-id]
   (dispatch [:set :wrong-password? false])
   (doseq [id ids]
     (status/complete-transaction
@@ -38,13 +38,15 @@
       password
       #(dispatch [:transaction-completed
                   {:id               id
-                   :response         %}]))))
+                   :response         %
+                   :previous-view-id previous-view-id}]))))
 
 (register-handler :accept-transactions
   (u/side-effect!
-    (fn [{:keys [transactions]} [_ password]]
-      (let [ids              (keys transactions)]
-        (on-unlock ids password)))))
+    (fn [{:keys [transactions navigation-stack]} [_ password]]
+      (let [ids              (keys transactions)
+            previous-view-id (second navigation-stack)]
+        (on-unlock ids password previous-view-id)))))
 
 (register-handler :deny-transactions
   (u/side-effect!
@@ -123,7 +125,7 @@
     (remove-pending-message db message-id)))
 
 (register-handler :transaction-queued
-  (after #(dispatch [:navigate-to-modal :confirm]))
+  (after #(dispatch [:navigate-to :confirm]))
   (fn [db [_ {:keys [id message_id args]}]]
     (let [{:keys [from to value]} args
           transaction {:id         id
@@ -135,7 +137,7 @@
 
 (register-handler :transaction-completed
   (u/side-effect!
-    (fn [{:keys [transactions]} [_ {:keys [id response]}]]
+    (fn [{:keys [transactions]} [_ {:keys [id response previous-view-id]}]]
       (let [{:keys [hash error] :as parsed-response} (t/json->clj response)
             {:keys [message-id]} (transactions id)]
         (log/debug :parsed-response parsed-response)
@@ -146,7 +148,7 @@
                                                     :message-id message-id}])
                 (dispatch [::check-completed-transaction!
                            {:message-id message-id}])
-                (dispatch [:navigate-back]))
+                (dispatch [:navigation-replace previous-view-id]))
             (dispatch [::remove-transaction id])))))))
 
 (register-handler ::add-transactions-hash

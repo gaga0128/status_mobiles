@@ -21,7 +21,6 @@
       {:keys [result error]}]]
   (let [{:keys [context returned]} result
         {handler-error :error} returned]
-    (log/debug "command handler: " result error parameters)
     (cond
       handler-error
       (log/debug :error-from-handler handler-error

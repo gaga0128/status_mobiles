@@ -2,8 +2,7 @@
   (:require [re-frame.core :refer [after dispatch enrich]]
             [status-im.utils.handlers :refer [register-handler]]
             [status-im.data-store.requests :as requests]
-            [status-im.utils.handlers :refer [register-handler] :as u]
-            [taoensso.timbre :as log]))
+            [status-im.utils.handlers :refer [register-handler] :as u]))
 
 (defn store-request!
   [{:keys [new-request] :as db}]
@@ -16,7 +15,6 @@
                  :type       (:command content)
                  :added      (js/Date.)}
         request' (update request :type keyword)]
-    (log/debug "Adding request: " request')
     (-> db
         (update-in [:chats chat-id :requests] conj request')
         (assoc :new-request request))))

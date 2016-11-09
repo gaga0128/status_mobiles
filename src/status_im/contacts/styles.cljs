@@ -211,8 +211,3 @@
 
 (def qr-input
   {:margin-right 42})
-
-(def scan-qr-icon
-  {:margin        18
-   :width         25
-   :height        19})

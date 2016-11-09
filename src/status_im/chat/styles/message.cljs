@@ -260,12 +260,8 @@
    :textAlign  :center
    :color      text2-color})
 
-(defn message-animated-container [height]
-  {:height height})
-
-(defn message-container [window-width]
-  {:position :absolute
-   :width    window-width})
+(defn message-container [height]
+  {:top height})
 
 (defn new-message-container [margin on-top?]
   {:background-color color-white

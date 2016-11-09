@@ -1,7 +1,6 @@
 var _status_catalog = {
         commands: {},
-        responses: {},
-        functions: {}
+        responses: {}
     },
     status = {};
 
@@ -32,7 +31,6 @@ Command.prototype.create = function (com) {
     this.preview = com.preview;
     this["suggestions-trigger"] = com.suggestionsTrigger || "on-change";
     this.fullscreen = com.fullscreen;
-    this.request = com.request;
     this.addToCatalog();
 
     return this;
@@ -154,9 +152,6 @@ var status = {
     response: function (h) {
         var response = new Response();
         return response.create(h);
-    },
-    registerFunction: function (name, fn){
-        _status_catalog.functions[name] = fn;
     },
     autorun: function (commandName) {
         _status_catalog.autorun = commandName;

@@ -7,7 +7,6 @@
             [status-im.utils.datetime :as time]
             [re-frame.core :refer [enrich after dispatch path]]
             [status-im.chat.utils :as cu]
-            [status-im.commands.utils :as commands-utils]
             [status-im.constants :refer [text-content-type
                                          content-type-command
                                          content-type-command-request
@@ -19,20 +18,17 @@
             [status-im.chat.handlers.console :as console]))
 
 (defn prepare-command
-  [identity chat-id clock-value request
+  [identity chat-id clock-value
    {:keys [id preview preview-string params command to-message handler-data]}]
-  (let [content (or request {:command (command :name)
-                             :params  params})]
+  (let [content {:command (command :name)
+                 :params  params}]
     {:message-id       id
      :from             identity
      :to               chat-id
      :timestamp        (time/now-ms)
      :content          (assoc content :preview preview-string
-                                      :handler-data handler-data
-                                      :type (name (:type command)))
-     :content-type     (if request
-                         content-type-command-request
-                         content-type-command)
+                                      :handler-data handler-data)
+     :content-type     content-type-command
      :outgoing         true
      :preview          preview-string
      :rendered-preview preview
@@ -66,7 +62,7 @@
   (u/side-effect!
     (fn [_ [_ {:keys [commands message chat-id] :as params}]]
       (doseq [{:keys [command] :as message} commands]
-        (let [params'      (assoc params :staged-command message)
+        (let [params' (assoc params :staged-command message)
               command-name (:name (:command message))]
           (if (:sent-to-jail? message)
             ;; todo there could be other reasons for "long-running"
@@ -92,13 +88,11 @@
 (register-handler :prepare-command!
   (u/side-effect!
     (fn [{:keys [current-public-key] :as db}
-         [_ add-to-chat-id {:keys [chat-id staged-command command handler-data] :as params}]]
+         [_ add-to-chat-id {:keys [chat-id staged-command handler-data] :as params}]]
       (let [{:keys [clock-value]} (get-in db [:chats add-to-chat-id])
-            request  (:request (:handler-data command))
             command' (->> (assoc staged-command :handler-data handler-data)
-                          (prepare-command current-public-key chat-id clock-value request)
+                          (prepare-command current-public-key chat-id clock-value)
                           (cu/check-author-direction db chat-id))]
-        (log/debug "Handler data: " request handler-data (dissoc params :commands :staged-command))
         (dispatch [:clear-command chat-id (:id staged-command)])
         (dispatch [::send-command! add-to-chat-id (assoc params :command command')])
 
@@ -217,30 +211,29 @@
                                               :keypair {:public  public-key
                                                         :private private-key})))
             (protocol/send-message! (assoc-in options
-                                              [:message :to] (:to message))))))
-      (dispatch [:inc-clock chat-id]))))
+                                              [:message :to] (:to message))))
+          (dispatch [:inc-clock chat-id]))))))
 
 (register-handler ::send-command-protocol!
   (u/side-effect!
-    (fn [{:keys [web3 current-public-key chats] :as db}
-         [_ {:keys [chat-id command]}]]
-      (log/debug "sending command: " command)
-      (when (cu/not-console? chat-id)
-        (let [{:keys [public-key private-key]} (chats chat-id)
-              {:keys [group-chat]} (get-in db [:chats chat-id])
-
-              payload (-> command
-                          (select-keys [:content :content-type :clock-value])
-                          (assoc :timestamp (datetime/now-ms)))
-              options {:web3    web3
-                       :message {:from       current-public-key
-                                 :message-id (:message-id command)
-                                 :payload    payload}}]
-          (if group-chat
-            (protocol/send-group-message! (assoc options
-                                            :group-id chat-id
-                                            :keypair {:public  public-key
-                                                      :private private-key}))
-            (protocol/send-message! (assoc-in options
-                                              [:message :to] chat-id)))
-          (dispatch [:inc-clock chat-id]))))))
+    (fn [{:keys [web3 current-public-key chats] :as db} [_ {:keys [chat-id command]}]]
+      (let [{:keys [content message-id clock-value]} command]
+        (when (cu/not-console? chat-id)
+          (let [{:keys [public-key private-key]} (chats chat-id)
+                {:keys [group-chat]} (get-in db [:chats chat-id])
+                payload {:content      content
+                         :content-type content-type-command
+                         :timestamp    (datetime/now-ms)
+                         :clock-value  clock-value}
+                options {:web3    web3
+                         :message {:from        current-public-key
+                                   :message-id  message-id
+                                   :payload     payload}}]
+            (if group-chat
+              (protocol/send-group-message! (assoc options
+                                              :group-id chat-id
+                                              :keypair {:public  public-key
+                                                        :private private-key}))
+              (protocol/send-message! (assoc-in options
+                                                [:message :to] chat-id)))
+            (dispatch [:inc-clock chat-id])))))))

@@ -25,13 +25,3 @@ status.command({
 });
 
 status.autorun("browse");
-
-status.registerFunction("send", function (params, context) {
-    var data = {
-        from: context.from,
-        to: params.address,
-        value: web3.toWei(params.amount, "ether")
-    };
-
-    web3.eth.sendTransaction(data);
-})
