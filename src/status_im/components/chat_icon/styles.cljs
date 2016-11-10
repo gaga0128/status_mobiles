@@ -96,15 +96,6 @@
    :border-radius    11
    :background-color :white})
 
-(def online-view-menu-wrapper
-  {:position         :absolute
-   :bottom           0
-   :right            -1
-   :width            16
-   :height           16
-   :border-radius    8
-   :background-color :white})
-
 (def online-view
   {:position         :absolute
    :bottom           2
@@ -118,9 +109,7 @@
   (merge online-view
          {:width         14
           :height        14
-          :border-radius 7
-          :bottom 1
-          :right 1}))
+          :border-radius 7}))
 
 (def online-view-profile
   (merge online-view
@@ -151,11 +140,9 @@
           :width  3
           :height 3}))
 (def online-dot-left-menu-item
-  (merge online-dot-menu-item {:left 2.5
-                               :top  5}))
+  (merge online-dot-menu-item {:left 1.7}))
 (def online-dot-right-menu-item
-  (merge online-dot-menu-item {:left 8
-                               :top  5}))
+  (merge online-dot-menu-item {:left 6.3}))
 
 (def online-dot-profile
   (merge online-dot
@@ -186,7 +173,7 @@
 (def container-message-status
   {:margin-top 20})
 
-(def default-border-style
+(def default-image-style
   {:margin 4})
 
 (defn border-style [size]

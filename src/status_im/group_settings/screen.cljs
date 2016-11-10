@@ -29,7 +29,7 @@
 (defview member-menu []
   [{:keys [name] :as participant} [:selected-participant]]
   (when participant
-    [modal {:animationType  :none
+    [modal {:animated       false
             :transparent    false
             :onRequestClose close-member-menu}
      [touchable-highlight {:style    st/modal-container
