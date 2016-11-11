@@ -65,17 +65,7 @@ status.command({
     }]
 });
 
-function validateSend(params, context) {
-    if (!context.to) {
-        return {
-            errors: [
-                status.components.validationMessage(
-                    "Wrong address",
-                    "Recipient address must be specified"
-                )
-            ]
-        };
-    }
+function validateBalance(params, context) {
     if (!params.amount) {
         return {
             errors: [
@@ -146,7 +136,7 @@ var send = {
         );
     },
     handler: sendTransaction,
-    validator: validateSend
+    validator: validateBalance
 };
 
 status.command(send);

@@ -243,10 +243,8 @@
                                   :params
                                   (get parameter-idx)
                                   :name)
-            to                (get-in db [:contacts chat-id :address])
             context           {:current-parameter current-parameter
-                               :from              address
-                               :to                to}
+                               :from              address}
             path              [(if (= :command type) :commands :responses)
                                name
                                :validator]
