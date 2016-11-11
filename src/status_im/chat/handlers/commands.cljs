@@ -9,7 +9,8 @@
             [status-im.i18n :as i18n]
             [status-im.utils.datetime :as time]
             [status-im.utils.random :as random]
-            [status-im.utils.platform :as platform]))
+            [status-im.utils.platform :as platform]
+            [taoensso.timbre :as log]))
 
 (defn content-by-command
   [{:keys [type]} content]
@@ -108,6 +109,7 @@
   (fn [{:keys [current-chat-id current-account-id] :as db} [_ command-input command]]
     (let [command-input (or command-input (commands/get-command-input db))
           command       (or command (commands/get-chat-command db))]
+      (log/debug "Staging command 1: " command-input command)
       (dispatch [::start-command-validation! {:command-input command-input
                                               :command       command
                                               :chat-id       current-chat-id
@@ -148,9 +150,10 @@
    (after #(dispatch [:command-edit-mode]))]
   set-chat-command)
 
-(defn set-response-command [db [_ to-message-id command-key params]]
+(defn set-response-command [db [_ to-message-id command-key]]
+  (log/debug "set-response-command: " to-message-id command-key)
   (-> db
-      (commands/set-command-input :responses to-message-id command-key params)
+      (commands/set-command-input :responses to-message-id command-key)
       (assoc :canceled-command false)))
 
 (register-handler ::set-response-chat-command
@@ -162,9 +165,9 @@
 (register-handler :set-response-chat-command
   (u/side-effect!
     (fn [{:keys [current-chat-id] :as db}
-         [_ to-message-id command-key params]]
+         [_ to-message-id command-key]]
       (when (get-in db [:chats current-chat-id :responses command-key])
-        (dispatch [::set-response-chat-command to-message-id command-key params])))))
+        (dispatch [::set-response-chat-command to-message-id command-key])))))
 
 (register-handler ::add-validation-errors
   (after #(dispatch [:fix-response-height]))
@@ -258,8 +261,10 @@
       (commands/set-command-parameter db name value))))
 
 (register-handler :next-command-parameter
-  (fn [db _]
-    (commands/next-command-parameter db)))
+  (fn [{:keys [current-chat-id] :as db}]
+    (-> db
+        (update-in [:chats current-chat-id :command-input :parameter-idx] inc)
+        (commands/set-chat-command-content nil))))
 
 (register-handler :check-suggestions-trigger!
   (u/side-effect!

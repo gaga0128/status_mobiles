@@ -1,6 +1,7 @@
 (ns status-im.models.commands
   (:require [status-im.db :as db]
-            [tailrecursion.priority-map :refer [priority-map-by]]))
+            [tailrecursion.priority-map :refer [priority-map-by]]
+            [taoensso.timbre :as log]))
 
 (defn get-commands [{:keys [current-chat-id] :as db}]
   (or (get-in db [:chats current-chat-id :commands]) {}))
@@ -15,7 +16,7 @@
 
 (defn set-chat-command-content
   [{:keys [current-chat-id] :as db} content]
-  (assoc-in db (db/chat-command-content-path current-chat-id) content))
+  (assoc-in db [:chats current-chat-id :command-input :content] content))
 
 (defn set-command-parameter
   [{:keys [current-chat-id] :as db} name value]
@@ -28,47 +29,16 @@
 (defn get-command-input [{:keys [current-chat-id] :as db}]
   (get-in db [:chats current-chat-id :command-input]))
 
-(defn add-params [command params]
-  (let [command-params (:params command)
-        command-params (vec (map (fn [param]
-                                   (let [param-key (keyword (:name param))
-                                         value (get params param-key)]
-                                     (assoc param :value value))) command-params))]
-    (assoc command :params command-params)))
-
 (defn set-command-input
   ([db type command-key]
    (set-command-input db type nil command-key))
-  ([db type message-id command-key]
-   (set-command-input db type message-id command-key nil))
-  ([{:keys [current-chat-id] :as db} type message-id command-key params]
-   (let [command (-> (get-response-or-command type db command-key)
-                     (add-params params))
-         first-parameter (get (:params command) 0)
-         value (:value first-parameter)]
-     (update-in db [:chats current-chat-id :command-input] merge
-                {:content       value
-                 :command       command
-                 :parameter-idx 0
-                 :params        params
-                 :to-message-id message-id}))))
-
-(defn get-command-parameter-index
-  ([{:keys [current-chat-id] :as db}]
-   (get-command-parameter-index db current-chat-id))
-  ([db chat-id]
-   (get-in db [:chats chat-id :command-input :parameter-idx])))
-
-(defn next-command-parameter
-  [{:keys [current-chat-id] :as db}]
-  (let [parameter-index (get-command-parameter-index db)
-        command (get-chat-command db)
-        next-parameter (get (:params command) (inc parameter-index))
-        value (:value next-parameter)]
-    (-> db
-        (update-in [:chats current-chat-id :command-input :parameter-idx] inc)
-        (set-chat-command-content value))))
-
+  ([{:keys [current-chat-id] :as db} type message-id command-key]
+   (update-in db [:chats current-chat-id :command-input] merge
+              {:content       nil
+               :command       (get-response-or-command type db command-key)
+               :parameter-idx 0
+               :params        nil
+               :to-message-id message-id})))
 
 (defn get-chat-command-to-message-id
   [{:keys [current-chat-id] :as db}]
@@ -100,4 +70,5 @@
   (update content :command #((keyword %) commands)))
 
 (defn parse-command-request [commands content]
+  (log/debug "parse-command-request: " commands content)
   (update content :command #((keyword %) commands)))
