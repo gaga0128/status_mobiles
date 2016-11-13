@@ -9,14 +9,14 @@
                                                 touchable-highlight]]
             [status-im.chat.styles.message :as st]
             [status-im.models.commands :refer [parse-command-request]]
-            [status-im.components.animation :as anim]))
+            [status-im.components.animation :as anim]
+            [taoensso.timbre :as log]))
 
 (def request-message-icon-scale-delay 600)
 
 (defn set-chat-command [message-id command]
-  (let [command-key (keyword (:name command))
-        params      (:set-params command)]
-    (dispatch [:set-response-chat-command message-id command-key params])))
+  (log/debug "set-chat-command: " message-id command)
+  (dispatch [:set-response-chat-command message-id (keyword (:name command))]))
 
 (defn label [command]
   (when command
@@ -78,11 +78,8 @@
         status-initialized? (subscribe [:get :status-module-initialized?])]
     (fn [{:keys [message-id content from incoming-group]}]
       (let [commands @commands-atom
-            params (:params content)
             {:keys [command content]} (parse-command-request commands content)
-            command (if (and params command)
-                      (merge command {:set-params params})
-                      command)]
+            _ (log/debug "message-content: " command content)]
         [view st/comand-request-view
          [touchable-highlight
           {:on-press (when (and (not @answered?) @status-initialized?)

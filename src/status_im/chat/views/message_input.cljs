@@ -13,7 +13,8 @@
             [status-im.chat.styles.plain-message :as st-message]
             [status-im.chat.styles.response :as st-response]
             [reagent.core :as r]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [taoensso.timbre :as log]))
 
 (defn send-button [{:keys [on-press accessibility-label]}]
   [touchable-highlight {:on-press            on-press
