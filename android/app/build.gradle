@@ -84,7 +84,7 @@ android {
     buildToolsVersion "23.0.1"
 
     defaultConfig {
-        applicationId "im.status.ethereum"
+        applicationId "com.statusim"
         minSdkVersion 18
         targetSdkVersion 22
         versionCode 1

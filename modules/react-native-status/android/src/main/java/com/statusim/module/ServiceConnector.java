@@ -1,4 +1,4 @@
-package im.status.ethereum.module;
+package com.statusim.module;
 
 
 import android.content.ComponentName;

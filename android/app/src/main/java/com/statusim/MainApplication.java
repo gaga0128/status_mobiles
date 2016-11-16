@@ -1,4 +1,4 @@
-package im.status.ethereum;
+package com.statusim;
 
 import android.app.Application;
 
@@ -9,7 +9,7 @@ import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
 
-import im.status.ethereum.module.StatusPackage;
+import com.statusim.module.StatusPackage;
 import io.realm.react.RealmReactPackage;
 import com.oblador.vectoricons.VectorIconsPackage;
 import com.rt2zz.reactnativecontacts.ReactNativeContacts;
