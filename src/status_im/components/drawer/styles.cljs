@@ -85,5 +85,3 @@
   {:font-size   14
    :line-height 21
    :color       text3-color})
-
-(def feedback {:text-align     :center})

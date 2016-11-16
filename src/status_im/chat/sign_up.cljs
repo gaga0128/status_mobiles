@@ -102,15 +102,7 @@
                 :outgoing     false
                 :chat-id      console-chat-id
                 :from         console-chat-id
-                :to           "me"}]))
-  (dispatch [:received-message
-             {:message-id   (random/id)
-              :content      (label :t/shake-your-phone)
-              :content-type text-content-type
-              :outgoing     false
-              :chat-id      console-chat-id
-              :from         console-chat-id
-              :to           "me"}]))
+                :to           "me"}])))
 
 ;; -- Saving password ----------------------------------------
 (defn account-generation-message []
@@ -123,7 +115,7 @@
               :from         console-chat-id
               :to           "me"}]))
 
-(defn passphrase-messages [mnemonic messages-count]
+(defn passpharse-messages [mnemonic messages-count]
   (dispatch [:received-message
              {:message-id   (random/id)
               :content      (if (> messages-count 3)
@@ -142,6 +134,7 @@
               :chat-id      console-chat-id
               :from         console-chat-id
               :to           "me"}])
+  ;; TODO highlight '!phone'
   (start-signup))
 
 (def intro-status

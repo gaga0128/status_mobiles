@@ -71,7 +71,3 @@ re-natal
 
 # status-go
 Statusgo.framework
-
-#ios
-ios/Pods
-ios/StatusIm.xcworkspace

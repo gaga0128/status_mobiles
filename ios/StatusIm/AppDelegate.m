@@ -11,8 +11,6 @@
 
 #import "RCTBundleURLProvider.h"
 #import "RCTRootView.h"
-#import <Instabug/Instabug.h>
-#import "SplashScreen.h"
 
 @implementation AppDelegate
 
@@ -33,8 +31,6 @@
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
   [self.window makeKeyAndVisible];
-  [Instabug startWithToken:@"5534212f4a44f477c9ab270ab5cd2062" invocationEvent:IBGInvocationEventShake];
-  [SplashScreen show];
   return YES;
 }
 

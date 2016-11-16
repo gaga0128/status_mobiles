@@ -65,7 +65,7 @@
               :value            name
               :on-change-text   #(dispatch [:set-in [:profile-edit :name] %])
               :on-end-editing   #(when (and new-name (not (str/blank? new-name)))
-                                   (dispatch [:account-update {:name new-name}]))}]]
+                                  (dispatch [:account-update {:name new-name}]))}]]
            [view st/status-container
             [text-input {:style               st/status-input
                          :editable            true
@@ -91,15 +91,19 @@
                         :handler #(dispatch [:navigate-to :discovery])}]
             [menu-item {:name    (label :t/contacts)
                         :handler #(dispatch [:navigate-to :contact-list])}]
-            ]
-           (when (zero? @keyboard-height)
-             [text {:style st/feedback
-                    :font  :default} (label :t/feedback)])
-           (when (zero? @keyboard-height)
+            [menu-item {:name    (label :t/invite-friends)
+                        :handler (fn []
+                                   ;; TODO not implemented
+                                   )}]
+            [menu-item {:name    (label :t/faq)
+                        :handler (fn [])}]]
+           (when (= @keyboard-height 0)
              [view st/switch-users-container
               [touchable-opacity {:onPress (fn []
                                              (close-drawer)
-                                             (dispatch [:navigate-to :accounts]))}
+                                             (dispatch [:navigate-to :accounts])
+                                             ;; TODO not implemented
+                                             )}
                [text {:style st/switch-users-text
                       :font  :default}
                 (label :t/switch-users)]]])]]]))))

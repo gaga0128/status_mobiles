@@ -1,4 +1,6 @@
 (ns status-im.utils.utils
+  (:require-macros
+   [natal-shell.async-storage :refer [get-item set-item]])
   (:require [status-im.constants :as const]
             [reagent.core :as r]))
 

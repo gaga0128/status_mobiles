@@ -14,8 +14,6 @@
 (def orientation (js/require "react-native-orientation"))
 (def drawer (js/require "react-native-drawer-layout"))
 
-(def splash-screen (.-SplashScreen native-modules))
-
 ;; React Components
 
 (def app-registry (get-react-property "AppRegistry"))

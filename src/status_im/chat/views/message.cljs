@@ -130,9 +130,6 @@
                        :contact-address (if outgoing to from)
                        :current-chat-id current-chat-id}]]))
 
-(defn set-chat-command [message-id command]
-  (dispatch [:set-response-chat-command message-id (keyword (:name command))]))
-
 (defn message-view
   [message content]
   [view (st/message-view message)
@@ -148,42 +145,23 @@
   [wrapper message]
   [wrapper message [message-content-command-request message]])
 
-(def replacements
-  {"\\*[^*]+\\*" {:font-weight :bold}
-   "~[^~]+~"     {:font-style :italic}})
-
-(def regx (re-pattern (s/join "|" (map first replacements))))
-
-(defn get-style [string]
-  (->> replacements
-       (into [] (comp
-                  (map first)
-                  (map #(vector % (re-pattern %)))
-                  (drop-while (fn [[_ regx]] (not (re-matches regx string))))
-                  (take 1)))
-       ffirst
-       replacements))
-
 ;; todo rewrite this, naive implementation
 (defn- parse-text [string]
   (if (string? string)
-    (let [general-text (s/split string regx)
-          general-text' (if (zero? (count general-text))
-                          [nil]
-                          general-text)
-          styled-text  (vec (map-indexed
+    (let [regx         #"\*[^*]+\*"
+          general-text (s/split string regx)
+          bold-text    (vec (map-indexed
                               (fn [idx string]
-                                (let [style (get-style string)]
-                                  [text
-                                   {:key   (str idx "_" string)
-                                    :style style}
-                                   (subs string 1 (- (count string) 1))]))
+                                [text
+                                 {:key   (str idx "_" string)
+                                  :style {:font-weight :bold}}
+                                 (subs string 1 (- (count string) 1))])
                               (re-seq regx string)))
-          styled-text' (if (> (count general-text)
-                              (count styled-text))
-                         (conj styled-text nil)
-                         styled-text)]
-      (mapcat vector general-text' styled-text'))
+          bold-text'   (if (> (count general-text)
+                              (count bold-text))
+                         (conj bold-text nil)
+                         bold-text)]
+      (mapcat vector general-text bold-text'))
     (str string)))
 
 (defn text-message
@@ -342,7 +320,7 @@
          (fn [message & children]
            @layout-height
            [animated-view {:style (st/message-animated-container anim-value)}
-            (into [view {:style    (st/message-container window-width)
+            (into [view {:style (st/message-container window-width)
                          :onLayout (fn [event]
                                      (let [height (.. event -nativeEvent -layout -height)]
                                        (reset! layout-height height)))}]
