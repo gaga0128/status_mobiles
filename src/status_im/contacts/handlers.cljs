@@ -17,9 +17,11 @@
 
 (defmethod nav/preload-data! :group-contacts
   [db [_ _ group]]
-  (if group
-    (assoc db :contacts-group group)
-    db))
+  (dissoc
+    (if group
+      (assoc db :contacts-group group)
+      db)
+    :contacts-filter))
 
 (defmethod nav/preload-data! :new-group
   [db _]
@@ -29,7 +31,8 @@
 
 (defmethod nav/preload-data! :contact-list
   [db [_ _ click-handler]]
-  (assoc db :contacts-click-handler click-handler))
+  (assoc db :contacts-click-handler click-handler
+            :contacts-filter nil))
 
 
 (register-handler :remove-contacts-click-handler

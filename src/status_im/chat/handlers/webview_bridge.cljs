@@ -9,7 +9,8 @@
             [status-im.commands.utils :as cu]
             [status-im.components.status :as s]
             [status-im.constants :as c]
-            [cljs.reader :refer [read-string]]))
+            [cljs.reader :refer [read-string]]
+            [status-im.navigation.handlers :as nav]))
 
 (def web3 (js/require "web3"))
 
@@ -19,7 +20,6 @@
 
 (defn scan-qr-handler
   [{:keys [contacts]} [_ _ data]]
-  (log/debug "scaned qr" data)
   (let [data'  (read-string data)
         data'' (cond
                  (map? data') data'
@@ -39,7 +39,6 @@
     (assoc db :webview-bridge bridge)))
 
 (defn contacts-click-handler [whisper-identity action params]
-  (log/debug "Contact clicked: " whisper-identity action params)
   (dispatch [:navigate-back])
   (when action
     (if (= whisper-identity :qr-scan)
@@ -57,7 +56,6 @@
                            :parameter-idx 0
                            :params        {"amount" (:amount params)}
                            :to-message-id nil}]
-        (log/debug "Staging command: " command-key command command-input)
         (dispatch [:stage-command command-input command])))))
 
 
@@ -79,18 +77,28 @@
             params (:data options)]
         (log/debug (str "message from webview: " message))
         (case event'
-          :webview-send-transaction (dispatch [:show-contacts-menu contacts-click-handler :send params])
-          :webview-receive-transaction (dispatch [:show-contacts-menu contacts-click-handler :request params])
+          :webview-send-transaction
+          (dispatch [:navigate-to-modal
+                     :contact-list-modal
+                     {:handler contacts-click-handler
+                      :action  :send
+                      :params  params}])
+          :webview-receive-transaction
+          (dispatch [:navigate-to-modal
+                     :contact-list-modal
+                     {:handler contacts-click-handler
+                      :action  :request
+                      :params  params}])
           :webview-scan-qr (dispatch [:show-scan-qr :webview-address-from-qr])
           :webview-send-eth (dispatch [:webview-send-eth! params])
           (log/error (str "Unknown event: " event')))))))
 
-(register-handler :show-contacts-menu
-  (after #(dispatch [:navigate-to-modal :contact-list-modal]))
-  (fn [db [_ click-handler action params]]
-    (assoc db :contacts-click-handler click-handler
-              :contacts-click-action action
-              :contacts-click-params params)))
+(defmethod nav/preload-data! :contact-list-modal
+  [db [_ _ {:keys [handler action params]}]]
+  (assoc db :contacts-click-handler handler
+            :contacts-click-action action
+            :contacts-click-params params
+            :contacts-filter #(not (nil? (:address %)))))
 
 (def qr-context {:toolbar-title (label :t/address)})
 
