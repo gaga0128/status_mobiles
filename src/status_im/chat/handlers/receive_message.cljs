@@ -6,8 +6,7 @@
             [status-im.commands.utils :refer [generate-hiccup]]
             [status-im.utils.random :as random]
             [status-im.constants :refer [wallet-chat-id
-                                         content-type-command-request]
-             :as c]
+                                         content-type-command-request]]
             [cljs.reader :refer [read-string]]
             [status-im.data-store.chats :as chats]
             [taoensso.timbre :as log]
@@ -65,14 +64,10 @@
                (= "send" (get-in message [:content :command])))
         (add-message-to-wallet db message)))))
 
-(defn add-message-to-wallet [db {:keys [content-type] :as message}]
-  (let [ct       (if (= content-type c/content-type-command)
-                   c/content-type-wallet-command
-                   c/content-type-wallet-request)
-        message' (assoc message :clock-value 0
+(defn add-message-to-wallet [db message]
+  (let [message' (assoc message :clock-value 0
                                 :message-id (random/id)
-                                :chat-id wallet-chat-id
-                                :content-type ct)]
+                                :chat-id wallet-chat-id)]
     (add-message db message')))
 
 (register-handler :received-protocol-message!

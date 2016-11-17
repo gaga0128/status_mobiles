@@ -11,7 +11,7 @@
             [status-im.constants :refer [text-content-type
                                          content-type-command
                                          content-type-command-request
-                                         default-number-of-messages] :as c]
+                                         default-number-of-messages]]
             [status-im.utils.datetime :as datetime]
             [status-im.protocol.core :as protocol]
             [taoensso.timbre :refer-macros [debug] :as log]
@@ -20,8 +20,7 @@
 
 (defn prepare-command
   [identity chat-id clock-value request
-   {:keys [id preview preview-string params command
-           to-message handler-data content-type]}]
+   {:keys [id preview preview-string params command to-message handler-data]}]
   (let [content (or request {:command (command :name)
                              :params  params})]
     {:message-id       id
@@ -31,10 +30,9 @@
      :content          (assoc content :preview preview-string
                                       :handler-data handler-data
                                       :type (name (:type command)))
-     :content-type     (or content-type
-                           (if request
-                             content-type-command-request
-                             content-type-command))
+     :content-type     (if request
+                         content-type-command-request
+                         content-type-command)
      :outgoing         true
      :preview          preview-string
      :rendered-preview preview
@@ -106,11 +104,7 @@
 
         (when (and (= "send" (get-in staged-command [:command :name]))
                    (not= add-to-chat-id wallet-chat-id))
-          (let [ct              (if request
-                                  c/content-type-wallet-request
-                                  c/content-type-wallet-command)
-                staged-command' (assoc staged-command :id (random/id)
-                                                      :content-type ct)
+          (let [staged-command' (assoc staged-command :id (random/id))
                 params'         (assoc params :staged-command staged-command')]
             (dispatch [:prepare-command! wallet-chat-id params'])))))))
 

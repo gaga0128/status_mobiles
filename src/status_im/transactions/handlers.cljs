@@ -79,8 +79,8 @@
         (update :transactions-queue #(apply dissoc % hashes)))))
 
 (register-handler ::remove-transaction
-  (after (fn [{:keys [transactions modal]}]
-           (when-not (and (:confirm modal) (seq transactions))
+  (after (fn [{:keys [transactions]}]
+           (when-not (seq transactions)
              (dispatch [:navigate-back]))))
   (fn [db [_ hash]]
     (-> db
@@ -152,7 +152,8 @@
                                                     :hash       hash
                                                     :message-id message-id}])
                 (dispatch [::check-completed-transaction!
-                           {:message-id message-id}]))
+                           {:message-id message-id}])
+                (dispatch [:navigate-back]))
             (dispatch [::remove-transaction id])))))))
 
 (register-handler ::add-transactions-hash

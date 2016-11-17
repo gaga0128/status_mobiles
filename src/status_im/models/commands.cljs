@@ -97,9 +97,7 @@
                                            (get-chat-command-to-message-id db))))
 
 (defn parse-command-message-content [commands content]
-  (if (map? content)
-    (update content :command #((keyword %) commands))
-    content))
+  (update content :command #((keyword %) commands)))
 
 (defn parse-command-request [commands content]
   (update content :command #((keyword %) commands)))

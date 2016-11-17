@@ -51,12 +51,8 @@
 
 (when status (call-module init-jail))
 
-(defonce listener-initialized (atom false))
-
-(when-not @listener-initialized
-  (reset! listener-initialized true)
-  (.addListener r/device-event-emitter "gethEvent"
-                #(dispatch [:signal-event (.-jsonEvent %)])))
+(.addListener r/device-event-emitter "gethEvent"
+              #(dispatch [:signal-event (.-jsonEvent %)]))
 
 (defn start-node [on-result]
   (when status

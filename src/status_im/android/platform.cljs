@@ -13,7 +13,10 @@
                            :transparent {:height       20
                                          :bar-style    "light-content"
                                          :translucent? true
-                                         :color        styles/color-transparent}}
+                                         :color        styles/color-transparent}
+                           :modal       {:height    0
+                                         :bar-style "light-content"
+                                         :color     styles/color-black}}
    :sized-text            {:margin-top        0
                            :additional-height 0}
    :chat                  {:new-message {:border-top-color styles/color-transparent
@@ -47,8 +50,7 @@
                            :font-size        12}})
 
 (def fonts
-  {:light         {:font-family "sans-serif-light"}
-   :default       {:font-family "sans-serif"}
+  {:default       {:font-family "sans-serif"}
    :medium        {:font-family "sans-serif-medium"}
 
    :toolbar-title {:font-family "sans-serif"}})

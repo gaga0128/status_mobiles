@@ -12,23 +12,15 @@
             [status-im.utils.gfycat.core :refer [generate-gfy]]
             [status-im.constants :refer [console-chat-id
                                          content-type-command
-                                         content-type-command-request] :as c]
+                                         content-type-command-request]]
             [taoensso.timbre :as log]))
 
 (defmulti message-content (fn [{:keys [content-type] :as message}] content-type))
 
-(defn command-content
+(defmethod message-content content-type-command
   [{{:keys [command params]} :content}]
   (let [kw (keyword (str "t/command-text-" (name command)))]
     (label kw params)))
-
-(defmethod message-content content-type-command
-  [message]
-  (command-content message))
-
-(defmethod message-content c/content-type-wallet-command
-  [message]
-  (command-content message))
 
 (defmethod message-content content-type-command-request
   [{{:keys [content]} :content}]
