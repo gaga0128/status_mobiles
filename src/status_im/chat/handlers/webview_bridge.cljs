@@ -38,14 +38,13 @@
   (fn [db [_ bridge]]
     (assoc db :webview-bridge bridge)))
 
-(defn contacts-click-handler [{:keys [whisper-identity] :as contact} action params]
+(defn contacts-click-handler [whisper-identity action params]
   (dispatch [:navigate-back])
   (when action
-    (if (= contact :qr-scan)
+    (if (= whisper-identity :qr-scan)
       (if (= action :send)
         (dispatch [:show-scan-qr :webview-address-from-qr])
-        (dispatch [:navigate-to-modal :qr-code-view {:qr-source :whisper-identity
-                                                     :amount?   true}]))
+        (dispatch [:navigate-to-modal :wallet-qr-code]))
       (dispatch [:chat-with-command whisper-identity action params]))))
 
 (register-handler ::send-command

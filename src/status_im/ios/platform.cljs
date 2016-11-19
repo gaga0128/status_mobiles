@@ -12,10 +12,7 @@
                                          :color     toolbar-background2}
                            :transparent {:height    20
                                          :bar-style "light-content"
-                                         :color     styles/color-transparent}
-                           :modal       {:height    20
-                                         :bar-style "light-content"
-                                         :color     "#2f3031"}}
+                                         :color     styles/color-transparent}}
    :toolbar               {:border-bottom-color styles/color-gray3
                            :border-bottom-width 0.5}
    :sized-text            {:margin-top        -5

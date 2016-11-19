@@ -13,10 +13,7 @@
                            :transparent {:height       20
                                          :bar-style    "light-content"
                                          :translucent? true
-                                         :color        styles/color-transparent}
-                           :modal       {:height    0
-                                         :bar-style "light-content"
-                                         :color     styles/color-black}}
+                                         :color        styles/color-transparent}}
    :sized-text            {:margin-top        0
                            :additional-height 0}
    :chat                  {:new-message {:border-top-color styles/color-transparent

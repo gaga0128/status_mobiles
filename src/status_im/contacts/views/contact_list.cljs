@@ -40,7 +40,8 @@
         [contact-view-with-letter row click-handler action params]
         [contact-view row
          (or click-handler
-             (on-press row))]))))
+             (let [whisper-identity (:whisper-identity row)]
+               (on-press whisper-identity)))]))))
 
 (defn qr-scan [click-handler action]
   [touchable-highlight
