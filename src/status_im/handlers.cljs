@@ -23,8 +23,7 @@
     status-im.transactions.handlers
     status-im.network.handlers
     [status-im.utils.types :as t]
-    [status-im.constants :refer [console-chat-id]]
-    [status-im.utils.ethereum-network :as enet]))
+    [status-im.constants :refer [console-chat-id]]))
 
 ;; -- Common --------------------------------------------------------------
 
@@ -43,15 +42,12 @@
     (assoc-in db [:animations k] v)))
 
 (register-handler :initialize-db
-  (fn [{:keys [status-module-initialized? network]} _]
+  (fn [{:keys [status-module-initialized?]} _]
     (data-store/init)
-    (cond-> (assoc app-db :current-account-id nil)
-
-            status-module-initialized?
-            (assoc :status-module-initialized? true)
-
-            true
-            (assoc :network network))))
+    (let [db' (assoc app-db :current-account-id nil)]
+      (if status-module-initialized?
+        (assoc db' :status-module-initialized? true)
+        db'))))
 
 (register-handler :initialize-account-db
   (fn [db _]
@@ -101,8 +97,7 @@
                                    (dispatch [:crypt-initialized]))))))))
 
 (defn node-started [db result]
-  (log/debug "Started Node")
-  (enet/get-network #(dispatch [:set :network %])))
+  (log/debug "Started Node: "))
 
 (register-handler :initialize-geth
   (u/side-effect!
