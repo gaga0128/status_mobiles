@@ -12,7 +12,10 @@
                                          :color     toolbar-background2}
                            :transparent {:height    20
                                          :bar-style "light-content"
-                                         :color     styles/color-transparent}}
+                                         :color     styles/color-transparent}
+                           :modal       {:height    20
+                                         :bar-style "light-content"
+                                         :color     "#2f3031"}}
    :toolbar               {:border-bottom-color styles/color-gray3
                            :border-bottom-width 0.5}
    :sized-text            {:margin-top        -5
@@ -55,7 +58,8 @@
                            :font-size        14}})
 
 (def fonts
-  {:default       {:font-family "SFUIText-Regular"}
+  {:light         {:font-family "SFUIText-Light"}
+   :default       {:font-family "SFUIText-Regular"}
    :medium        {:font-family "SFUIText-Medium"}
    :bold          {:font-family "SFUIText-Bold"}
 
