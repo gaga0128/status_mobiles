@@ -19,30 +19,26 @@
             [status-im.utils.platform :refer [ios?]]
             [status-im.chat.suggestions-responder :as resp]
             [status-im.chat.constants :as c]
-            [status-im.i18n :refer [label]]
-            [status-im.chat.views.response :as response]))
+            [status-im.i18n :refer [label]]))
 
 (defn set-command-input [command]
   (dispatch [:set-chat-command command]))
 
 (defview request-item [{:keys [type message-id]}]
-  [{:keys     [color description]
-    icon-path :icon
-    :as       response} [:get-response type]
-   {:keys [name chat-id]} [:get-current-chat]
-   {:keys [added]} [:get-request message-id]]
+  [{:keys [color icon description] :as response} [:get-response type]]
   [touchable-highlight
    {:on-press #(dispatch [:set-response-chat-command message-id type])}
    [view st/request-container
     [view st/request-icon-container
      [view (st/request-icon-background color)
-      (when icon-path
-        [icon icon-path st/request-icon])]]
+      (if icon
+        [image {:source {:uri icon}
+                :style  st/request-icon}])]]
     [view st/request-info-container
      [text {:style st/request-info-description} description]
-     (when added
-       [text {:style st/request-message-info}
-        (response/request-info-text name chat-id added)])]]])
+     ;; todo stub
+     [text {:style st/request-message-info}
+      "By console, today at 14:50"]]]])
 
 (defn suggestion-list-item
   [[command {:keys [title description]
