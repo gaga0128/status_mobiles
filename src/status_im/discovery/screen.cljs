@@ -61,7 +61,7 @@
           :font       :medium}
     (label label-kw)]])
 
-(defview discovery-popular [{:keys [contacts current-account]}]
+(defview discovery-popular [{:keys [contacts]}]
   [popular-tags [:get-popular-tags 10]]
   [view st/popular-container
    [title :t/popular-tags false]
@@ -70,36 +70,31 @@
                 :gap       0
                 :sneak     (if (> (count popular-tags) 1) 16 8)}
       (for [{:keys [name]} popular-tags]
-        [discovery-popular-list {:tag             name
-                                 :contacts        contacts
-                                 :current-account current-account}])]
+        [discovery-popular-list {:tag      name
+                                 :contacts contacts}])]
      [text (label :t/none)])])
 
-(defview discovery-recent [{:keys [current-account]}]
+(defview discovery-recent [{:keys [contacts]}]
   [discoveries [:get-recent-discoveries]]
   (when (seq discoveries)
     [view st/recent-container
      [title :t/recent true]
      [view st/recent-list
       (let [discoveries (map-indexed vector discoveries)]
-        (for [[i {:keys [message-id] :as message}] discoveries]
+        (for [[i {:keys [message-id] :as discovery}] discoveries]
           ^{:key (str "message-" message-id)}
-          [discovery-list-item {:message         message
-                                :show-separator? (not= (inc i) (count discoveries))
-                                :current-account current-account}]))]]))
+          [discovery-list-item discovery (not= (inc i) (count discoveries))]))]]))
 
 (defview discovery []
   [show-search? [:get ::show-search?]
    contacts [:get :contacts]
-   current-account [:get-current-account]
    discoveries [:get-recent-discoveries]]
   [view st/discovery-container
    [discovery-toolbar show-search?]
    (if discoveries
      [scroll-view st/scroll-view-container
-      [discovery-popular {:contacts        contacts
-                          :current-account current-account}]
-      [discovery-recent {:current-account current-account}]]
+      [discovery-popular {:contacts contacts}]
+      [discovery-recent {:contacts contacts}]]
      [view contacts-styles/empty-contact-groups
       ;; todo change icon
       [icon :group_big contacts-styles/empty-contacts-icon]
