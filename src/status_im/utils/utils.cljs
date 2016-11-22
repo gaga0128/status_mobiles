@@ -1,7 +1,6 @@
 (ns status-im.utils.utils
   (:require [status-im.constants :as const]
-            [reagent.core :as r]
-            [clojure.string :as str]))
+            [reagent.core :as r]))
 
 (defn require [module]
   (if (exists? js/window)
@@ -54,12 +53,6 @@
   (if (and (< max (count s)) s)
     (str (subs s 0 (- max 3)) "...")
     s))
-
-(defn clean-text [s]
-  (-> s
-      (str/replace #"\n" " ")
-      (str/replace #"\r" "")
-      (str/trim)))
 
 (defn first-index
   [cond coll]

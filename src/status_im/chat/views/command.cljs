@@ -4,6 +4,7 @@
             [status-im.components.react :refer [view
                                                 icon
                                                 text
+                                                text-input
                                                 touchable-highlight]]
             [status-im.chat.styles.input :as st]))
 

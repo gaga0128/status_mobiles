@@ -3,6 +3,7 @@
   (:require [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [status-im.components.react :refer [view
                                                 text
+                                                text-input
                                                 image
                                                 linear-gradient
                                                 touchable-highlight
@@ -17,7 +18,8 @@
                                                  icon-search
                                                  icon-back
                                                  icon-qr
-                                                 button-input]]
+                                                 button-input
+                                                 white-form-text-input]]
             [status-im.i18n :refer [label]]
             [status-im.accounts.login.styles :as st]))
 

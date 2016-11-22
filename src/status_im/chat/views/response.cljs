@@ -8,6 +8,7 @@
                                                 icon
                                                 image
                                                 text
+                                                text-input
                                                 touchable-highlight
                                                 web-view
                                                 scroll-view]]

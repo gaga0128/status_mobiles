@@ -3,6 +3,7 @@
   (:require [re-frame.core :refer [subscribe dispatch]]
             [status-im.resources :as res]
             [status-im.components.react :refer [view
+                                                text-input
                                                 text
                                                 image
                                                 icon

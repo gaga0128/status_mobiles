@@ -1,6 +1,7 @@
 (ns status-im.components.toolbar.view
   (:require [re-frame.core :refer [subscribe dispatch]]
             [status-im.components.react :refer [view
+                                                text-input
                                                 icon
                                                 text
                                                 image
@@ -37,7 +38,7 @@
            [text {:style st/toolbar-title-text
                   :font  :toolbar-title}
             title]])
-      [view (st/toolbar-actions-container (count actions) (or custom-content custom-action))
+      [view (st/toolbar-actions-container (count actions) custom-action)
        (if actions
          (for [{action-image   :image
                 action-handler :handler} actions]
