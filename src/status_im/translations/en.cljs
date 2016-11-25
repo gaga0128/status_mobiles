@@ -38,7 +38,7 @@
 
    ;messages
    :status-sending                        "Sending"
-   :status-pending                        "Sending"
+   :status-pending                        "Pending"
    :status-sent                           "Sent"
    :status-seen-by-everyone               "Seen by everyone"
    :status-seen                           "Seen"
@@ -79,6 +79,11 @@
    :image-source-gallery                  "Select from gallery"
    :image-source-cancel                   "Cancel"
 
+   ;;sharing
+   :sharing-copy-to-clipboard             "Copy to clipboard"
+   :sharing-share                         "Share..."
+   :sharing-cancel                        "Cancel"
+
    ;sign-up
    :contacts-syncronized                  "Your contacts have been synchronized"
    :confirmation-code                     (str "Thanks! We've sent you a text message with a confirmation "
@@ -116,7 +121,7 @@
    :contacts                              "Contacts"
    :new-contact                           "New Contact"
    :show-all                              "SHOW ALL"
-   :contacts-group-dapps                  "Dapps"
+   :contacts-group-dapps                  "ÐApps"
    :contacts-group-people                 "People"
    :contacts-group-new-chat               "Start new chat"
    :no-contacts                           "No contacts yet"

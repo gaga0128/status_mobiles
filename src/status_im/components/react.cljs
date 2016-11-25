@@ -67,13 +67,17 @@
                    (assoc :style (merge style font)))]
               ts))))))
 
-(defn text-input [props text]
-  [text-input-class (merge
-                      {:underline-color-android :transparent
-                       :placeholder-text-color  st/text2-color
-                       :placeholder             "Type"
-                       :value                   text}
-                      props)])
+(defn text-input [{:keys [font style] :as opts
+                   :or   {font :default}} text]
+  (let [font (get-in platform-specific [:fonts (keyword font)])]
+    [text-input-class (merge
+                        {:underline-color-android :transparent
+                         :placeholder-text-color  st/text2-color
+                         :placeholder             "Type"
+                         :value                   text}
+                        (-> opts
+                            (dissoc :font)
+                            (assoc :style (merge style font))))]))
 
 (defn icon
   ([n] (icon n {}))
@@ -114,3 +118,8 @@
         (.then images-fn))))
 
 (def swiper (adapt-class (js/require "react-native-swiper")))
+
+;; Clipboard
+
+(defn copy-to-clipboard [text]
+  (.setString (.-Clipboard react-native) text))

@@ -5,7 +5,6 @@
             [reagent.core :as r]
             [status-im.components.react :refer [view
                                                 animated-view
-                                                text-input
                                                 text
                                                 image
                                                 touchable-highlight
@@ -20,8 +19,9 @@
             [status-im.components.tabs.tabs :refer [tabs]]
             [status-im.components.tabs.styles :as st]
             [status-im.components.styles :as common-st]
-            [status-im.i18n :refer [label]]
-            [taoensso.timbre :as log]))
+            [status-im.i18n :refer [label]]))
+
+(def window-width (:width (get-dimensions "window")))
 
 (def tab-list
   [{:view-id :chat-list
@@ -70,20 +70,17 @@
         n (get-tab-index view-id)]
     (- n p)))
 
-(defn on-scroll-end [swiped? dragging?]
+(defn on-scroll-end [swiped?]
   (fn [_ state]
-    (when @dragging?
-      (reset! dragging? false)
-      (let [{:strs [index]} (js->clj state)]
-        (reset! swiped? true)
-        (dispatch [:navigate-to-tab (index->tab index)])))))
+    (let [{:strs [index]} (js->clj state)]
+      (reset! swiped? true)
+      (dispatch [:navigate-to-tab (index->tab index)]))))
 
 (defn main-tabs []
   (let [view-id      (subscribe [:get :view-id])
         prev-view-id (subscribe [:get :prev-view-id])
-        main-swiper  (r/atom nil)
-        swiped?      (r/atom false)
-        dragging?    (r/atom false)]
+        main-swiper  (atom nil)
+        swiped?      (atom false)]
     (r/create-class
       {:component-will-update
        (fn []
@@ -104,8 +101,7 @@
                        {:index                  (get-tab-index @view-id)
                         :loop                   false
                         :ref                    #(reset! main-swiper %)
-                        :onScrollBeginDrag      #(reset! dragging? true)
-                        :on-momentum-scroll-end (on-scroll-end swiped? dragging?)})
+                        :on-momentum-scroll-end (on-scroll-end swiped?)})
               [chats-list]
               [discovery]
               [contact-list]]
