@@ -21,7 +21,7 @@
                            :additional-height 0}
    :chat                  {:new-message {:border-top-color styles/color-transparent
                                          :border-top-width 0.5}}
-   :discovery             {:subtitle {:color     styles/color-gray2
+   :discover             {:subtitle {:color     styles/color-gray2
                                       :font-size 14}
                            :popular  {:border-radius 1
                                       :margin-top    2
@@ -75,10 +75,11 @@
   {:component-styles  component-styles
    :fonts             fonts
    :list-selection-fn show-dialog
+   :tabs              {:tab-shadows? true}
    :chats             {:action-button?       true
                        :new-chat-in-toolbar? false}
    :contacts          {:action-button?          true
                        :new-contact-in-toolbar? false
                        :uppercase-subtitles?    false
                        :group-block-shadows?    true}
-   :discovery         {:uppercase-subtitles? false}})
+   :discover         {:uppercase-subtitles? false}})
