@@ -99,7 +99,7 @@
    :new-group-chat                        "नई ग्रुप चैट"
 
    ;discover
-   :discover                             "खोज" 
+   :discovery                             "खोज" 
    :none                                  "कोई नहीं" 
    :search-tags                           "अपने खोज टैग यहां टाइप करें"
    :popular-tags                          "लोकप्रिय टैग"

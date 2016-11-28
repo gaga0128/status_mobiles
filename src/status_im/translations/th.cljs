@@ -99,7 +99,7 @@
    :new-group-chat                        "แชทกลุ่มใหม่"
 
    ;discover
-   :discover                             "การค้นพบ"
+   :discovery                             "การค้นพบ"
    :none                                  "ไม่มี"
    :search-tags                           "พิมพ์แท็กการค้นหาของคุณที่นี่"
    :popular-tags                          "แท็กยอดนิยม"

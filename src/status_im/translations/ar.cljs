@@ -99,7 +99,7 @@
    :new-group-chat                        "مجموعة دردشة جديدة"
 
    ;discover
-   :discover                             "اكتشاف"
+   :discovery                             "اكتشاف"
    :none                                  "لا شيء"
    :search-tags                           "اكتب بيانات بحثك هنا"
    :popular-tags                          "العلامات المشهورة"

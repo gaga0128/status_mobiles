@@ -20,7 +20,7 @@
              :new-contact-identity       ""
              :contacts                   {}
              :discoveries                {}
-             :discover-search-tags      []
+             :discovery-search-tags      []
              :tags                       {}
 
              :chats                      {}

@@ -1,4 +1,4 @@
-(ns status-im.discover.styles
+(ns status-im.discovery.styles
   (:require [status-im.components.styles :refer [color-gray2
                                                  color-white]]
             [status-im.components.toolbar.styles :refer [toolbar-background2]]))
@@ -24,23 +24,23 @@
 
 ;; Toolbar
 
-(def discover-toolbar-content
+(def discovery-toolbar-content
   {:flex            1
    :align-items     :center
    :justify-content :center})
 
-(def discover-toolbar
+(def discovery-toolbar
   {:background-color toolbar-background2
    :elevation        0})
 
-(def discover-search-input
+(def discovery-search-input
   {:flex            1
    :align-self      "stretch"
    :margin-left     18
    :font-size       14
    :color           "#7099e6"})
 
-(def discover-title
+(def discovery-title
   {:color       "#000000de"
    :align-self  :center
    :text-align  :center
@@ -117,7 +117,7 @@
    :align-items    :center
    :padding-top    16})
 
-;; discover_recent
+;; discovery_recent
 
 (def recent-container
   {:background-color toolbar-background2})
@@ -126,13 +126,13 @@
   {:background-color :white
    :padding-left     16})
 
-;; Discover tag
+;; Discovery tag
 
-(def discover-tag-toolbar
+(def discovery-tag-toolbar
   {:border-bottom-color "#D7D7D7"
    :border-bottom-width 1})
 
-(def discover-tag-container
+(def discovery-tag-container
   {:flex            1
    :backgroundColor "#eef2f5"})
 
@@ -161,7 +161,7 @@
   {:width  17
    :height 17})
 
-(def discover-container
+(def discovery-container
   {:flex            1
    :backgroundColor color-white})
 

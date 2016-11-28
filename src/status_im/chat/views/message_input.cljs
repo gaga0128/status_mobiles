@@ -39,10 +39,9 @@
 
 (defview message-input [input-options set-layout-size]
   [input-message [:get-chat-input-text]
-   disable? [:get :disable-input]
-   active? [:chat :is-active]]
+   disable? [:get :disable-input]]
   [text-input (merge
-                (plain-input-options (or disable? (not active?)))
+                (plain-input-options disable?)
                 {:placeholder-text-color :#c0c5c9
                  :auto-focus             false
                  :blur-on-submit         true

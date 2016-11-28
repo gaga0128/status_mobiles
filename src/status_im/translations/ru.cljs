@@ -106,7 +106,7 @@
    :new-group-chat                        "Новый групповой чат"
 
    ;discover
-   :discover                             "Поиск"
+   :discovery                             "Поиск"
    :none                                  "Нет"
    :search-tags                           "Введите теги для поиска сюда"
    :popular-tags                          "Популярные теги"

@@ -99,7 +99,7 @@
    :new-group-chat                        "新規グループチャット"
 
    ;discover
-   :discover                             "発見"
+   :discovery                             "発見"
    :none                                  "なし"
    :search-tags                           "ここに検索タグを入力してください"
    :popular-tags                          "人気のタグ"

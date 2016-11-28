@@ -21,7 +21,7 @@
                            :additional-height 0}
    :chat                  {:new-message {:border-top-color styles/color-transparent
                                          :border-top-width 0.5}}
-   :discover             {:subtitle {:color     styles/color-gray2
+   :discovery             {:subtitle {:color     styles/color-gray2
                                       :font-size 14}
                            :popular  {:border-radius 1
                                       :margin-top    2
@@ -81,4 +81,4 @@
                        :new-contact-in-toolbar? false
                        :uppercase-subtitles?    false
                        :group-block-shadows?    true}
-   :discover         {:uppercase-subtitles? false}})
+   :discovery         {:uppercase-subtitles? false}})

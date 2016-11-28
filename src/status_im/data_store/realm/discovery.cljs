@@ -1,11 +1,11 @@
-(ns status-im.data-store.realm.discover
+(ns status-im.data-store.realm.discovery
   (:require [status-im.data-store.realm.core :as realm]
             [taoensso.timbre :as log])
   (:refer-clojure :exclude [exists?]))
 
 (defn get-all
   [ordering]
-  (-> (realm/get-all @realm/account-realm :discover)
+  (-> (realm/get-all @realm/account-realm :discovery)
       (realm/sorted :created-at ordering)))
 
 (defn get-all-as-list
@@ -32,37 +32,37 @@
 
 (defn- get-tags
   [message-id]
-  (-> (realm/get-one-by-field-clj @realm/account-realm :discover :message-id message-id)
+  (-> (realm/get-one-by-field-clj @realm/account-realm :discovery :message-id message-id)
       (:tags)
       (vals)))
 
-(defn- upsert-discover [{:keys [message-id tags] :as discover}]
-  (log/debug "Creating/updating discover with tags: " tags)
+(defn- upsert-discovery [{:keys [message-id tags] :as discovery}]
+  (log/debug "Creating/updating discovery with tags: " tags)
   (let [prev-tags (get-tags message-id)]
     (when prev-tags
       (update-tags-counter dec prev-tags))
-    (realm/create @realm/account-realm :discover discover true)
+    (realm/create @realm/account-realm :discovery discovery true)
     (update-tags-counter inc tags)))
 
 (defn exists?
   [message-id]
-  (realm/exists? @realm/account-realm :discover {:message-id message-id}))
+  (realm/exists? @realm/account-realm :discovery {:message-id message-id}))
 
 (defn save
-  [discover]
+  [discovery]
   (realm/write @realm/account-realm
-               #(upsert-discover discover)))
+               #(upsert-discovery discovery)))
 
 (defn save-all
   [discoveries]
   (realm/write @realm/account-realm
                (fn []
-                 (doseq [discover discoveries]
-                   (upsert-discover discover)))))
+                 (doseq [discovery discoveries]
+                   (upsert-discovery discovery)))))
 
 (defn delete
   [by ordering critical-count to-delete-count]
-  (let [discoveries  (realm/get-all @realm/account-realm :discover)
+  (let [discoveries  (realm/get-all @realm/account-realm :discovery)
         count (realm/get-count discoveries)]
     (if (> count critical-count)
       (let [to-delete (-> (realm/sorted discoveries by ordering)

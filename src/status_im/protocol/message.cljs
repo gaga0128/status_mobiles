@@ -22,11 +22,11 @@
   #{:group-message :group-invitation :add-group-identity
     :remove-group-identity :leave-group :update-group})
 
-(s/def :discover-message/type #{:online :status :discover :contact-request})
+(s/def :discovery-message/type #{:online :status :discovery :contact-request})
 
 (s/def :message/type
   (s/or :group :group-message/type
-        :discover :discover-message/type
+        :discovery :discovery-message/type
         :user #{:message}))
 
 (s/def :message/payload

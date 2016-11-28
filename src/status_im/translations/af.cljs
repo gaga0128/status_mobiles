@@ -99,7 +99,7 @@
    :new-group-chat                        "Nuwe groepgeselsie"
 
    ;discover
-   :discover                             "Ontdekking"
+   :discovery                             "Ontdekking"
    :none                                  "Geen"
    :search-tags                           "Tik jou soek-oortjies hier in"
    :popular-tags                          "Gewilde oortjies"

@@ -1,5 +1,5 @@
-(ns status-im.data-store.discover
-  (:require [status-im.data-store.realm.discover :as data-store]))
+(ns status-im.data-store.discovery
+  (:require [status-im.data-store.realm.discovery :as data-store]))
 
 (defn get-all
   [ordering]
@@ -7,8 +7,8 @@
        (mapv #(update % :tags vals))))
 
 (defn save
-  [discover]
-  (data-store/save discover))
+  [discovery]
+  (data-store/save discovery))
 
 (defn exists?
   [message-id]

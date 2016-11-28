@@ -1,7 +1,7 @@
-(ns status-im.data-store.realm.schemas.account.v1.discover
+(ns status-im.data-store.realm.schemas.account.v1.discovery
   (:require [taoensso.timbre :as log]))
 
-(def schema {:name       :discover
+(def schema {:name       :discovery
              :primaryKey :message-id
              :properties {:message-id   "string"
                           :name         {:type "string" :optional true}
@@ -14,4 +14,4 @@
                           :last-updated "date"}})
 
 (defn migration [old-realm new-realm]
-  (log/debug "migrating discover schema"))
+  (log/debug "migrating discovery schema"))

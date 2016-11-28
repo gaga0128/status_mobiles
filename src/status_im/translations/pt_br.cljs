@@ -99,7 +99,7 @@
    :new-group-chat                        "Novo bate-papo em grupo"
 
    ;discover
-   :discover                             "Descoberta"
+   :discovery                             "Descoberta"
    :none                                  "Nenhum(a)"
    :search-tags                           "Digite suas tags de pesquisa aqui"
    :popular-tags                          "Tags populares"
