@@ -200,7 +200,7 @@
 
 (def buttons-container
   {:position :absolute
-   :bottom   24
+   :bottom   0
    :right    0
    :width    220
    :height   170})

@@ -11,6 +11,7 @@
     [status-im.components.toolbar.view :refer [toolbar]]
     [status-im.components.drawer.view :refer [open-drawer]]
     [status-im.discover.styles :as st]
+    [status-im.components.tabs.bottom-gradient :refer [bottom-gradient]]
     [status-im.i18n :refer [label]]
     [status-im.components.carousel.carousel :refer [carousel]]
     [status-im.discover.views.popular-list :refer [discover-popular-list]]
@@ -106,4 +107,5 @@
       ;; todo change icon
       [icon :group_big contacts-styles/empty-contacts-icon]
       [text {:style contacts-styles/empty-contacts-text}
-       (label :t/no-statuses-discovered)]])])
+       (label :t/no-statuses-discovered)]])
+   [bottom-gradient]])
