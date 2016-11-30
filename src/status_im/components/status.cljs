@@ -64,9 +64,20 @@
   (when status
     (call-module #(.startNode status on-result))))
 
+(defonce account-creation? (atom false))
+
 (defn create-account [password on-result]
   (when status
-    (call-module #(.createAccount status password on-result))))
+    (let [callback (fn [data]
+                     (reset! account-creation? true)
+                     (on-result data))]
+      (swap! account-creation?
+             (fn [creation?]
+               (if-not creation?
+                 (do
+                   (call-module #(.createAccount status password callback))
+                   true)
+                 false))))))
 
 (defn recover-account [passphrase password on-result]
   (when status
@@ -80,7 +91,7 @@
   [hash password callback]
   (log/debug :complete-transaction (boolean status) hash password)
   (when status
-    (call-module #(.completeTransaction status hash password callback))))
+    (call-module #(.completeTransaction status (str hash) password callback))))
 
 (defn discard-transaction
   [id]
