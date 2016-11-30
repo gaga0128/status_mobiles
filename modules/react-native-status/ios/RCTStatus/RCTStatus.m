@@ -189,9 +189,6 @@ RCT_EXPORT_METHOD(setSoftInputMode: (NSInteger) i) {
 
 + (void)signalEvent:(char *) signal
 {
-    if(!signal){
-        return;
-    }
     NSString *sig = [NSString stringWithUTF8String:signal];
 #if DEBUG
     NSLog(@"SignalEvent");

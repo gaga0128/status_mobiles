@@ -51,7 +51,7 @@
             (assoc :status-module-initialized? true)
 
             true
-            (assoc :network (or network :testnet)))))
+            (assoc :network network))))
 
 (register-handler :initialize-account-db
   (fn [db _]

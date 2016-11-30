@@ -17,7 +17,7 @@
                           :last-updated        {:type :int :default 0}
                           :signed-up?          {:type    :bool
                                                 :default false}
-                          :network             :string}})
+                          :network             {:type :string}}})
 
 (defn migration [old-realm new-realm]
   (log/debug "migrating account schema v2")
