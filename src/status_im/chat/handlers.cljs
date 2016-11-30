@@ -14,6 +14,7 @@
                                          content-type-command
                                          content-type-command-request
                                          default-number-of-messages
+                                         console-chat-id
                                          wallet-chat-id]]
             [status-im.utils.random :as random]
             [status-im.chat.sign-up :as sign-up-service]
@@ -27,7 +28,6 @@
             status-im.chat.handlers.commands
             [status-im.commands.utils :refer [command-prefix]]
             [status-im.chat.utils :refer [console? not-console?]]
-            [status-im.constants :refer [console-chat-id]]
             [status-im.utils.gfycat.core :refer [generate-gfy]]
             status-im.chat.handlers.animation
             status-im.chat.handlers.requests
@@ -216,7 +216,6 @@
          (-> db
              (assoc :new-chat new-chat)
              (update :chats assoc console-chat-id new-chat)
-             (update :chats-ids conj console-chat-id)
              (assoc :current-chat-id console-chat-id)))))))
 
 (register-handler :init-console-chat
@@ -303,7 +302,6 @@
 
     (-> db
         (assoc :chats chats')
-        (assoc :chats-ids ids)
         (dissoc :loaded-chats)
         (init-console-chat true))))
 
@@ -381,14 +379,15 @@
   [db [_ chat-id chat]]
   (assoc db :new-chat (prepare-chat db chat-id chat)))
 
-(defn add-chat [{:keys [new-chat] :as db} [_ chat-id]]
-  (-> db
-      (update :chats assoc chat-id new-chat)
-      (update :chats-ids conj chat-id)))
+(defn add-chat [{:keys [new-chat chats] :as db} [_ chat-id]]
+  (if-not (get chats chat-id)
+    (update db :chats assoc chat-id new-chat)
+    db))
 
 (defn save-new-chat!
-  [{:keys [new-chat]} _]
-  (chats/save new-chat))
+  [{{:keys [chat-id] :as new-chat} :new-chat} _]
+  (when-not (chats/exists? chat-id)
+    (chats/save new-chat)))
 
 (defn open-chat!
   [_ [_ chat-id _ navigation-type]]
@@ -411,9 +410,8 @@
 
 (register-handler :add-chat
   (u/side-effect!
-    (fn [{:keys [chats]} [_ chat-id chat]]
-      (when-not (get chats chat-id)
-        (dispatch [::add-chat chat-id chat])))))
+    (fn [_ [_ chat-id chat]]
+      (dispatch [::add-chat chat-id chat]))))
 
 (register-handler ::add-chat
   (-> add-new-chat
@@ -579,3 +577,29 @@
                      (update :clock-value inc)
                      (assoc :timestamp (random/timestamp)))]
         (dispatch [:update-chat! chat])))))
+
+(register-handler :update-group-message
+  (u/side-effect!
+    (fn [{:keys [current-public-key web3 chats]}
+         [_ {:keys                                [from]
+             {:keys [group-id keypair timestamp]} :payload}]]
+      (let [{:keys [private public]} keypair]
+        (let [{:keys [updated-at removed-at]} (chats/get-by-id group-id)
+              is-active (chats/is-active? group-id)
+              chat      {:chat-id     group-id
+                         :public-key  public
+                         :private-key private
+                         :updated-at  timestamp}]
+          (when (and (= from (get-in chats [group-id :group-admin]))
+                     (or (not (chats/exists? group-id))
+                         is-active
+                         (> timestamp removed-at)
+                         (> timestamp updated-at)))
+            (dispatch [:update-chat! chat])
+            (when is-active
+              (protocol/start-watching-group!
+                {:web3     web3
+                 :group-id group-id
+                 :identity current-public-key
+                 :keypair  keypair
+                 :callback #(dispatch [:incoming-message %1 %2])}))))))))
