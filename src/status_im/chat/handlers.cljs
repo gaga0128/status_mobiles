@@ -14,7 +14,6 @@
                                          content-type-command
                                          content-type-command-request
                                          default-number-of-messages
-                                         console-chat-id
                                          wallet-chat-id]]
             [status-im.utils.random :as random]
             [status-im.chat.sign-up :as sign-up-service]
@@ -28,6 +27,7 @@
             status-im.chat.handlers.commands
             [status-im.commands.utils :refer [command-prefix]]
             [status-im.chat.utils :refer [console? not-console?]]
+            [status-im.constants :refer [console-chat-id]]
             [status-im.utils.gfycat.core :refer [generate-gfy]]
             status-im.chat.handlers.animation
             status-im.chat.handlers.requests
@@ -38,7 +38,8 @@
             status-im.chat.handlers.webview-bridge
             status-im.chat.handlers.wallet-chat
             status-im.chat.handlers.console
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log]
+            [tailrecursion.priority-map :refer [priority-map-by]]))
 
 (register-handler :set-chat-ui-props
   (fn [db [_ ui-element value]]
@@ -215,6 +216,7 @@
          (-> db
              (assoc :new-chat new-chat)
              (update :chats assoc console-chat-id new-chat)
+             (update :chats-ids conj console-chat-id)
              (assoc :current-chat-id console-chat-id)))))))
 
 (register-handler :init-console-chat
@@ -284,6 +286,10 @@
       ((enrich init-chat))
       ((after load-commands!))))
 
+(defn compare-chats
+  [{timesatmp1 :timestamp} {timestamp2 :timestamp}]
+  (compare timestamp2 timesatmp1))
+
 (defn initialize-chats
   [{:keys [loaded-chats account-creation? chats] :as db} _]
   (let [chats' (if account-creation?
@@ -292,11 +298,12 @@
                       (map (fn [{:keys [chat-id] :as chat}]
                              (let [last-message (messages/get-last-message db chat-id)]
                                [chat-id (assoc chat :last-message last-message)])))
-                      (into {})))
+                      (into (priority-map-by compare-chats))))
         ids    (set (keys chats'))]
 
     (-> db
         (assoc :chats chats')
+        (assoc :chats-ids ids)
         (dissoc :loaded-chats)
         (init-console-chat true))))
 
@@ -374,15 +381,14 @@
   [db [_ chat-id chat]]
   (assoc db :new-chat (prepare-chat db chat-id chat)))
 
-(defn add-chat [{:keys [new-chat chats] :as db} [_ chat-id]]
-  (if-not (get chats chat-id)
-    (update db :chats assoc chat-id new-chat)
-    db))
+(defn add-chat [{:keys [new-chat] :as db} [_ chat-id]]
+  (-> db
+      (update :chats assoc chat-id new-chat)
+      (update :chats-ids conj chat-id)))
 
 (defn save-new-chat!
-  [{{:keys [chat-id] :as new-chat} :new-chat} _]
-  (when-not (chats/exists? chat-id)
-    (chats/save new-chat)))
+  [{:keys [new-chat]} _]
+  (chats/save new-chat))
 
 (defn open-chat!
   [_ [_ chat-id _ navigation-type]]
@@ -431,7 +437,8 @@
   (fn [db [_ {:keys [chat-id clock-value] :as opts}]]
     (let [chat (if (chats/exists? chat-id)
                  (let [{old-clock-value :clock-value :as chat} (chats/get-by-id chat-id)]
-                   (assoc chat :clock-value (max old-clock-value clock-value)))
+                   (assoc chat :clock-value (max old-clock-value clock-value)
+                               :timestamp (random/timestamp)))
                  (prepare-chat db chat-id opts))]
       (chats/save chat)
       (update-in db [:chats chat-id] merge chat))))
@@ -569,5 +576,6 @@
   (u/side-effect!
     (fn [_ [_ chat-id]]
       (let [chat (-> (chats/get-by-id chat-id)
-                     (update :clock-value inc))]
+                     (update :clock-value inc)
+                     (assoc :timestamp (random/timestamp)))]
         (dispatch [:update-chat! chat])))))

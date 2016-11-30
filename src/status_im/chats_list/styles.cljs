@@ -114,8 +114,7 @@
   {:flex 1})
 
 (def list-container
-  {:background-color color-light-gray
-   :margin-bottom    72})
+  {:background-color color-light-gray})
 
 (def create-icon
   {:fontSize 20
