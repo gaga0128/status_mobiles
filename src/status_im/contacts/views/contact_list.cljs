@@ -9,23 +9,17 @@
             [status-im.contacts.views.contact :refer [contact-view
                                                       on-press
                                                       contact-view-with-letter]]
-            [status-im.components.text-field.view :refer [text-field]]
             [status-im.components.status-bar :refer [status-bar]]
             [status-im.components.toolbar.view :refer [toolbar]]
             [status-im.components.toolbar.styles :refer [toolbar-background1]]
             [status-im.components.drawer.view :refer [drawer-view open-drawer]]
             [status-im.components.styles :refer [icon-search
-                                                 icon-back
-                                                 button-input-container
-                                                 button-input]]
-            [status-im.components.image-button.view :refer [scan-button]]
+                                                 icon-back]]
             [status-im.contacts.styles :as st]
             [status-im.utils.listview :as lw]
             [status-im.i18n :refer [label]]
             [status-im.utils.platform :refer [platform-specific]]
-            [status-im.contacts.views.contact-inner :refer [contact-inner-view]]
-            [reagent.core :as r]
-            [clojure.string :as str]))
+            [status-im.contacts.views.contact-inner :refer [contact-inner-view]]))
 
 (defn new-group-chat-view []
   [touchable-highlight
@@ -48,17 +42,19 @@
          (or click-handler
              (on-press row))]))))
 
-(defn contact-list-entry [{:keys [click-handler icon icon-style label]}]
+(defn qr-scan [click-handler action]
   [touchable-highlight
-   {:on-press click-handler}
+   {:onPress #(click-handler :qr-scan action)}
    [view st/contact-container
     [view st/contact-inner-container
-     [image {:source {:uri icon}
-             :style  icon-style}]
+     [image {:source {:uri :icon_menu_group}
+             :style  st/scan-qr-icon}]
      [view st/info-container
       [text {:style           st/name-text
              :number-of-lines 1}
-       label]]]]])
+       (label (if (= :request action)
+                :t/show-qr
+                :t/scan-qr))]]]]])
 
 (defview contact-list-toolbar []
   [group [:get :contacts-group]
@@ -94,25 +90,11 @@
       [contact-list-toolbar]
       ;; todo add stub
       (when modal
-        [view
-         [contact-list-entry {:click-handler #(do
-                                                (dispatch [:send-to-webview-bridge
-                                                           {:event (name :webview-send-transaction)}])
-                                                (dispatch [:navigate-back]))
-                              :icon          :icon_enter_address
-                              :icon-style    st/enter-address-icon
-                              :label         (label :t/enter-address)}]
-         [contact-list-entry {:click-handler #(click-handler :qr-scan action)
-                              :icon          :icon_scan_q_r
-                              :icon-style    st/scan-qr-icon
-                              :label         (label (if (= :request action)
-                                                      :t/show-qr
-                                                      :t/scan-qr))}]])
+        [qr-scan click-handler action])
       (when contacts
         [list-view {:dataSource          (lw/to-datasource contacts)
                     :enableEmptySections true
                     :renderRow           (render-row modal click-handler action params)
-                    :bounces             false
                     :renderHeader        #(list-item
                                             [view
                                              (if show-new-group-chat?

@@ -89,7 +89,8 @@
   (after #(dispatch [:set-soft-input-mode :resize]))
   (u/side-effect!
     (fn [db _]
-      (dispatch [:animate-cancel-command]))))
+      (dispatch [:animate-cancel-command])
+      (dispatch [:cancel-command]))))
 
 (defn update-input-text
   [{:keys [current-chat-id] :as db} text]
@@ -116,9 +117,21 @@
         db))
     db))
 
+(defn set-command-suggestions
+  [db [_ chat-id suggestions]]
+  (assoc-in db [:command-suggestions chat-id] suggestions))
+
+(register-handler ::set-command-suggestions set-command-suggestions)
+
 (defn check-suggestions
   [db [_ chat-id text]]
-  (let [suggestions (suggestions/get-suggestions db text)]
+  (let [suggestions (suggestions/get-suggestions db text)
+        {:keys [dapp?]} (get-in db [:contacts chat-id])]
+    (when (and dapp? (empty? suggestions))
+      (if (seq text)
+        (dispatch [::check-dapp-suggestions chat-id text])
+        (dispatch [:clear-response-suggestions chat-id])))
+    (log/debug "Suggestions: " suggestions)
     (assoc-in db [:command-suggestions chat-id] suggestions)))
 
 (defn select-suggestion!
@@ -128,12 +141,32 @@
       (dispatch [:set-chat-command (ffirst suggestions)])
       (dispatch [::set-text chat-id text]))))
 
+(register-handler ::check-dapp-suggestions
+  (u/side-effect!
+    (fn [db [_ chat-id text]]
+      (let [data   (get-in db [:local-storage chat-id])
+            path   [:functions
+                    :message-suggestions]
+            params {:parameters {:message text}
+                    :context    {:data data}}]
+        (status/call-jail chat-id
+                          path
+                          params
+                          (fn [{:keys [result] :as data}]
+                            (let [{:keys [returned]} result]
+                              (log/debug "Message suggestions: " returned)
+                              (if returned
+                                (dispatch [:suggestions-handler {:chat-id chat-id} data])
+                                (dispatch [:clear-response-suggestions chat-id])))))))))
+
 (register-handler :set-chat-input-text
   (u/side-effect!
-    (fn [{:keys [current-chat-id]} [_ text]]
-      (if (console? current-chat-id)
-        (dispatch [::check-input-for-commands text])
-        (dispatch [::check-suggestions current-chat-id text])))))
+    (fn [{:keys [current-chat-id] :as db} [_ text]]
+      (let [{:keys [dapp?] :as contact} (get-in db [:contacts current-chat-id])]
+        (log/debug "SET CHAT INPUT TEXT: " current-chat-id text contact dapp?)
+        (if (console? current-chat-id)
+          (dispatch [::check-input-for-commands text])
+          (dispatch [::check-suggestions current-chat-id text]))))))
 
 (def possible-commands
   {[:confirmation-code :responses] #(re-matches #"^[\d]{4}$" %)
@@ -201,7 +234,8 @@
     (set-message-shown db chat-id message-id)))
 
 (defn init-console-chat
-  ([{:keys [chats current-account-id] :as db} existing-account?]
+  ([existing-account?] (init-console-chat {} existing-account?))
+  ([{:keys [chats] :as db} existing-account?]
    (let [new-chat sign-up-service/console-chat]
      (if (chats console-chat-id)
        db
@@ -209,8 +243,7 @@
          (dispatch [:add-contacts [sign-up-service/console-contact]])
          (chats/save new-chat)
          (contacts/save-all [sign-up-service/console-contact])
-         (when-not current-account-id
-           (sign-up-service/intro))
+         (sign-up-service/intro)
          (when existing-account?
            (sign-up-service/start-signup))
          (-> db

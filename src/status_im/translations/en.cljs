@@ -127,7 +127,6 @@
    :contacts-group-new-chat               "Start new chat"
    :no-contacts                           "No contacts yet"
    :show-qr                               "Show QR"
-   :enter-address                         "Enter address"
 
    ;group-settings
    :remove                                "Remove"
