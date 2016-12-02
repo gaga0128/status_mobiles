@@ -125,6 +125,7 @@
    :contacts-group-new-chat               "Начать новый час"
    :no-contacts                           "Пока нет контактов"
    :show-qr                               "Показать QR"
+   :enter-address                         "Ввести адрес"
 
    ;group-settings
    :remove                                "Удалить"
@@ -185,6 +186,7 @@
    :whisper-identity                      "Скрытая личность"
    :address-explication                   "Может быть, здесь должен быть какой-то текст, поясняющий адрес и то, где его искать"
    :enter-valid-address                   "Введите действительный адрес или сканируйте QR-код"
+   :enter-valid-public-key                "Введите действительный публичный ключ или сканируйте QR-код"
    :contact-already-added                 "Контакт уже добавлен"
    :can-not-add-yourself                  "Вы не можете добавить себя"
    :unknown-address                       "Неизвестный адрес"
