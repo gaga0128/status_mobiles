@@ -89,7 +89,8 @@
   (after #(dispatch [:set-soft-input-mode :resize]))
   (u/side-effect!
     (fn [db _]
-      (dispatch [:animate-cancel-command]))))
+      (dispatch [:animate-cancel-command])
+      (dispatch [:cancel-command]))))
 
 (defn update-input-text
   [{:keys [current-chat-id] :as db} text]
@@ -116,9 +117,21 @@
         db))
     db))
 
+(defn set-command-suggestions
+  [db [_ chat-id suggestions]]
+  (assoc-in db [:command-suggestions chat-id] suggestions))
+
+(register-handler ::set-command-suggestions set-command-suggestions)
+
 (defn check-suggestions
   [db [_ chat-id text]]
-  (let [suggestions (suggestions/get-suggestions db text)]
+  (let [suggestions (suggestions/get-suggestions db text)
+        {:keys [dapp?]} (get-in db [:contacts chat-id])]
+    (when (and dapp? (empty? suggestions))
+      (if (seq text)
+        (dispatch [::check-dapp-suggestions chat-id text])
+        (dispatch [:clear-response-suggestions chat-id])))
+    (log/debug "Suggestions: " suggestions)
     (assoc-in db [:command-suggestions chat-id] suggestions)))
 
 (defn select-suggestion!
@@ -128,12 +141,32 @@
       (dispatch [:set-chat-command (ffirst suggestions)])
       (dispatch [::set-text chat-id text]))))
 
+(register-handler ::check-dapp-suggestions
+  (u/side-effect!
+    (fn [db [_ chat-id text]]
+      (let [data   (get-in db [:local-storage chat-id])
+            path   [:functions
+                    :message-suggestions]
+            params {:parameters {:message text}
+                    :context    {:data data}}]
+        (status/call-jail chat-id
+                          path
+                          params
+                          (fn [{:keys [result] :as data}]
+                            (let [{:keys [returned]} result]
+                              (log/debug "Message suggestions: " returned)
+                              (if returned
+                                (dispatch [:suggestions-handler {:chat-id chat-id} data])
+                                (dispatch [:clear-response-suggestions chat-id])))))))))
+
 (register-handler :set-chat-input-text
   (u/side-effect!
-    (fn [{:keys [current-chat-id]} [_ text]]
-      (if (console? current-chat-id)
-        (dispatch [::check-input-for-commands text])
-        (dispatch [::check-suggestions current-chat-id text])))))
+    (fn [{:keys [current-chat-id] :as db} [_ text]]
+      (let [{:keys [dapp?] :as contact} (get-in db [:contacts current-chat-id])]
+        (log/debug "SET CHAT INPUT TEXT: " current-chat-id text contact dapp?)
+        (if (console? current-chat-id)
+          (dispatch [::check-input-for-commands text])
+          (dispatch [::check-suggestions current-chat-id text]))))))
 
 (def possible-commands
   {[:confirmation-code :responses] #(re-matches #"^[\d]{4}$" %)
@@ -224,15 +257,15 @@
 
 (register-handler :account-generation-message
   (u/side-effect!
-    (fn [{:keys [chats]}]
-      (when (> 4 (count (get-in chats [console-chat-id :messages])))
+    (fn [_]
+      (when (not (messages/get-by-id sign-up-service/passphraze-message-id))
         (sign-up-service/account-generation-message)))))
 
 (register-handler :show-mnemonic
   (u/side-effect!
-    (fn [{:keys [chats]} [_ mnemonic]]
-      (let [messages-count (count (get-in chats [console-chat-id :messages]))]
-        (sign-up-service/passphrase-messages mnemonic messages-count)))))
+    (fn [_ [_ mnemonic]]
+      (let [crazy-math-message? (messages/get-by-id sign-up-service/crazy-math-message)]
+        (sign-up-service/passphrase-messages mnemonic crazy-math-message?)))))
 
 (register-handler :sign-up
   (after (fn [_ [_ phone-number]]
@@ -586,14 +619,17 @@
          [_ {:keys                                [from]
              {:keys [group-id keypair timestamp]} :payload}]]
       (let [{:keys [private public]} keypair]
-        (let [is-active (chats/is-active? group-id)
+        (let [{:keys [updated-at removed-at]} (chats/get-by-id group-id)
+              is-active (chats/is-active? group-id)
               chat      {:chat-id     group-id
                          :public-key  public
                          :private-key private
                          :updated-at  timestamp}]
           (when (and (= from (get-in chats [group-id :group-admin]))
                      (or (not (chats/exists? group-id))
-                         (chats/new-update? timestamp group-id)))
+                         is-active
+                         (> timestamp removed-at)
+                         (> timestamp updated-at)))
             (dispatch [:update-chat! chat])
             (when is-active
               (protocol/start-watching-group!
