@@ -99,7 +99,6 @@ public class StatusService extends Service {
 
     private boolean handleMessage(Message message) {
         Log.d(TAG, "Received service message." + message.toString());
-        applicationMessenger = message.replyTo;
         doStartNode();
         switch (message.what) {
 
@@ -178,6 +177,7 @@ public class StatusService extends Service {
     }
 
     private void startNode(Message message) {
+        applicationMessenger = message.replyTo;
         doStartNode();
         createAndSendReply(message, StatusMessages.MSG_START_NODE, null);
     }

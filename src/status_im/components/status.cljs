@@ -51,6 +51,8 @@
   (let [init-js (str js-res/status-js "I18n.locale = '" i/i18n.locale "';")]
     (.initJail status init-js #(log/debug "jail initialized"))))
 
+(when status (call-module init-jail))
+
 (defonce listener-initialized (atom false))
 
 (when-not @listener-initialized
