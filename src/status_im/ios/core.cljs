@@ -29,8 +29,7 @@
             status-im.data-store.core
             [taoensso.timbre :as log]
             [status-im.chat.styles.screen :as st]
-            [status-im.accounts.views.qr-code :refer [qr-code-view]]
-            [status-im.components.status :as status]))
+            [status-im.accounts.views.qr-code :refer [qr-code-view]]))
 
 (defn orientation->keyword [o]
   (keyword (.toLowerCase o)))
@@ -110,7 +109,6 @@
                       [component])]])]))))})))
 
 (defn init []
-  (status/call-module status/init-jail)
   (dispatch-sync [:reset-app])
   (dispatch [:listen-to-network-status!])
   (dispatch [:initialize-crypt])
