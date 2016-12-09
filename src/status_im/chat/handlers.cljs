@@ -34,7 +34,6 @@
             status-im.chat.handlers.unviewed-messages
             status-im.chat.handlers.send-message
             status-im.chat.handlers.receive-message
-            status-im.chat.handlers.faucet
             [cljs.core.async :as a]
             status-im.chat.handlers.webview-bridge
             status-im.chat.handlers.wallet-chat
@@ -585,10 +584,6 @@
   (fn [{:keys [current-chat-id] :as db} [_ url]]
     (assoc-in db [:web-view-url current-chat-id] url)))
 
-(register-handler :set-web-view-extra-js
-  (fn [{:keys [current-chat-id] :as db} [_ extra-js]]
-    (assoc-in db [:web-view-extra-js current-chat-id] extra-js)))
-
 (register-handler :set-soft-input-mode
   (after
     (fn [{:keys [current-chat-id]} [_ mode chat-id]]
@@ -624,17 +619,14 @@
          [_ {:keys                                [from]
              {:keys [group-id keypair timestamp]} :payload}]]
       (let [{:keys [private public]} keypair]
-        (let [{:keys [updated-at removed-at]} (chats/get-by-id group-id)
-              is-active (chats/is-active? group-id)
+        (let [is-active (chats/is-active? group-id)
               chat      {:chat-id     group-id
                          :public-key  public
                          :private-key private
                          :updated-at  timestamp}]
           (when (and (= from (get-in chats [group-id :group-admin]))
                      (or (not (chats/exists? group-id))
-                         is-active
-                         (> timestamp removed-at)
-                         (> timestamp updated-at)))
+                         (chats/new-update? timestamp group-id)))
             (dispatch [:update-chat! chat])
             (when is-active
               (protocol/start-watching-group!

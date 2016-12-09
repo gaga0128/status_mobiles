@@ -26,7 +26,6 @@ Command.prototype.create = function (com) {
     this.description = com.description;
     this.handler = com.handler;
     this["has-handler"] = com.handler != null;
-    this["registered-only"] = com.registeredOnly;
     this.validator = com.validator;
     this.color = com.color;
     this.icon = com.icon;

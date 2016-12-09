@@ -2,8 +2,6 @@
 #
 .DS_Store
 .projectile
-.cljs_rhino_repl/
-.#*
 
 # Xcode
 #

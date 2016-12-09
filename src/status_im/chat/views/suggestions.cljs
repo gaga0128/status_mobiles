@@ -1,6 +1,5 @@
 (ns status-im.chat.views.suggestions
-  (:require-macros [status-im.utils.views :refer [defview]]
-                   [clojure.string :as str])
+  (:require-macros [status-im.utils.views :refer [defview]])
   (:require [re-frame.core :refer [subscribe dispatch]]
             [status-im.components.react :refer [view
                                                 scroll-view
@@ -78,7 +77,7 @@
         ^{:key [chat-id message-id]}
         [request-item request]))
     [title (label :t/suggestions-commands)]
-    (for [suggestion (remove #(nil? (:title (second %))) suggestions)]
+    (for [suggestion suggestions]
       ^{:key (first suggestion)}
       [suggestion-list-item suggestion])]])
 
