@@ -1,7 +1,6 @@
 (ns status-im.contacts.subs
   (:require-macros [reagent.ratom :refer [reaction]])
   (:require [re-frame.core :refer [register-sub subscribe]]
-            [clojure.string :as str]
             [status-im.utils.identicon :refer [identicon]]
             [taoensso.timbre :as log]))
 
@@ -34,6 +33,7 @@
   (fn []
     (let [contacts (subscribe [:all-added-contacts])]
       (reaction (filter :dapp? @contacts)))))
+
 
 (register-sub :get-added-people-with-limit
   (fn [_ [_ limit]]

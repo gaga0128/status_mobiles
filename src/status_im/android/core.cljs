@@ -12,7 +12,6 @@
                                                 modal
                                                 splash-screen]]
             [status-im.components.main-tabs :refer [main-tabs]]
-            [status-im.contacts.search-results :refer [contacts-search-results]]
             [status-im.contacts.views.contact-list :refer [contact-list]]
             [status-im.contacts.views.new-contact :refer [new-contact]]
             [status-im.qr-scanner.screen :refer [qr-scanner]]
@@ -77,8 +76,7 @@
                        (fn [e]
                          (let [h (.. e -endCoordinates -height)]
                            (when-not (= h @keyboard-height)
-                             (dispatch [:set :keyboard-height h])
-                             (dispatch [:set :keyboard-max-height h])))))
+                             (dispatch [:set :keyboard-height h])))))
          (.addListener keyboard
                        "keyboardDidHide"
                        #(when-not (= 0 @keyboard-height)
@@ -97,7 +95,6 @@
                                :new-group new-group
                                :group-settings group-settings
                                :contact-list main-tabs
-                               :contact-list-search-results contacts-search-results
                                :group-contacts contact-list
                                :new-contact new-contact
                                :qr-scanner qr-scanner

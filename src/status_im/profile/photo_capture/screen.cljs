@@ -12,7 +12,6 @@
             [status-im.components.icons.custom-icons :refer [ion-icon]]
             [status-im.components.status-bar :refer [status-bar]]
             [status-im.components.toolbar.view :refer [toolbar]]
-            [status-im.components.toolbar.actions :as act]
             [status-im.components.toolbar.styles :refer [toolbar-background1]]
             [status-im.utils.image-processing :refer [img->base64]]
             [status-im.profile.photo-capture.styles :as st]
@@ -36,7 +35,9 @@
     [view st/container
      [status-bar]
      [toolbar {:title            (label :t/image-source-title)
-               :nav-action       (act/back #(dispatch [:navigate-back]))
+               :nav-action       {:image   {:source {:uri :icon_back}
+                                            :style  icon-back}
+                                  :handler #(dispatch [:navigate-back])}
                :background-color toolbar-background1}]
      [camera {:style         {:flex 1}
               :aspect        (:fill aspects)

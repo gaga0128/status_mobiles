@@ -1,7 +1,6 @@
 (ns status-im.discover.screen
   (:require-macros [status-im.utils.views :refer [defview]])
   (:require
-    [reagent.core :as r]
     [re-frame.core :refer [dispatch subscribe]]
     [clojure.string :as str]
     [status-im.components.react :refer [view
@@ -9,33 +8,52 @@
                                         text
                                         text-input
                                         icon]]
-    [status-im.components.toolbar.view :refer [toolbar-with-search]]
-    [status-im.components.toolbar.actions :as act]
+    [status-im.components.toolbar.view :refer [toolbar]]
     [status-im.components.drawer.view :refer [open-drawer]]
+    [status-im.discover.styles :as st]
+    [status-im.i18n :refer [label]]
     [status-im.components.carousel.carousel :refer [carousel]]
     [status-im.discover.views.popular-list :refer [discover-popular-list]]
     [status-im.discover.views.discover-list-item :refer [discover-list-item]]
+    [status-im.contacts.styles :as contacts-styles]
     [status-im.utils.platform :refer [platform-specific]]
-    [status-im.i18n :refer [label]]
-    [status-im.discover.styles :as st]
-    [status-im.contacts.styles :as contacts-st]))
+    [reagent.core :as r]))
 
 (defn get-hashtags [status]
   (let [hashtags (map #(str/lower-case (str/replace % #"#" "")) (re-seq #"[^ !?,;:.]+" status))]
     (or hashtags [])))
 
-(defn toolbar-view [show-search?]
-  [toolbar-with-search
-   {:show-search?       show-search?
-    :search-key         :discover
-    :title              (label :t/discover)
-    :search-placeholder (label :t/search-tags)
-    :nav-action         (act/hamburger open-drawer)
-    :on-search-submit   (fn [text]
-                          (when-not (str/blank? text)
-                            (let [hashtags (get-hashtags text)]
-                              (dispatch [:set :discover-search-tags hashtags])
-                              (dispatch [:navigate-to :discover-search-results]))))}])
+(defn title-content [show-search?]
+  [view st/discover-toolbar-content
+   (if show-search?
+     [text-input {:style             st/discover-search-input
+                  :auto-focus        true
+                  :placeholder       (label :t/search-tags)
+                  :on-blur           (fn [e]
+                                       (dispatch [:set :discover-show-search? false]))
+                  :on-submit-editing (fn [e]
+                                       (let [search   (aget e "nativeEvent" "text")
+                                             hashtags (get-hashtags search)]
+                                         (dispatch [:set :discover-search-tags hashtags])
+                                         (dispatch [:navigate-to :discover-search-results])))}]
+     [view
+      [text {:style st/discover-title
+             :font  :toolbar-title}
+       (label :t/discover)]])])
+
+(defn toogle-search [current-value]
+  (dispatch [:set :discover-show-search? (not current-value)]))
+
+(defn discover-toolbar [show-search?]
+  [toolbar
+   {:style          st/discover-toolbar
+    :nav-action     {:image   {:source {:uri :icon_hamburger}
+                               :style  st/hamburger-icon}
+                     :handler open-drawer}
+    :custom-content [title-content show-search?]
+    :actions        [{:image   {:source {:uri :icon_search}
+                                :style  st/search-icon}
+                      :handler #(toogle-search show-search?)}]}])
 
 (defn title [label-kw spacing?]
   [view st/section-spacing
@@ -73,20 +91,19 @@
                                :current-account current-account}]))]]))
 
 (defview discover [current-view?]
-  [show-search [:get-in [:toolbar-search :show]]
+  [show-search? [:get :discover-show-search?]
    contacts [:get :contacts]
    current-account [:get-current-account]
    discoveries [:get-recent-discoveries]]
   [view st/discover-container
-   [toolbar-view (and current-view?
-                      (= show-search :discover))]
+   [discover-toolbar (and current-view? show-search?)]
    (if discoveries
      [scroll-view st/scroll-view-container
       [discover-popular {:contacts        contacts
                          :current-account current-account}]
       [discover-recent {:current-account current-account}]]
-     [view contacts-st/empty-contact-groups
+     [view contacts-styles/empty-contact-groups
       ;; todo change icon
-      [icon :group_big contacts-st/empty-contacts-icon]
-      [text {:style contacts-st/empty-contacts-text}
+      [icon :group_big contacts-styles/empty-contacts-icon]
+      [text {:style contacts-styles/empty-contacts-text}
        (label :t/no-statuses-discovered)]])])

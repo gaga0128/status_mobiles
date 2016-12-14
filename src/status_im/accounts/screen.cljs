@@ -11,7 +11,6 @@
                                                 touchable-highlight]]
             [status-im.components.status-bar :refer [status-bar]]
             [status-im.components.toolbar.view :refer [toolbar]]
-            [status-im.components.toolbar.actions :as act]
             [status-im.components.styles :refer [color-purple
                                                  color-white
                                                  icon-search
@@ -62,9 +61,9 @@
                        :style     st/gradient-background}
       [status-bar {:type :transparent}]
       [toolbar {:background-color :transparent
-                :nav-action       (if show-back?
-                                    (act/back-white #(dispatch [:navigate-back]))
-                                    act/nothing)
+                :nav-action       {:image   {:source (if show-back? {:uri :icon_back_white} nil)
+                                             :style  icon-back}
+                                   :handler (if show-back? #(dispatch [:navigate-back]) nil)}
                 :custom-content   [toolbar-title]
                 :actions          [{:image   {:style icon-search}
                                     :handler #()}]}]]

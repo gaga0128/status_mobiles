@@ -31,6 +31,10 @@
 (def flex
   {:flex 1})
 
+(def hamburger-icon
+  {:width  16
+   :height 12})
+
 (def icon-search
   {:width  17
    :height 17})

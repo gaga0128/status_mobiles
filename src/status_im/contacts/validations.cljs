@@ -7,11 +7,8 @@
 (defn is-address? [s]
   (.isAddress web3.prototype s))
 
-(defn contact-can-be-added? [identity]
-  (if (contacts/exists? identity)
-    (-> (contacts/get-by-id identity)
-        (get :pending))
-    true))
+(defn unique-identity? [identity]
+  (not (contacts/exists? identity)))
 
 (defn valid-length? [identity]
   (let [length (count identity)]
@@ -21,11 +18,11 @@
       (is-address? identity))))
 
 (s/def ::identity-length valid-length?)
-(s/def ::contact-can-be-added contact-can-be-added?)
+(s/def ::unique-identity unique-identity?)
 (s/def ::not-empty-string (s/and string? not-empty))
 (s/def ::name ::not-empty-string)
 (s/def ::whisper-identity (s/and ::not-empty-string
-                                 ::contact-can-be-added
+                                 ::unique-identity
                                  ::identity-length))
 
 (s/def ::contact (s/keys :req-un [::name ::whisper-identity]

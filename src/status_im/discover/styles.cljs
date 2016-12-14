@@ -1,10 +1,9 @@
 (ns status-im.discover.styles
   (:require [status-im.components.styles :refer [color-gray2
-                                                 color-white
-                                                 color-light-gray]]
+                                                 color-white]]
             [status-im.components.toolbar.styles :refer [toolbar-background2]]))
 
-;; Common
+;; common
 
 (def row-separator
   {:border-bottom-width 1
@@ -22,6 +21,30 @@
    :background-color color-white
    :align-items      :center
    :justify-content  :center})
+
+;; Toolbar
+
+(def discover-toolbar-content
+  {:flex            1
+   :align-items     :center
+   :justify-content :center})
+
+(def discover-toolbar
+  {:background-color toolbar-background2
+   :elevation        0})
+
+(def discover-search-input
+  {:flex            1
+   :align-self      "stretch"
+   :margin-left     18
+   :font-size       14
+   :color           "#7099e6"})
+
+(def discover-title
+  {:color       "#000000de"
+   :align-self  :center
+   :text-align  :center
+   :font-size   16})
 
 (def section-spacing
   {:padding 16})
@@ -111,7 +134,7 @@
 
 (def discover-tag-container
   {:flex            1
-   :backgroundColor color-light-gray})
+   :backgroundColor "#eef2f5"})
 
 (def tag-title-scroll
   {:flex           1
@@ -141,6 +164,10 @@
 (def discover-container
   {:flex            1
    :backgroundColor color-white})
+
+(def hamburger-icon
+  {:width  16
+   :height 12})
 
 (def search-icon
   {:width  17

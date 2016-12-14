@@ -1,13 +1,9 @@
 (ns status-im.components.webview-bridge
   (:require [status-im.utils.utils :as u]
-            [reagent.core :as r]
-            [status-im.utils.platform :as p]))
+            [reagent.core :as r]))
 
 (def webview-bridge-class
-  (r/adapt-react-class (js/require "react-native-webview-bridge"))
-  #_(if p/ios?
-    (r/adapt-react-class (.-default (js/require "react-native-wkwebview-reborn")))
-    (r/adapt-react-class (js/require "react-native-webview-bridge"))))
+  (r/adapt-react-class (js/require "react-native-webview-bridge")))
 
 (defn webview-bridge [opts]
   [webview-bridge-class opts])

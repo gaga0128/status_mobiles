@@ -34,8 +34,7 @@
     "eccjs",
     "chance",
     "react-native-swiper",
-    "react-native-share",
-    "react-native-emoji-picker"
+    "react-native-share"
   ],
   "imageDirs": [
     "images"

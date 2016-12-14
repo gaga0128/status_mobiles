@@ -6,11 +6,12 @@
                                                 touchable-highlight
                                                 list-view
                                                 list-item]]
-            [status-im.contacts.views.contact :refer [contact-view]]
+            [status-im.contacts.views.contact :refer [contact-view
+                                                      on-press
+                                                      contact-view-with-letter]]
             [status-im.components.text-field.view :refer [text-field]]
             [status-im.components.status-bar :refer [status-bar]]
             [status-im.components.toolbar.view :refer [toolbar]]
-            [status-im.components.toolbar.actions :as act]
             [status-im.components.toolbar.styles :refer [toolbar-background1]]
             [status-im.components.drawer.view :refer [drawer-view open-drawer]]
             [status-im.components.styles :refer [icon-search
@@ -41,10 +42,11 @@
 (defn render-row [chat-modal click-handler action params]
   (fn [row _ _]
     (list-item
-     [contact-view {:contact  row
-                    :letter?  chat-modal
-                    :on-click (if click-handler
-                                #(click-handler row action params))}])))
+      (if chat-modal
+        [contact-view-with-letter row click-handler action params]
+        [contact-view row
+         (or click-handler
+             (on-press row))]))))
 
 (defn contact-list-entry [{:keys [click-handler icon icon-style label]}]
   [touchable-highlight
@@ -69,10 +71,14 @@
                                           :t/contacts-group-dapps
                                           :t/contacts-group-new-chat)))
              :nav-action       (when modal
-                                 (act/back #(dispatch [:navigate-back])))
+                                 {:handler #(dispatch [:navigate-back])
+                                  :image   {:source {:uri :icon_back}
+                                            :style  icon-back}})
              :background-color toolbar-background1
              :style            (get-in platform-specific [:component-styles :toolbar])
-             :actions          [(act/search #())]}]])
+             :actions          [{:image   {:source {:uri :icon_search}
+                                           :style  icon-search}
+                                 :handler (fn [])}]}]])
 
 (defview contact-list []
   [contacts [:contacts-with-letters]

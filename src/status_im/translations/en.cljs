@@ -8,8 +8,6 @@
    :chat-name                             "Chat name"
    :notifications-title                   "Notifications and sounds"
    :offline                               "Offline"
-   :search-for                            "Search for..."
-   :cancel                                "Cancel"
 
    ;drawer
    :invite-friends                        "Invite friends"
@@ -110,6 +108,7 @@
    :new-group-chat                        "New group chat"
 
    ;discover
+
    :discover                              "Discover"
    :none                                  "None"
    :search-tags                           "Type your search tags here"
@@ -124,7 +123,6 @@
    ;contacts
    :contacts                              "Contacts"
    :new-contact                           "New Contact"
-   :remove-contact                        "Remove contact"
    :show-all                              "SHOW ALL"
    :contacts-group-dapps                  "ÐApps"
    :contacts-group-people                 "People"

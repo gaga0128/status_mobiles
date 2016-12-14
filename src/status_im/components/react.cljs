@@ -123,12 +123,3 @@
 
 (defn copy-to-clipboard [text]
   (.setString (.-Clipboard react-native) text))
-
-
-;; Emoji
-
-(def emoji-picker-class (js/require "react-native-emoji-picker"))
-
-(def emoji-picker
-  (let [emoji-picker (.-default emoji-picker-class)]
-    (r/adapt-react-class emoji-picker)))

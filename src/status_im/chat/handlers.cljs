@@ -2,7 +2,7 @@
   (:require-macros [cljs.core.async.macros :as am])
   (:require [re-frame.core :refer [enrich after debug dispatch]]
             [status-im.models.commands :as commands]
-            [clojure.string :as string]
+            [clojure.string :as str]
             [status-im.components.styles :refer [default-chat-color]]
             [status-im.chat.suggestions :as suggestions]
             [status-im.protocol.core :as protocol]
@@ -46,10 +46,6 @@
   (fn [db [_ ui-element value]]
     (assoc-in db [:chat-ui-props ui-element] value)))
 
-(register-handler :toggle-chat-ui-props
-  (fn [{:keys [chat-ui-props] :as db} [_ ui-element]]
-    (assoc-in db [:chat-ui-props ui-element] (not (ui-element chat-ui-props)))))
-
 (register-handler :set-show-info
   (fn [db [_ show-info]]
     (assoc db :show-info show-info)))
@@ -58,7 +54,6 @@
   (u/side-effect!
     (fn [_ [_ details]]
       (dispatch [:set-chat-ui-props :show-bottom-info? true])
-      (dispatch [:set-chat-ui-props :show-emoji? false])
       (dispatch [:set-chat-ui-props :bottom-info details]))))
 
 (register-handler :load-more-messages
@@ -83,7 +78,7 @@
 
 (defn safe-trim [s]
   (when (string? s)
-    (string/trim s)))
+    (str/trim s)))
 
 (register-handler :cancel-command
   (fn [{:keys [current-chat-id] :as db} _]
@@ -170,15 +165,10 @@
   (u/side-effect!
     (fn [{:keys [current-chat-id] :as db} [_ text]]
       (let [{:keys [dapp?] :as contact} (get-in db [:contacts current-chat-id])]
+        (log/debug "SET CHAT INPUT TEXT: " current-chat-id text contact dapp?)
         (if (console? current-chat-id)
           (dispatch [::check-input-for-commands text])
           (dispatch [::check-suggestions current-chat-id text]))))))
-
-(register-handler :add-to-chat-input-text
-  (u/side-effect!
-    (fn [{:keys [chats current-chat-id] :as db} [_ text-to-add]]
-      (let [input-text (get-in chats [current-chat-id :input-text])]
-        (dispatch [:set-chat-input-text (str input-text text-to-add)])))))
 
 (def possible-commands
   {[:confirmation-code :responses] #(re-matches #"^[\d]{4}$" %)
