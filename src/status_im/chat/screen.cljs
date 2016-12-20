@@ -118,7 +118,6 @@
              :custom-action  [toolbar-action]
              :style          (get-in platform-specific [:component-styles :toolbar])}]
    [add-contact-bar]])
-
 (defn get-intro-status-message [all-messages]
   (let [{:keys [timestamp content-type] :as last-message} (last all-messages)]
     (when (not= content-type content-type-status)
@@ -126,14 +125,13 @@
        :content-type content-type-status
        :timestamp    (or timestamp (time/now-ms))})))
 
-(defn messages-with-timemarks [all-messages extras]
+
+(defn messages-with-timemarks [all-messages]
   (let [status-message (get-intro-status-message all-messages)
         all-messages   (if status-message
                          (concat all-messages [status-message])
                          all-messages)
         messages       (->> all-messages
-                            (map #(merge % (get extras (:message-id %))))
-                            (remove #(false? (:show? %)))
                             (sort-by :clock-value >)
                             (map #(assoc % :datemark (time/day-relative (:timestamp %))))
                             (group-by :datemark)
@@ -149,10 +147,9 @@
 (defview messages-view [group-chat]
   [messages [:chat :messages]
    contacts [:chat :contacts]
-   message-extras [:get :message-extras]
    loaded? [:all-messages-loaded?]]
   (let [contacts' (contacts-by-identity contacts)
-        messages  (messages-with-timemarks messages message-extras)]
+        messages  (messages-with-timemarks messages)]
     [list-view {:renderRow                 (fn [row _ index]
                                              (message-row {:contact-by-identity contacts'
                                                            :group-chat          group-chat

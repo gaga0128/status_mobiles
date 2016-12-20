@@ -28,9 +28,7 @@
                           :user-statuses  {:type       :list
                                            :objectType "user-status"}
                           :clock-value    {:type    :int
-                                           :default 0}
-                          :show?          {:type    :bool
-                                           :default true}}})
+                                           :default 0}}})
 
 (defn migration [old-realm new-realm]
   (log/debug "migrating message schema"))

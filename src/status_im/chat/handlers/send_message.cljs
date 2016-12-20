@@ -1,7 +1,6 @@
 (ns status-im.chat.handlers.send-message
   (:require [status-im.utils.handlers :refer [register-handler] :as u]
             [clojure.string :as s]
-            [status-im.data-store.chats :as chats]
             [status-im.data-store.messages :as messages]
             [status-im.components.status :as status]
             [status-im.utils.random :as random]
@@ -44,8 +43,7 @@
      :to-message       to-message
      :type             (:type command)
      :has-handler      (:has-handler command)
-     :clock-value      (inc clock-value)
-     :show?            true}))
+     :clock-value      (inc clock-value)}))
 
 (register-handler :send-chat-message
   (u/side-effect!
@@ -97,15 +95,14 @@
 
 (register-handler :prepare-command!
   (u/side-effect!
-    (fn [{:keys [current-public-key network-status] :as db}
+    (fn [{:keys [current-public-key] :as db}
          [_ add-to-chat-id {:keys [chat-id staged-command command handler-data] :as params}]]
-      (let [clock-value (messages/get-last-clock-value chat-id)
-            request     (:request (:handler-data command))
-            command'    (->> (assoc staged-command :handler-data handler-data)
-                             (prepare-command current-public-key chat-id clock-value request)
-                             (cu/check-author-direction db chat-id))]
+      (let [{:keys [clock-value]} (get-in db [:chats add-to-chat-id])
+            request  (:request (:handler-data command))
+            command' (->> (assoc staged-command :handler-data handler-data)
+                          (prepare-command current-public-key chat-id clock-value request)
+                          (cu/check-author-direction db chat-id))]
         (log/debug "Handler data: " request handler-data (dissoc params :commands :staged-command))
-        (dispatch [:update-message-overhead! chat-id network-status])
         (dispatch [:clear-command chat-id (:id staged-command)])
         (dispatch [::send-command! add-to-chat-id (assoc params :command command')])
         (when (cu/console? chat-id)
@@ -182,25 +179,22 @@
 
 (register-handler ::prepare-message
   (u/side-effect!
-    (fn [{:keys [network-status]} [_ {:keys [chat-id identity message] :as params}]]
-      (let [{:keys [group-chat]} (get-in db [:chats chat-id])
-            clock-value (messages/get-last-clock-value chat-id)
-            message'    (cu/check-author-direction
-                         db chat-id
-                         {:message-id   (random/id)
-                          :chat-id      chat-id
-                          :content      message
-                          :from         identity
-                          :content-type text-content-type
-                          :outgoing     true
-                          :timestamp    (time/now-ms)
-                          :clock-value  (inc clock-value)
-                          :show?        true})
-            message''   (if group-chat
-                          (assoc message' :group-id chat-id :message-type :group-user-message)
-                          (assoc message' :to chat-id :message-type :user-message))
-            params'     (assoc params :message message'')]
-        (dispatch [:update-message-overhead! chat-id network-status])
+    (fn [db [_ {:keys [chat-id identity message] :as params}]]
+      (let [{:keys [group-chat clock-value]} (get-in db [:chats chat-id])
+            message'  (cu/check-author-direction
+                        db chat-id
+                        {:message-id   (random/id)
+                         :chat-id      chat-id
+                         :content      message
+                         :from         identity
+                         :content-type text-content-type
+                         :outgoing     true
+                         :timestamp    (time/now-ms)
+                         :clock-value  (inc clock-value)})
+            message'' (if group-chat
+                        (assoc message' :group-id chat-id :message-type :group-user-message)
+                        (assoc message' :to chat-id :message-type :user-message))
+            params'   (assoc params :message message'')]
         (dispatch [::add-message params'])
         (dispatch [::save-message! params'])))))
 
@@ -267,20 +261,15 @@
 
 (register-handler ::send-message!
   (u/side-effect!
-   (fn [{:keys [web3 chats network-status]
-         :as db} [_ {{:keys [message-type]
-                      :as   message} :message
-                     chat-id         :chat-id}]]
+    (fn [{:keys [web3 chats] :as db} [_ {{:keys [message-type]
+                                          :as   message} :message
+                                         chat-id         :chat-id}]]
       (let [{:keys [dapp?] :as contact} (get-in db [:contacts chat-id])]
         (if dapp?
           (dispatch [::send-dapp-message chat-id message])
           (when message
             (let [message' (select-keys message [:from :message-id])
-                  payload  (select-keys message [:timestamp :content :content-type
-                                                 :clock-value :show?])
-                  payload  (if (= network-status :offline)
-                             (assoc payload :show? false)
-                             payload)
+                  payload  (select-keys message [:timestamp :content :content-type :clock-value])
                   options  {:web3    web3
                             :message (assoc message' :payload payload)}]
               (if (= message-type :group-user-message)
@@ -290,11 +279,12 @@
                                                   :keypair {:public  public-key
                                                             :private private-key})))
                 (protocol/send-message! (assoc-in options
-                                                  [:message :to] (:to message)))))))))))
+                                                  [:message :to] (:to message)))))))
+        (dispatch [:inc-clock chat-id])))))
 
 (register-handler ::send-command-protocol!
   (u/side-effect!
-    (fn [{:keys [web3 current-public-key chats network-status] :as db}
+    (fn [{:keys [web3 current-public-key chats] :as db}
          [_ {:keys [chat-id command]}]]
       (log/debug "sending command: " command)
       (when (cu/not-console? chat-id)
@@ -302,12 +292,8 @@
               {:keys [group-chat]} (get-in db [:chats chat-id])
 
               payload (-> command
-                          (select-keys [:content :content-type
-                                        :clock-value :show?])
+                          (select-keys [:content :content-type :clock-value])
                           (assoc :timestamp (datetime/now-ms)))
-              payload (if (= network-status :offline)
-                        (assoc payload :show? false)
-                        payload)
               options {:web3    web3
                        :message {:from       current-public-key
                                  :message-id (:message-id command)
@@ -318,4 +304,5 @@
                                             :keypair {:public  public-key
                                                       :private private-key}))
             (protocol/send-message! (assoc-in options
-                                              [:message :to] chat-id))))))))
+                                              [:message :to] chat-id)))
+          (dispatch [:inc-clock chat-id]))))))
