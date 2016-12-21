@@ -23,8 +23,8 @@
             [status-im.chat.views.datemark :refer [chat-datemark]]
             [status-im.chat.views.response :refer [response-view]]
             [status-im.chat.views.new-message :refer [chat-message-input-view]]
-            [status-im.chat.views.staged-commands :refer [staged-commands-view]]
             [status-im.chat.views.actions :refer [actions-view]]
+            [status-im.chat.views.emoji :refer [emoji-view]]
             [status-im.chat.views.bottom-info :refer [bottom-info-view]]
             [status-im.chat.views.toolbar-content :refer [toolbar-content-view]]
             [status-im.chat.views.suggestions :refer [suggestion-container]]
@@ -172,7 +172,6 @@
 
 (defview messages-container [messages]
   [offset               [:messages-offset]
-   staged-scroll-height [:get-chat-staged-commands-scroll-height]
    messages-offset      (anim/create-value 0)
    context              {:offset offset
                          :val    messages-offset}
@@ -180,15 +179,15 @@
   {:component-did-mount  on-update
    :component-did-update on-update}
   [animated-view
-   {:style (st/messages-container staged-scroll-height messages-offset)}
+   {:style (st/messages-container messages-offset)}
    messages])
 
 (defview chat []
   [group-chat        [:chat :group-chat]
    show-actions?     [:chat-ui-props :show-actions?]
    show-bottom-info? [:chat-ui-props :show-bottom-info?]
+   show-emoji?       [:chat-ui-props :show-emoji?]
    command?          [:command?]
-   staged-commands   [:get-chat-staged-commands]
    layout-height     [:get :layout-height]]
   {:component-did-mount #(dispatch [:check-autorun])}
   [view {:style    st/chat-view
@@ -201,14 +200,15 @@
     [messages-view group-chat]]
    ;; todo uncomment this
    #_(when @group-chat [typing-all])
-   (when (seq staged-commands)
-     [staged-commands-view staged-commands])
    (when-not command?
      [suggestion-container])
    [response-view]
+   (when show-emoji?
+     [emoji-view])
    [chat-message-input-view]
    (when show-actions?
      [actions-view])
    (when show-bottom-info?
      [bottom-info-view])
-   [offline-view {:top (get-in platform-specific [:component-styles :status-bar :default :height])}]])
+   [offline-view {:top (get-in platform-specific
+                               [:component-styles :status-bar :default :height])}]])

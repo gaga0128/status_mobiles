@@ -89,13 +89,6 @@
     (let [commands (subscribe [:get-chat-staged-commands])]
       (reaction (some #(= id (:to-message %)) @commands)))))
 
-(register-sub :get-chat-staged-commands-scroll-height
-  (fn [db _]
-    (let [{:keys [staged-commands
-                  staged-scroll-height]} (get-in @db [:chats (:current-chat-id @db)])]
-      (reaction
-        (if (seq staged-commands) staged-scroll-height 0)))))
-
 (register-sub :get-message-input-view-height
   (fn [db _]
     (reaction (get-in @db [:chats (:current-chat-id @db) :message-input-height]))))
@@ -272,13 +265,16 @@
 
 (register-sub :input-margin
   (fn []
-    (let [kb-height (subscribe [:get :keyboard-height])
-          focused   (subscribe [:get :focused])
-          mode      (subscribe [:kb-mode])]
+    (let [kb-height   (subscribe [:get :keyboard-height])
+          focused     (subscribe [:get :focused])
+          mode        (subscribe [:kb-mode])
+          kb-max      (subscribe [:get :keyboard-max-height])
+          show-emoji? (subscribe [:chat-ui-props :show-emoji?])]
       (reaction
-        (cond ios? @kb-height
-              (and @focused (= :pan @mode) (pos? @kb-height)) 20
-              :else 0)))))
+       (cond @show-emoji? (or @kb-max c/emoji-container-height)
+             ios? @kb-height
+             (and @focused (= :pan @mode) (pos? @kb-height)) 20
+             :else 0)))))
 
 (register-sub :max-layout-height
   (fn [db [_ status-bar]]
