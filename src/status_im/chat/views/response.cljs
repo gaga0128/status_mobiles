@@ -139,8 +139,7 @@
       :injected-on-start-loading-java-script (str js-res/web3 js-res/web3-init)
       :injected-java-script                  (str js-res/webview-js extra-js)
       :bounces                               false
-      :on-navigation-state-change            on-navigation-change
-      :local-storage-enabled                 true}]))
+      :on-navigation-state-change            on-navigation-change}]))
 
 (defn placeholder []
   [view st/input-placeholder])

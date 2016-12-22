@@ -75,7 +75,8 @@
 (defn status-view [height]
   {:align-self "stretch"
    :font-size  14
-   :min-height height
+   :height     height
+   :min-height 30
    :text-align "center"
    :color      text2-color})
 
@@ -148,12 +149,27 @@
   {:margin-right 96
    :flex         1})
 
+(def profile-input-wrapper
+  {:margin-bottom 16})
+
+(def profile-input-text
+  {:color text1-color})
+
+(def profile-input-text-non-editable
+  {:color text1-disabled-color})
+
 (def report-user-text
   {:font-size      14
    :line-height    21
    :color          text2-color
    ;; IOS:
    :letter-spacing 0.5})
+
+(def qr-code-container
+  {:flex             1
+   :alignItems       :center
+   :justify-content  :center
+   :background-color "#000000aa"})
 
 (def qr-code
   {:width            250
@@ -163,6 +179,9 @@
    :align-items      :center
    :padding-top      15
    :elevation        4})
+
+(def hashtag
+  {:color "#7099e6"})
 
 (def underline-container
   {:background-color "#0000001f"
