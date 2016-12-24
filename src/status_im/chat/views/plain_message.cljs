@@ -18,9 +18,10 @@
 (defn send []
   (dispatch [:send-chat-message]))
 
-(defn message-valid? [ message]
-  (and (pos? (count message))
-       (not= "!" message)))
+(defn message-valid? [staged-commands message]
+  (or (and (pos? (count message))
+           (not= "!" message))
+      (pos? (count staged-commands))))
 
 (defn button-animation-logic [{:keys [command? val]}]
   (fn [_]

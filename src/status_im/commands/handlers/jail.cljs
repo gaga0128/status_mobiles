@@ -18,7 +18,7 @@
 
 (defn command-handler!
   [_ [chat-id
-      {:keys [command-message] :as parameters}
+      {:keys [staged-command] :as parameters}
       {:keys [result error]}]]
   (let [{:keys [context returned]} result
         {handler-error :error} returned]
@@ -27,13 +27,13 @@
       handler-error
       (log/debug :error-from-handler handler-error
                  :chat-id chat-id
-                 :command command-message)
+                 :command staged-command)
 
       result
-      (let [command'    (assoc command-message :handler-data returned)
+      (let [command'    (assoc staged-command :handler-data returned)
             parameters' (assoc parameters :command command')]
         (if (:eth_sendTransaction context)
-          (dispatch [:wait-for-transaction (:id command-message) parameters'])
+          (dispatch [:wait-for-transaction (:id staged-command) parameters'])
           (dispatch [:prepare-command! chat-id parameters'])))
 
       (not (or error handler-error))
@@ -42,13 +42,17 @@
       :else nil)))
 
 (defn suggestions-handler!
-  [db [{:keys [chat-id]} {:keys [result]}]]
+  [{:keys [contacts] :as db} [{:keys [chat-id]} {:keys [result]}]]
   (let [{:keys [markup webViewUrl]} (:returned result)
-        hiccup (generate-hiccup markup)]
+        {:keys [dapp? dapp-url]} (get contacts chat-id)
+        hiccup       (generate-hiccup markup)
+        web-view-url (if (and (= webViewUrl "dapp-url") dapp? dapp-url)
+                       dapp-url
+                       webViewUrl)]
     (-> db
         (assoc-in [:suggestions chat-id] hiccup)
-        (assoc-in [:web-view-url chat-id] webViewUrl)
-        (assoc-in [:has-suggestions? chat-id] (or hiccup webViewUrl)))))
+        (assoc-in [:web-view-url chat-id] web-view-url)
+        (assoc-in [:has-suggestions? chat-id] (or hiccup web-view-url)))))
 
 (defn suggestions-events-handler!
   [{:keys [current-chat-id] :as db} [[n data]]]
@@ -64,14 +68,14 @@
     nil)))
 
 (defn command-preview
-  [_ [command-message {:keys [result]}]]
+  [db [chat-id command-id {:keys [result]}]]
   (let [result' (:returned result)]
-    (dispatch [:send-chat-message
-               (if result'
-                 (assoc command-message
+    (if result'
+      (let [path [:chats chat-id :staged-commands command-id]]
+        (update-in db path assoc
                    :preview (generate-hiccup result')
-                   :preview-string (str result'))
-                 command-message)])))
+                   :preview-string (str result')))
+      db)))
 
 (defn print-error-message! [message]
   (fn [_ params]
@@ -98,7 +102,7 @@
 
 (reg-handler :command-preview
   (after (print-error-message! "Error on command preview"))
-  (u/side-effect! command-preview))
+  command-preview)
 
 (reg-handler :set-local-storage
   (fn [{:keys [current-chat-id] :as db} [{:keys [data] :as event}]]

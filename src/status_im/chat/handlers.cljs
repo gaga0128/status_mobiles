@@ -37,7 +37,6 @@
             status-im.chat.handlers.faucet
             [cljs.core.async :as a]
             status-im.chat.handlers.webview-bridge
-            status-im.chat.handlers.wallet-chat
             status-im.chat.handlers.console
             [taoensso.timbre :as log]
             [tailrecursion.priority-map :refer [priority-map-by]]))
@@ -168,14 +167,15 @@
 
 (register-handler :set-chat-input-text
   (u/side-effect!
-    (fn [{:keys [current-chat-id]} [_ text]]
-      (if (console? current-chat-id)
-        (dispatch [::check-input-for-commands text])
-        (dispatch [::check-suggestions current-chat-id text])))))
+    (fn [{:keys [current-chat-id] :as db} [_ text]]
+      (let [{:keys [dapp?] :as contact} (get-in db [:contacts current-chat-id])]
+        (if (console? current-chat-id)
+          (dispatch [::check-input-for-commands text])
+          (dispatch [::check-suggestions current-chat-id text]))))))
 
 (register-handler :add-to-chat-input-text
   (u/side-effect!
-    (fn [{:keys [chats current-chat-id]} [_ text-to-add]]
+    (fn [{:keys [chats current-chat-id] :as db} [_ text-to-add]]
       (let [input-text (get-in chats [current-chat-id :input-text])]
         (dispatch [:set-chat-input-text (str input-text text-to-add)])))))
 
@@ -193,10 +193,10 @@
         (let [text' (if (= :commands type)
                       (str command-prefix text)
                       text)]
-          (dispatch [::set-command-with-content command text']))
+          (dispatch [::stage-command-with-content command text']))
         (dispatch [::check-suggestions console-chat-id text])))))
 
-(register-handler ::set-command-with-content
+(register-handler ::stage-command-with-content
   (u/side-effect!
     (fn [_ [_ [command type] text]]
       (dispatch [:set-chat-command command type])
@@ -342,7 +342,7 @@
 ;TODO: check if its new account / signup status / create console chat
 (register-handler :initialize-chats
   [(after #(dispatch [:load-unviewed-messages!]))
-   (after #(dispatch [:init-wallet-chat]))]
+   (after #(dispatch [:load-default-contacts!]))]
   ((enrich initialize-chats) load-chats!))
 
 (defmethod nav/preload-data! :chat
@@ -398,9 +398,7 @@
             :group-chat false
             :is-active  true
             :timestamp  (.getTime (js/Date.))
-            :contacts   [{:identity chat-id}]
-            :dapp-url   nil
-            :dapp-hash  nil}
+            :contacts   [{:identity chat-id}]}
            chat)))
 
 (defn add-new-chat

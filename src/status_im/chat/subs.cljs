@@ -69,15 +69,36 @@
          (get-in @db)
          (reaction))))
 
+(register-sub :get-chat-staged-commands
+  (fn [db _]
+    (->> [:chats (:current-chat-id @db) :staged-commands]
+         (get-in @db)
+         vals
+         (reaction))))
+
+(register-sub :get-chat-staged-commands-ids
+  (fn [db _]
+    (->> [:chats (:current-chat-id @db) :staged-commands]
+         (get-in @db)
+         vals
+         (keep :to-message)
+         (reaction))))
+
+(register-sub :staged-response?
+  (fn [_ [_ id]]
+    (let [commands (subscribe [:get-chat-staged-commands])]
+      (reaction (some #(= id (:to-message %)) @commands)))))
+
 (register-sub :get-message-input-view-height
   (fn [db _]
     (reaction (get-in @db [:chats (:current-chat-id @db) :message-input-height]))))
 
 (register-sub :valid-plain-message?
   (fn [_ _]
-    (let [input-message (subscribe [:get-chat-input-text])]
+    (let [input-message   (subscribe [:get-chat-input-text])
+          staged-commands (subscribe [:get-chat-staged-commands])]
       (reaction
-        (plain-message/message-valid? @input-message)))))
+        (plain-message/message-valid? @staged-commands @input-message)))))
 
 (register-sub :valid-command?
   (fn [_ [_ validator]]
@@ -136,9 +157,10 @@
   (fn []
     (let [command?            (subscribe [:command?])
           type                (subscribe [:command-type])
-          command-suggestions (subscribe [:get-content-suggestions])]
+          command-suggestions (subscribe [:get-content-suggestions])
+          staged-commands     (subscribe [:get-chat-staged-commands])]
       (reaction
-        (cond (and @command? (= @type :response))
+        (cond (and @command? (= @type :response) (not (seq @staged-commands)))
               c/request-info-height
 
               (and @command? (= @type :command) (seq @command-suggestions))
@@ -156,8 +178,12 @@
 
 (register-sub :get-requests
   (fn [db]
-    (let [chat-id (subscribe [:get-current-chat-id])]
-      (reaction (get-in @db [:chats @chat-id :requests])))))
+    (let [chat-id    (subscribe [:get-current-chat-id])
+          staged-ids (subscribe [:get-chat-staged-commands-ids])]
+      (reaction
+        (let [ids      (set @staged-ids)
+              requests (get-in @db [:chats @chat-id :requests])]
+          (remove #(ids (:message-id %)) requests))))))
 
 (register-sub :get-requests-map
   (fn [db]

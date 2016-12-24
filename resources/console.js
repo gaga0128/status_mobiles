@@ -1710,12 +1710,6 @@ var phoneConfig = {
     title: I18n.t('phone_title'),
     description: I18n.t('phone_description'),
     color: "#5bb2a2",
-    validator: function (params) {
-        return {
-            validationHandler: "phone",
-            parameters: [params.phone]
-        };
-    },
     params: [{
         name: "phone",
         type: status.types.PHONE,
