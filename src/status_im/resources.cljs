@@ -17,6 +17,3 @@
 (def smile (js/require "./images/smile.png"))
 (def trash-icon (js/require "./images/trash.png"))
 (def v (js/require "./images/v.png"))
-
-(def contacts
-  {:auction-house (js/require "./images/contacts/auction-house.png")})

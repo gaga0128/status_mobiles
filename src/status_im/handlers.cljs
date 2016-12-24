@@ -85,7 +85,7 @@
       (dispatch [:initialize-db])
       (dispatch [:load-accounts])
       (dispatch [:init-console-chat])
-      (dispatch [:load-default-contacts!])
+      (dispatch [:init-wallet-chat])
       (dispatch [:load-commands! console-chat-id])
       (dispatch [:load-commands!]))))
 

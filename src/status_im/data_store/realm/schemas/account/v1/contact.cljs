@@ -16,11 +16,7 @@
                           :private-key      {:type     :string
                                              :optional true}
                           :dapp?            {:type    :bool
-                                             :default false}
-                          :dapp-url         {:type     :string
-                                             :optional true}
-                          :dapp-hash        {:type     :int
-                                             :optional true}}})
+                                             :default false}}})
 
 (defn migration [old-realm new-realm]
   (log/debug "migrating contact schema"))

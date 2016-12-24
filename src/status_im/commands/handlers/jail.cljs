@@ -42,17 +42,13 @@
       :else nil)))
 
 (defn suggestions-handler!
-  [{:keys [contacts] :as db} [{:keys [chat-id]} {:keys [result]}]]
+  [db [{:keys [chat-id]} {:keys [result]}]]
   (let [{:keys [markup webViewUrl]} (:returned result)
-        {:keys [dapp? dapp-url]} (get contacts chat-id)
-        hiccup       (generate-hiccup markup)
-        web-view-url (if (and (= webViewUrl "dapp-url") dapp? dapp-url)
-                       dapp-url
-                       webViewUrl)]
+        hiccup (generate-hiccup markup)]
     (-> db
         (assoc-in [:suggestions chat-id] hiccup)
-        (assoc-in [:web-view-url chat-id] web-view-url)
-        (assoc-in [:has-suggestions? chat-id] (or hiccup web-view-url)))))
+        (assoc-in [:web-view-url chat-id] webViewUrl)
+        (assoc-in [:has-suggestions? chat-id] (or hiccup webViewUrl)))))
 
 (defn suggestions-events-handler!
   [{:keys [current-chat-id] :as db} [[n data]]]
