@@ -67,8 +67,6 @@
       {:style             st/toolbar-search-input
        :auto-focus        true
        :placeholder       search-placeholder
-       :return-key-type   "search"
-       :on-blur           #(dispatch [:set-in [:toolbar-search :show] nil])
        :on-change-text    #(dispatch [:set-in [:toolbar-search :text] %])
        :on-submit-editing #(toolbar-search-submit on-search-submit)}]
      [view
@@ -84,7 +82,8 @@
                                    on-search-submit]
                             :as   opts}]
   (let [toggle-search-fn #(dispatch [:set-in [:toolbar-search :show] %])
-        actions          (if-not show-search?
+        actions          (if show-search?
+                           [(act/search #(toolbar-search-submit on-search-submit))]
                            (into actions [(act/search #(toggle-search-fn search-key))]))]
     [toolbar {:style          (merge st/toolbar-with-search style)
               :nav-action     (if show-search?
