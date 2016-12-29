@@ -24,8 +24,7 @@
     status-im.network.handlers
     [status-im.utils.types :as t]
     [status-im.constants :refer [console-chat-id]]
-    [status-im.utils.ethereum-network :as enet]
-    [status-im.protocol.core :as protocol]))
+    [status-im.utils.ethereum-network :as enet]))
 
 ;; -- Common --------------------------------------------------------------
 
@@ -85,7 +84,7 @@
       (dispatch [:initialize-db])
       (dispatch [:load-accounts])
       (dispatch [:init-console-chat])
-      (dispatch [:init-wallet-chat])
+      (dispatch [:load-default-contacts!])
       (dispatch [:load-commands! console-chat-id])
       (dispatch [:load-commands!]))))
 
