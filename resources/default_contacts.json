@@ -1,29 +1,13 @@
-{
-    "wallet":
-    {
-        "name":
-        {
-            "en": "Wallet",
-            "es": "Monedero",
-            "es-ar": "Monedero",
-            "ru": "Кошелек"
-        },
-        "photo-path": "icon_wallet_avatar",
-        "add-chat?": true,
-        "dapp?": true
-    },
+[
+    {"id": "wallet",
+     "name": "Wallet",
+     "photo-path": "icon_wallet_avatar",
+     "add-chat?": true,
+     "dapp?": true},
 
-    "auction-house":
-    {
-        "name":
-        {
-            "en": "Auction House"
-        },
-        "photo-path": "contacts://auction-house",
-        "dapp?": true,
-        "dapp-url":
-        {
-            "en": "http://auctionhouse.dappbench.com"
-        }
-    }
-}
+    {"id": "dapp-auction-house",
+     "name": "Auction House",
+     "photo-path": "contacts://auction-house",
+     "dapp?": true,
+     "dapp-url": "http://auctionhouse.dappbench.com"}
+]

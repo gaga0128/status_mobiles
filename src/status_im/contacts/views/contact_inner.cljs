@@ -4,7 +4,7 @@
             [status-im.components.chat-icon.screen :refer [contact-icon-contacts-tab]]
             [status-im.contacts.styles :as st]
             [status-im.utils.gfycat.core :refer [generate-gfy]]
-            [status-im.i18n :refer [get-contact-translated label]]))
+            [status-im.i18n :refer [label]]))
 
 (defn contact-photo [contact]
   [view st/contact-photo-container
@@ -13,14 +13,14 @@
 (defn contact-inner-view
   ([contact]
    (contact-inner-view contact nil))
-  ([{:keys [whisper-identity name] :as contact} info]
+  ([{:keys [name] :as contact} info]
    [view st/contact-inner-container
     [contact-photo contact]
     [view st/info-container
      [text {:style           st/name-text
             :number-of-lines 1}
       (if (pos? (count (:name contact)))
-        (get-contact-translated whisper-identity :name name)
+        name
         ;; todo is this correct behaviour?
         (generate-gfy))]
      (when info

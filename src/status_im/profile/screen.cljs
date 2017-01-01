@@ -32,8 +32,7 @@
             [status-im.utils.random :refer [id]]
             [status-im.utils.utils :refer [clean-text]]
             [status-im.components.image-button.view :refer [show-qr-button]]
-            [status-im.i18n :refer [label
-                                    get-contact-translated]]))
+            [status-im.i18n :refer [label]]))
 
 (defn share [text dialog-title]
   (let [list-selection-fn (:list-selection-fn platform-specific)]
@@ -73,11 +72,8 @@
                             (r/set-state component {:height height}))]
     (r/create-class
       {:reagent-render
-       (fn [{{:keys [whisper-identity
-                     name
-                     status
-                     photo-path]} :account
-             edit?                :edit?}]
+       (fn [{{:keys [name status photo-path]} :account
+             edit?                            :edit?}]
          [view st/status-block
           [view st/user-photo-container
 
@@ -98,7 +94,7 @@
             :editable         edit?
             :input-style      (st/username-input edit? (s/valid? ::v/name name))
             :wrapper-style    st/username-wrapper
-            :value            (get-contact-translated whisper-identity :name name)
+            :value            name
             :on-change-text   #(dispatch [:set-in [:profile-edit :name] %])}]
           (if (or edit? @just-opened?)
             [text-input {:ref                    #(reset! input-ref %)

@@ -29,8 +29,7 @@
             [status-im.components.chat-icon.screen :refer [chat-icon-message-status]]
             [status-im.utils.identicon :refer [identicon]]
             [status-im.utils.gfycat.core :refer [generate-gfy]]
-            [status-im.i18n :refer [label
-                                    get-contact-translated]]
+            [status-im.i18n :refer [label]]
             [status-im.chat.utils :as cu]
             [clojure.string :as str]
             [status-im.chat.handlers.console :as console]
@@ -56,8 +55,7 @@
                 :number-of-lines 1}
           (if (str/blank? @name)
             (generate-gfy)
-            (or (get-contact-translated @chat-id :name @name)
-                (label :t/chat-name)))]
+            (or @name (label :t/chat-name)))]
          (when (or status content)
            [text {:style st/status-text
                   :font  :default}
