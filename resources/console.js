@@ -1156,7 +1156,6 @@ function jsSuggestionsContainerStyle(suggestionsCount) {
     return {
         marginVertical: 1,
         marginHorizontal: 0,
-        keyboardShouldPersistTaps: true,
         //height: Math.min(150, (56 * suggestionsCount)),
         backgroundColor: "white",
         borderRadius: 5,
@@ -1583,7 +1582,6 @@ function suggestionsContainerStyle(suggestionsCount) {
     return {
         marginVertical: 1,
         marginHorizontal: 0,
-        keyboardShouldPersistTaps: true,
         height: Math.min(150, (56 * suggestionsCount)),
         backgroundColor: "white",
         borderRadius: 5,
@@ -1699,6 +1697,10 @@ var faucets = [
     {
         name: "Status Testnet Faucet",
         url: "http://46.101.129.137:3001",
+    },
+    {
+        name: "Zerogox Faucet",
+        url: "https://zerogox.com/ethereum/wei_faucet"
     }
 ];
 
