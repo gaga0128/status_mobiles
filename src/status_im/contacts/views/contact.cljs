@@ -6,8 +6,7 @@
             [status-im.contacts.views.contact-inner :refer [contact-inner-view]]
             [status-im.utils.platform :refer [platform-specific]]))
 
-(defn- on-press [{:keys [whisper-identity] :as contact}]
-  (dispatch [:send-contact-request! contact])
+(defn- on-press [{:keys [whisper-identity]}]
   (dispatch [:start-chat whisper-identity {} :navigation-replace]))
 
 (defn- more-on-press [contact]
