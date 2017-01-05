@@ -5,7 +5,7 @@
    ;common
    :members-title                         "Membri"
    :not-implemented                       "!non implementato"
-   :chat-name                             "Nome della chat"
+   :chat-name                             "Nome chat"
    :notifications-title                   "Notifiche e suoni"
    :offline                               "Offline"
 
@@ -124,7 +124,7 @@
    :save                                  "Salva"
    :change-color                          "Cambia colore"
    :clear-history                         "Cancella cronologia"
-   :delete-and-leave                      "Elimina e lascia"
+   :delete-and-leave                      "Cancella e lascia"
    :chat-settings                         "Impostazioni chat"
    :edit                                  "Modifica"
    :add-members                           "Aggiungi membri"
@@ -184,14 +184,14 @@
 
 
    ;login
-   :connect                               "Connettiti"
+   :connect                               "Connetti"
    :address                               "Indirizzo"
    :password                              "Password"
    :login                                 "Accedi"
    :wrong-password                        "Password errata"
 
    ;recover
-   :recover-from-passphrase               "Recupera l'account usando la passphrase"
+   :recover-from-passphrase               "Recupera dalla passphrase"
    :recover-explain                       "Inserisci la passphrase per poter accedere alla tua password"
    :passphrase                            "Passphrase"
    :recover                               "Recupera"
@@ -209,7 +209,7 @@
    ;validation
    :invalid-phone                         "Numero di telefono non valido"
    :amount                                "Ammontare"
-   :not-enough-eth                        (str "Non hai abbastanza ETH "
+   :not-enough-eth                        (str "ETH sul bilancio insufficiente "
                                                "({{balance}} ETH)")
    ;transactions
    :confirm-transactions                  {:one   "Conferma transazione"
