@@ -47,7 +47,6 @@
                  :auto-focus             false
                  :blur-on-submit         true
                  :multiline              true
-                 :auto-capitalize        "sentences"
                  :on-content-size-change #(let [size (-> (.-nativeEvent %)
                                                          (.-contentSize)
                                                          (.-height))]
