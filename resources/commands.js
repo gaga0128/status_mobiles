@@ -179,26 +179,6 @@ I18n.translations = {
         validation_invalid_number: 'Bedrag is geen geldig nummer',
         validation_insufficient_amount: 'Niet genoeg ETH op saldo ('
     },
-    fi: {
-        location_title: 'Sijainti',
-        location_description: 'Jaa sijaintisi',
-        location_address: 'Osoite',
-
-        browse_title: 'Selain',
-        browse_description: 'Avaa selain',
-
-        send_title: 'Lähetä ETH',
-        send_description: 'Lähetä maksu',
-
-        request_title: 'Pyydä ETH',
-        request_description: 'Pyydä maksua',
-        request_requesting: 'Pyydetään ',
-
-        validation_title: 'Määrä',
-        validation_amount_specified: 'Anna määrä',
-        validation_invalid_number: 'Annettu määrä ei ole numero',
-        validation_insufficient_amount: 'Ei tarpeeksi ETH katetta ('
-    },
     fr: {
         location_title: 'Emplacement',
         location_description: 'Partager votre emplacement',
@@ -772,6 +752,7 @@ function validateSend(params, context) {
 
     try {
         var val = web3.toWei(params.amount, "ether");
+        if (val <= 0) { throw new Error(); }
     } catch (err) {
         return {
             errors: [
@@ -905,7 +886,7 @@ status.command({
     handler: function (params) {
         return {
             event: "request",
-            params: [params.amount]
+            params: [params.amount],
             request: {
                 command: "send",
                 params: {
@@ -915,4 +896,19 @@ status.command({
             }
         };
     },
+    validator: function(params) {
+        try {
+            var val = web3.toWei(params.amount, "ether");
+            if (val <= 0) { throw new Error(); }
+        } catch (err) {
+            return {
+                errors: [
+                    status.components.validationMessage(
+                        I18n.t('validation_title'),
+                        I18n.t('validation_invalid_number')
+                    )
+                ]
+            };
+        }
+    }
 });
