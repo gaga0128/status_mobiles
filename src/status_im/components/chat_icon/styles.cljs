@@ -1,10 +1,9 @@
 (ns status-im.components.chat-icon.styles
   (:require [status-im.components.styles :refer [color-white
-                                                 online-color]]
-            [status-im.utils.platform :as p]))
+                                                 online-color]]))
 
 (defn default-chat-icon [color]
-  {:margin          0
+  {:margin          4
    :width           40
    :height          40
    :alignItems      :center
@@ -90,10 +89,10 @@
 
 (def online-view-wrapper
   {:position         :absolute
-   :bottom           -2
-   :right            -2
-   :width            17
-   :height           17
+   :bottom           -1
+   :right            0
+   :width            22
+   :height           22
    :border-radius    11
    :background-color :white})
 
@@ -110,8 +109,8 @@
   {:position         :absolute
    :bottom           2
    :right            2
-   :width            13
-   :height           13
+   :width            18
+   :height           18
    :border-radius    9
    :background-color online-color})
 
@@ -131,13 +130,13 @@
 
 (def online-dot
   {:position         :absolute
-   :top              5
-   :width            3
-   :height           3
+   :top              7
+   :width            4
+   :height           4
    :border-radius    2
    :background-color color-white})
-(def online-dot-left (merge online-dot {:left 2.8}))
-(def online-dot-right (merge online-dot {:left 7.2}))
+(def online-dot-left (merge online-dot {:left 4}))
+(def online-dot-right (merge online-dot {:left 10}))
 
 (def photo-pencil
   {:margin-left  8
@@ -173,8 +172,8 @@
    :height 44})
 
 (def container-chat-list
-  {:width  40
-   :height 40})
+  {:width  48
+   :height 48})
 
 (def container-menu-item
   {:width  32
@@ -205,8 +204,8 @@
 
 (def pending-wrapper
   {:position         :absolute
-   :bottom           0
-   :right            0
+   :bottom           4
+   :right            5
    :width            12
    :height           12
    :border-radius    6
@@ -238,26 +237,3 @@
    :width            4
    :height           4
    :border-radius    2})
-
-(defn profile-icon-mask [size]
-  {:height           size
-   :width            size
-   :position         :absolute
-   :z-index          1
-   :background-color :black
-   :opacity          0.4
-   :border-radius    50})
-
-(defn profile-icon-edit-text-containter [size]
-  {:height          size
-   :width           size
-   :position        :absolute
-   :z-index         2
-   :align-items     :center
-   :justify-content :center})
-
-(def profile-icon-edit-text
-  (merge (get-in p/platform-specific [:component-styles :profile :profile-icon-edit-text])
-         {:color            :white
-          :background-color :transparent}))
-

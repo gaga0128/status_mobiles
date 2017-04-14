@@ -1,151 +1,142 @@
 (ns status-im.chats-list.styles
-  (:require-macros [status-im.utils.styles :refer [defnstyle]])
   (:require [status-im.components.styles :refer [color-white
                                                  color-light-gray
+                                                 color-separator
                                                  color-blue
-                                                 color-gray5
                                                  text1-color
                                                  text2-color
-                                                 text4-color
-                                                 separator-color
                                                  new-messages-count-color]]
-            [status-im.components.tabs.styles :as tabs-st]
+            [status-im.components.tabs.styles :refer [tabs-height]]
             [status-im.components.toolbar.styles :refer [toolbar-background1
                                                          toolbar-background2]]
             [status-im.utils.platform :as p]))
 
-(defn toolbar []
-  (merge {:background-color toolbar-background1}
+(defn toolbar [chats-scrolled?]
+  (merge {:background-color (if chats-scrolled?
+                              toolbar-background1
+                              toolbar-background2)}
          (get-in p/platform-specific [:component-styles :toolbar])))
 
+(def gradient-top-bottom-shadow
+  ["rgba(24, 52, 76, 0.165)"
+   "rgba(24, 52, 76, 0.03)"
+   "rgba(24, 52, 76, 0.01)"])
+
+(def chat-separator-wrapper
+  {:background-color color-white
+   :height           0.5
+   :padding-left     74})
+
 (def chat-separator-item
-  {:border-bottom-width 1
-   :border-bottom-color color-gray5})
+  {:border-bottom-width 0.5
+   :border-bottom-color color-separator})
 
 (def chat-container
-  (merge {:flex-direction   :row
-          :background-color color-white}
-         (get-in p/platform-specific [:component-styles :chat-list :chat-container])))
+  {:flex-direction   :row
+   :background-color color-white
+   :height           94})
 
 (def chat-icon-container
-  (merge {:padding-top    18
-          :padding-bottom 18
-          :padding-left   12
-          :padding-right  20
-          :width          72}
-         (get-in p/platform-specific [:component-styles :chat-list :chat-icon-container])))
+  {:margin-top  -2
+   :margin-left -4
+   :padding     16
+   :width       48
+   :height      48})
 
-(def chat-info-container
-  (merge {:margin-bottom   13
-          :justify-content :space-between
-          :flex            1
-          :flex-direction  :column}
-         (get-in p/platform-specific [:component-styles :chat-list :chat-info-container])))
-
-(def chat-options-container
-  (merge {:margin-right 16
-          :padding-top  10}
-         (get-in p/platform-specific [:component-styles :chat-list :chat-options-container])))
-
-(def item-upper-container
-  {:flex            1
-   :flex-direction  :row})
-
-(def item-lower-container
-  (merge {:flex            1
-          :flex-direction  :row
-          :justify-content :space-between}
-         (get-in p/platform-specific [:component-styles :chat-list :item-lower-container])))
-
-(def message-status-container
-  {:flex-direction :row
-   :align-items    :center})
+(def item-container
+  {:flex-direction :column
+   :margin-left    30
+   :padding-top    16
+   :padding-right  16
+   :flex           1})
 
 (def name-view
-  {:flex-direction :row
-   :flex           1
-   :margin-right   4})
+  {:flex-direction :row})
 
 (def name-text
-  (merge {:color     text1-color
-          :font-size 16}
-         (get-in p/platform-specific [:component-styles :chat-list :chat-name])))
+  {:color     text1-color
+   :font-size 14})
 
 (def private-group-icon-container
-  (merge {:width        16
-          :height       12
-          :margin-right 6}
-         (get-in p/platform-specific [:component-styles :chat-list :private-group-icon-container])))
+  {:width        16
+   :height       9
+   :padding-top  -4
+   :margin-top   (get-in p/platform-specific [:private-group-icon-container :margin-top])
+   :margin-right 6})
 
 (def private-group-icon
   {:width  16
    :height 16})
 
 (def public-group-icon-container
-  (merge {:width        16
-          :height       12
-          :margin-right 6}
-         (get-in p/platform-specific [:component-styles :chat-list :public-group-icon-container])))
+  {:width        16
+   :height       12
+   :padding-top  -2
+   :margin-top   (get-in p/platform-specific [:public-group-icon-container :margin-top])
+   :margin-right 6})
 
 (def public-group-icon
-  {:width  16
-   :height 16})
+  {:width         16
+   :height        16
+   :margin-bottom -20})
+
+(def memebers-text
+  {:marginTop  2
+   :marginLeft 4
+   :fontSize   12
+   :color      text2-color})
 
 (def last-message-container
-  {:flex-shrink 1})
+  {:margin-top   5
+   :margin-right 40})
 
 (def last-message-text
-  (merge {:color text4-color}
-         (get-in p/platform-specific [:component-styles :chat-list :last-message])))
+  {:color      text1-color
+   :fontSize   14
+   :lineHeight 20})
+
+(def last-message-text-no-messages
+  (merge last-message-text
+         {:color text2-color}))
 
 (def status-container
   {:flex-direction :row
-   :top            16
+   :top            18
    :right          16})
 
 (def status-image
-  {:opacity      0.6
-   :margin-right 4
-   :width        16
-   :height       16})
+  {:marginTop 4
+   :width     9
+   :height    7})
 
 (def datetime-text
-  (merge {:color text4-color}
-         (get-in p/platform-specific [:component-styles :chat-list :last-message-timestamp])))
+  {:fontSize   12
+   :color      text2-color
+   :marginLeft 5})
 
 (def new-messages-container
-  {:width           22
-   :height          22
-   :margin-left     15
+  {:position        :absolute
+   :top             54
+   :right           16
+   :width           24
+   :height          24
    :backgroundColor new-messages-count-color
    :borderRadius    50})
 
 (def new-messages-text
-  (merge {:left      0
-          :fontSize  12
-          :color     color-blue
-          :textAlign :center}
-         (get-in p/platform-specific [:component-styles :chat-list :unread-count])))
+  {:top       5
+   :left      0
+   :fontSize  10
+   :color     color-blue
+   :textAlign :center})
 
 (def chats-container
   {:flex 1})
 
-(defnstyle list-container [tabs-hidden?]
-  {:android {:background-color color-light-gray
-             :margin-bottom    20}
+(def list-container
+  (merge (get-in p/platform-specific [:component-styles :main-tab-list])
+         {:background-color color-light-gray}))
 
-   :ios     {:background-color color-white
-             :margin-bottom    (if tabs-hidden? 20 (+ 16 tabs-st/tabs-height))}})
-
-(def toolbar-actions
-  {:flex-direction :row
-   :padding-right  14})
-
-(def opts-btn
-  {:width          24
-   :height         24
-   :alignItems     :center
-   :justifyContent :center})
 
 (def create-icon
   {:fontSize 20
@@ -153,8 +144,6 @@
    :color    color-white})
 
 (def group-icon
-  {:margin-top   8
-   :margin-right 6
-   :width        14
-   :height       9
-   :tint-color   :white})
+  {:height     22
+   :width      22
+   :tint-color :white})

@@ -52,7 +52,9 @@
     (replace-view db view-id)))
 
 (defn- can-navigate-back? [db]
-  (and (not (db :creating-account?))))
+  (and (not (db :creating-account?))
+       ;; ...
+       ))
 
 (register-handler :navigate-back
   (enrich -preload-data!)

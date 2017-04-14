@@ -29,11 +29,12 @@
 
 (defn underline-container [background-color]
   {:background-color background-color
+   :height           1
    :align-items      :center})
 
-(defn underline [background-color width height]
+(defn underline [background-color width]
   {:background-color background-color
-   :height           height
+   :height           1
    :width            width})
 
 (defn error-text [color]
@@ -41,5 +42,4 @@
     (merge input-error-text-style
            {:color            color
             :background-color :transparent
-            :font-size        12
-            :line-height      20})))
+            :font-size        12})))

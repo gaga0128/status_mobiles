@@ -1,9 +1,7 @@
 (ns status-im.components.tabs.styles
-  (:require [status-im.components.styles :as st]
-            [status-im.utils.platform :as p]))
+  (:require [status-im.components.styles :refer [color-white]]))
 
-
-(def tabs-height (if p/ios? 62 56))
+(def tabs-height 56)
 (def tab-height (dec tabs-height))
 
 (def bottom-gradient
@@ -14,11 +12,12 @@
 
 (defn tabs-container [hidden?]
   {:position         :absolute
-   :bottom           (if hidden? (- tabs-height) 0)
+   :bottom           0
    :left             0
    :right            0
    :height           tabs-height
-   :background-color st/color-white
+   :background-color color-white
+   :margin-bottom    (if hidden? (- tabs-height) 0)
    :transform        [{:translateY 1}]})
 
 (def tabs-container-line
@@ -38,12 +37,12 @@
    :justifyContent :center
    :alignItems     :center})
 
-(defn tab-title [active?]
-  {:font-size  (if-not (or active? p/ios?) 12 14)
+(def tab-title
+  {:font-size  12
    :height     16
    :min-width  60
    :text-align :center
-   :color      (if active? st/color-light-blue st/color-gray4)})
+   :color      "#6e93d8"})
 
 (def tab-icon
   {:width        24
@@ -51,16 +50,22 @@
    :marginBottom 1
    :align-self   :center})
 
-(def tab-container
+(defn tab-container [active?]
   {:flex             1
    :height           tab-height
    :justifyContent   :center
-   :alignItems       :center})
+   :alignItems       :center
+   :padding-top      (if active? 0 16)})
 
-(defn main-swiper [tabs-hidden?]
+(defn animated-offset [value]
+  {:top value
+   :justifyContent :center
+   :alignItems     :center})
+
+(def main-swiper
   {:position         :absolute
    :top              0
    :left             0
    :right            0
-   :bottom           (if tabs-hidden? 0 tabs-height)
+   :bottom           tabs-height
    :shows-pagination false})

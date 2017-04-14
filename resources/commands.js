@@ -1,11 +1,11 @@
 I18n.translations = {
     en: {
         location_title: 'Location',
-        location_description: 'Send location',
+        location_description: 'Share your location',
         location_address: 'Address',
 
         browse_title: 'Browser',
-        browse_description: 'Open web browser',
+        browse_description: 'Launch the browser',
 
         send_title: 'Send ETH',
         send_description: 'Send a payment',
@@ -694,15 +694,13 @@ status.command({
             }
         );
 
-        return {markup: status.components.view({}, [text, image])};
+        return status.components.view({}, [text, image]);
     },
-    shortPreview: function (params) {
-        return {
-            markup: status.components.text(
-                {},
-                I18n.t('location_title') + ": " + params.address
-            )
-        };
+    shortPreview: function(params) {
+        return status.components.text(
+            {},
+            I18n.t('location_title') + ": " + params.address
+        );
     }
 }).param({
     name: "address",
@@ -710,59 +708,65 @@ status.command({
     placeholder: I18n.t('location_address')
 });
 
-status.command({
-    name: "browse",
-    fullscreen: true,
-    title: I18n.t('browse_title'),
-    description: I18n.t('browse_description'),
-    params: [{
-        name: "url",
-        placeholder: "URL",
-        type: status.types.TEXT
-    }],
-    onSend: function (params, context) {
+
+function browseSuggestions(params) {
+    if (params.url && params.url !== "undefined" && params.url != "") {
         var url = params.url;
         if (!/^[a-zA-Z-_]+:/.test(url)) {
             url = 'http://' + url;
         }
 
-        return {
-            title: "Browser",
-            dynamicTitle: true,
-            markup: status.components.bridgedWebView(url)
-        };
+        return {webViewUrl: url};
     }
+}
+
+status.command({
+    name: "browse",
+    title: I18n.t('browse_title'),
+    description: I18n.t('browse_description'),
+    color: "#ffa500",
+    fullscreen: true,
+    suggestionsTrigger: 'on-send',
+    params: [{
+        name: "url",
+        suggestions: browseSuggestions,
+        type: status.types.TEXT
+    }]
 });
 
 function validateSend(params, context) {
     if (!context.to) {
         return {
-            markup: status.components.validationMessage(
-                "Wrong address",
-                "Recipient address must be specified"
-            )
+            errors: [
+                status.components.validationMessage(
+                    "Wrong address",
+                    "Recipient address must be specified"
+                )
+            ]
         };
     }
     if (!params.amount) {
         return {
-            markup: status.components.validationMessage(
-                I18n.t('validation_title'),
-                I18n.t('validation_amount_specified')
-            )
+            errors: [
+                status.components.validationMessage(
+                    I18n.t('validation_title'),
+                    I18n.t('validation_amount_specified')
+                )
+            ]
         };
     }
 
     try {
         var val = web3.toWei(params.amount.replace(",", "."), "ether");
-        if (val <= 0) {
-            throw new Error();
-        }
+        if (val <= 0) { throw new Error(); }
     } catch (err) {
         return {
-            markup: status.components.validationMessage(
-                I18n.t('validation_title'),
-                I18n.t('validation_invalid_number')
-            )
+            errors: [
+                status.components.validationMessage(
+                    I18n.t('validation_title'),
+                    I18n.t('validation_invalid_number')
+                )
+            ]
         };
     }
 
@@ -772,15 +776,16 @@ function validateSend(params, context) {
         to: context.to,
         value: val
     });
-
     if (bn(val).plus(bn(estimatedGas)).greaterThan(bn(balance))) {
         return {
-            markup: status.components.validationMessage(
-                I18n.t('validation_title'),
-                I18n.t('validation_insufficient_amount')
-                + web3.fromWei(balance, "ether")
-                + " ETH)"
-            )
+            errors: [
+                status.components.validationMessage(
+                    I18n.t('validation_title'),
+                    I18n.t('validation_insufficient_amount')
+                    + web3.fromWei(balance, "ether")
+                    + " ETH)"
+                )
+            ]
         };
     }
 }
@@ -795,11 +800,7 @@ function sendTransaction(params, context) {
     try {
         return web3.eth.sendTransaction(data);
     } catch (err) {
-        var error = status.components.validationMessage(
-            "Error",
-            err.message
-        );
-        return {error: {markup: error}};
+        return {error: err};
     }
 }
 
@@ -809,7 +810,6 @@ var send = {
     color: "#5fc48d",
     title: I18n.t('send_title'),
     description: I18n.t('send_description'),
-    sequentialParams: true,
     params: [{
         name: "amount",
         type: status.types.NUMBER
@@ -855,29 +855,25 @@ var send = {
             )]
         );
 
-        return {
-            markup: status.components.view(
-                {
-                    style: {
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        marginTop: 8,
-                        marginBottom: 8
-                    }
-                },
-                [amount, currency]
-            )
-        };
+        return status.components.view(
+            {
+                style: {
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginTop: 8,
+                    marginBottom: 8
+                }
+            },
+            [amount, currency]
+        );
     },
     shortPreview: function (params, context) {
-        return {
-            markup: status.components.text(
-                {},
-                I18n.t('send_title') + ": "
-                + status.localizeNumber(params.amount, context.delimiter, context.separator)
-                + " ETH"
-            )
-        };
+        return status.components.text(
+            {},
+            I18n.t('send_title') + ": "
+            + status.localizeNumber(params.amount, context.delimiter, context.separator)
+            + " ETH"
+        );
     },
     handler: sendTransaction,
     validator: validateSend
@@ -888,10 +884,9 @@ status.response(send);
 
 status.command({
     name: "request",
-    color: "#5fc48d",
     title: I18n.t('request_title'),
+    color: "#7099e6",
     description: I18n.t('request_description'),
-    sequentialParams: true,
     params: [{
         name: "amount",
         type: status.types.NUMBER
@@ -909,37 +904,30 @@ status.command({
         };
     },
     preview: function (params, context) {
-        return {
-            markup: status.components.text(
-                {},
-                I18n.t('request_requesting') + " "
-                + status.localizeNumber(params.amount, context.delimiter, context.separator)
-                + " ETH"
-            )
-        };
+        return I18n.t('request_requesting')
+            + status.localizeNumber(params.amount, context.delimiter, context.separator)
+            + " ETH";
     },
     shortPreview: function (params, context) {
-        return {
-            markup: status.components.text(
-                {},
-                I18n.t('request_requesting') + " "
-                + status.localizeNumber(params.amount, context.delimiter, context.separator)
-                + " ETH"
-            )
-        };
+        return status.components.text(
+            {},
+            I18n.t('request_requesting') + " "
+            + status.localizeNumber(params.amount, context.delimiter, context.separator)
+            + " ETH"
+        );
     },
-    validator: function (params) {
+    validator: function(params) {
         try {
             var val = web3.toWei(params.amount.replace(",", "."), "ether");
-            if (val <= 0) {
-                throw new Error();
-            }
+            if (val <= 0) { throw new Error(); }
         } catch (err) {
             return {
-                markup: status.components.validationMessage(
-                    I18n.t('validation_title'),
-                    I18n.t('validation_invalid_number')
-                )
+                errors: [
+                    status.components.validationMessage(
+                        I18n.t('validation_title'),
+                        I18n.t('validation_invalid_number')
+                    )
+                ]
             };
         }
     }

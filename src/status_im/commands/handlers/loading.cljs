@@ -9,10 +9,8 @@
             [status-im.commands.utils :refer [reg-handler]]
             [status-im.constants :refer [console-chat-id wallet-chat-id]]
             [taoensso.timbre :as log]
-            [status-im.i18n :refer [label]]
             [status-im.utils.homoglyph :as h]
-            [status-im.utils.js-resources :as js-res]
-            [status-im.utils.random :as random]))
+            [status-im.utils.js-resources :as js-res]))
 
 (def commands-js "commands.js")
 
@@ -139,7 +137,6 @@
   [(path :chats)
    (after save-commands-js!)
    (after #(dispatch [:check-autorun]))
-   (after #(dispatch [:update-suggestions]))
    (after (fn [_ [id]]
             (dispatch [:invoke-commands-loading-callbacks id])
             (dispatch [:invoke-chat-loaded-callbacks id])))]

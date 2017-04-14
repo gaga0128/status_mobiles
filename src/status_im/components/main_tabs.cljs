@@ -4,9 +4,16 @@
                    [cljs.core.async.macros :as am])
   (:require [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [reagent.core :as r]
-            [status-im.components.react :refer [view swiper]]
+            [status-im.components.react :refer [view
+                                                animated-view
+                                                text
+                                                image
+                                                touchable-highlight
+                                                get-dimensions
+                                                swiper]]
             [status-im.components.status-bar :refer [status-bar]]
             [status-im.components.drawer.view :refer [drawer-view]]
+            [status-im.components.animation :as anim]
             [status-im.components.tabs.bottom-shadow :refer [bottom-shadow-view]]
             [status-im.chats-list.screen :refer [chats-list]]
             [status-im.discover.screen :refer [discover]]
@@ -18,24 +25,37 @@
             [cljs.core.async :as a]))
 
 (def tab-list
-  [{:view-id       :chat-list
-    :title         (label :t/chats)
-    :screen        chats-list
-    :icon-inactive :icon_chats
-    :icon-active   :icon_chats_active
-    :index         0}
-   {:view-id       :discover
-    :title         (label :t/discover)
-    :screen        discover
-    :icon-inactive :icon_discover
-    :icon-active   :icon_discover_active
-    :index         1}
-   {:view-id       :contact-list
-    :title         (label :t/contacts)
-    :screen        contact-list
-    :icon-inactive :icon_contacts
-    :icon-active   :icon_contacts_active
-    :index         2}])
+  [{:view-id :chat-list
+    :title   (label :t/chats)
+    :screen  chats-list
+    :icon    :icon_tab_chats
+    :index   0}
+   {:view-id :discover
+    :title   (label :t/discover)
+    :screen  discover
+    :icon    :icon_tab_discover
+    :index   1}
+   {:view-id :contact-list
+    :title   (label :t/contacts)
+    :screen  contact-list
+    :icon    :icon_tab_contacts
+    :index   2}])
+
+(defn animation-logic [{:keys [offsets val tab-id to-tab-id]}]
+  (fn [_]
+    (when-let [offsets @offsets]
+      (let [from-value (:from offsets)
+            to-value   (:to offsets)
+            to-tab-id  @to-tab-id]
+        (anim/set-value val from-value)
+        (when to-value
+          (anim/start
+            (anim/timing val {:toValue  to-value
+                              :duration 300})
+            (when (= tab-id to-tab-id)
+              (fn [arg]
+                (when (.-finished arg)
+                  (dispatch [:on-navigated-to-tab]))))))))))
 
 (def tab->index {:chat-list    0
                  :discover     1
@@ -76,14 +96,12 @@
     (recur (a/<! scroll-start))))
 
 (defn main-tabs []
-  (let [view-id           (subscribe [:get :view-id])
-        prev-view-id      (subscribe [:get :prev-view-id])
-        tabs-hidden?      (subscribe [:tabs-hidden?])
-        main-swiper       (r/atom nil)
-        swiped?           (r/atom false)
-        scroll-start      (a/chan 10)
-        scroll-ended      (a/chan 10)
-        tabs-were-hidden? (atom @tabs-hidden?)]
+  (let [view-id      (subscribe [:get :view-id])
+        prev-view-id (subscribe [:get :prev-view-id])
+        main-swiper  (r/atom nil)
+        swiped?      (r/atom false)
+        scroll-start (a/chan 10)
+        scroll-ended (a/chan 10)]
     (r/create-class
       {:component-did-mount
        #(start-scrolling-loop scroll-start scroll-ended)
@@ -91,10 +109,9 @@
        (fn []
          (if @swiped?
            (reset! swiped? false)
-           (when (and (= @tabs-were-hidden? @tabs-hidden?) @main-swiper)
+           (when @main-swiper
              (let [to (scroll-to @prev-view-id @view-id)]
-               (a/put! scroll-start [@main-swiper to]))))
-         (reset! tabs-were-hidden? @tabs-hidden?))
+               (a/put! scroll-start [@main-swiper to])))))
        :reagent-render
        (fn []
          [view common-st/flex
@@ -103,7 +120,7 @@
            [drawer-view
             [view {:style common-st/flex}
              [swiper (merge
-                      (st/main-swiper @tabs-hidden?)
+                       st/main-swiper
                        {:index                  (get-tab-index @view-id)
                         :loop                   false
                         :ref                    #(reset! main-swiper %)
@@ -114,5 +131,4 @@
              [tabs {:selected-view-id @view-id
                     :prev-view-id     @prev-view-id
                     :tab-list         tab-list}]
-             (when-not @tabs-hidden?
-               [bottom-shadow-view])]]]])})))
+             [bottom-shadow-view]]]]])})))

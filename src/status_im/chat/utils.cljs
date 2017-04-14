@@ -1,7 +1,6 @@
 (ns status-im.chat.utils
   (:require [status-im.constants :refer [console-chat-id
-                                         wallet-chat-id]]
-            [clojure.string :as str]))
+                                         wallet-chat-id]]))
 
 (defn console? [s]
   (= console-chat-id s))
@@ -11,10 +10,6 @@
 
 (defn wallet? [s]
   (= wallet-chat-id s))
-
-(defn safe-trim [s]
-  (when (string? s)
-    (str/trim s)))
 
 (defn add-message-to-db
   ([db add-to-chat-id chat-id message] (add-message-to-db db add-to-chat-id chat-id message true))
@@ -40,8 +35,3 @@
   ([db chat-id message]
    (let [previous-message (first (get-in db [:chats chat-id :messages]))]
      (check-message previous-message message))))
-
-(defn command-valid? [message validator]
-  (if validator
-    (validator message)
-    (pos? (count message))))
